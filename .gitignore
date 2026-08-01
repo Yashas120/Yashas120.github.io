@@ -12,5 +12,6 @@ next-env.d.ts
 .vercel
 *.tsbuildinfo
 
-# Personal reference documents (resume, CV, etc.)
-/reference/
+# Personal reference documents (resume, CV, etc.) — excluded except the public TA CV
+/reference/*
+!/reference/Yashas Kadambi UCSD TA CV.pdf
