@@ -1,0 +1,16 @@
+/node_modules
+/.next/
+/.next-dev/
+/dev-build/
+/out/
+/build
+*.pem
+.DS_Store
+npm-debug.log*
+.env*.local
+next-env.d.ts
+.vercel
+*.tsbuildinfo
+
+# Personal reference documents (resume, CV, etc.)
+/reference/

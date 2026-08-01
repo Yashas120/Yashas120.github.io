@@ -1,0 +1,54 @@
+---
+description: Dev server policy — one shared Next.js server, never pkill
+alwaysApply: true
+---
+
+# Dev server: one shared instance
+
+Multiple agent sessions work in this repo at once. They have repeatedly killed each
+other's servers and corrupted each other's builds. Follow these rules.
+
+## Reuse the server that already exists
+
+There should be exactly one dev server for this project. Check before starting
+anything:
+
+```bash
+lsof -nP -iTCP:3000,3100 -sTCP:LISTEN
+```
+
+If something is listening, **reuse it** — do not start a second server. It already
+serves your changes, because `next dev` hot-reloads from the same working tree.
+Only start one if nothing is listening.
+
+## Never use pkill
+
+```bash
+pkill -f "next dev"      # ❌ kills every other session's server too
+pkill -f "next-server"   # ❌ same
+```
+
+This is the single biggest cause of servers dying mid-session. If a restart is
+genuinely required, kill only the specific PID bound to the port:
+
+```bash
+kill "$(lsof -t -nP -iTCP:3000 -sTCP:LISTEN)"
+```
+
+## Start it with an isolated build directory
+
+```bash
+NEXT_DIST_DIR=.next-dev npm run dev
+```
+
+`next build` wipes `distDir`, so a dev server sharing the default `.next` dies
+mid-session with `MODULE_NOT_FOUND` on `.next/server/webpack-runtime.js`, or every
+route failing to prerender with `TypeError: e[o] is not a function`. Pointing dev
+at `.next-dev` leaves `.next` free for builds. `next.config.mjs` reads
+`NEXT_DIST_DIR` and `tsconfig.json` already includes `.next-dev/types/**/*.ts`.
+
+With that in place, builds are safe to run at any time and need no coordination:
+
+```bash
+npm run build   # writes .next, exports to ./out, leaves the server untouched
+```
