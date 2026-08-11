@@ -51,7 +51,7 @@ function neofetch(): string[] {
 
 const APPS = ["htop", "systemd", "man", "proc", "sched", "papers", "mail"];
 
-export function Terminal() {
+export function Terminal({ autoFocus = false }: Readonly<{ autoFocus?: boolean }>) {
   const desktop = useDesktop();
   const [history, setHistory] = useState<{ cmd: string; out: string[] }[]>([
     { cmd: "neofetch", out: neofetch() },
@@ -64,6 +64,10 @@ export function Terminal() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
   }, [history]);
+
+  useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+  }, [autoFocus]);
 
   const run = (raw: string) => {
     const cmd = raw.trim();

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Cpu, Moon, Sun, Terminal } from "lucide-react";
+import { ChevronDown, Cpu, HelpCircle, Moon, Sun, Terminal } from "lucide-react";
 import { hexToRgba } from "@/lib/utils";
 import { useTheme } from "@/lib/useTheme";
 import { PHOSPHOR, type AppDef } from "./types";
@@ -12,7 +12,8 @@ export function MenuBar({
   apps,
   activeTitle,
   onLaunch,
-}: Readonly<{ apps: AppDef[]; activeTitle?: string; onLaunch: (id: string) => void }>) {
+  onHelp,
+}: Readonly<{ apps: AppDef[]; activeTitle?: string; onLaunch: (id: string) => void; onHelp: () => void }>) {
   const [now, setNow] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [load, setLoad] = useState(0.42);
@@ -94,7 +95,11 @@ export function MenuBar({
                       >
                         <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: PHOSPHOR }} />
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate font-mono text-[11px] text-zinc-200">{a.short}</span>
+                          <span className="flex items-baseline gap-1.5">
+                            <span className="truncate text-[12px] text-zinc-100">{a.friendly}</span>
+                            <span className="font-mono text-[9px] text-zinc-500">{a.short}</span>
+                          </span>
+                          {a.blurb && <span className="block truncate text-[10px] text-zinc-500">{a.blurb}</span>}
                         </span>
                       </button>
                     </li>
@@ -123,6 +128,13 @@ export function MenuBar({
           </span>
         </span>
         <span className="hidden md:inline">up {now ? formatUptime(now) : "--"}</span>
+        <button
+          onClick={onHelp}
+          aria-label="Show the guided tour"
+          className="rounded p-1 text-zinc-400 transition-colors hover:bg-line/10 hover:text-zinc-100"
+        >
+          <HelpCircle className="h-3.5 w-3.5" />
+        </button>
         <button
           onClick={toggle}
           aria-label={light ? "Switch to dark theme" : "Switch to light theme"}

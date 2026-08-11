@@ -22,7 +22,7 @@ const dmesg: { t: string; msg: string; ok?: boolean }[] = [
   { t: "0.201339", msg: "crypto: secure-boot verified; CDR hardware attached" },
   { t: "0.256610", msg: "net: 2 publications, AWS Developer Associate cert mounted", ok: true },
   { t: "0.301998", msg: "init: reached target multi-user — 8 services ready" },
-  { t: "0.334120", msg: "systemd: starting X display manager ..." },
+  { t: "0.334120", msg: "systemd: starting display manager ..." },
 ];
 
 const login = [
@@ -30,23 +30,48 @@ const login = [
   { text: "login: yashas", delay: 420 },
   { text: "Password: ••••••••••", delay: 380 },
   { text: "Last login: today, from 127.0.0.1", delay: 240 },
-  { text: "$ startx", delay: 520 },
 ];
 
-type Stage = "post" | "dmesg" | "login";
+type Stage = "post" | "dmesg" | "login" | "menu";
 
-export function BootSequence({ onDone }: Readonly<{ onDone: () => void }>) {
+const AUTO_SECONDS = 6;
+
+// A GRUB-style choice so anyone can pick how to read the profile. The first
+// entry preserves the original behaviour (drop straight into the desktop); the
+// second is a plain-text path for non-technical visitors.
+const menuEntries = [
+  {
+    id: "desktop",
+    label: "yashOS 6.11 — graphical desktop",
+    note: "explore my work as apps · easiest if you're not technical",
+  },
+  {
+    id: "terminal",
+    label: "yashOS 6.11 — pre-boot shell",
+    note: "type commands to explore first · press F5 there to boot the desktop",
+  },
+];
+
+export function BootSequence({
+  onDone,
+  onReadTerminal,
+}: Readonly<{ onDone: () => void; onReadTerminal: () => void }>) {
   const [stage, setStage] = useState<Stage>("post");
   const [n, setN] = useState(0);
+  const [sel, setSel] = useState(0);
+  const [countdown, setCountdown] = useState(AUTO_SECONDS);
+  const [paused, setPaused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const done = useRef(false);
 
-  const finish = () => {
+  const choose = (id: string) => {
     if (done.current) return;
     done.current = true;
-    onDone();
+    if (id === "terminal") onReadTerminal();
+    else onDone();
   };
 
+  // Type out POST -> dmesg -> login, then hand off to the boot menu.
   useEffect(() => {
     if (stage === "post") {
       if (n < post.length) {
@@ -77,11 +102,41 @@ export function BootSequence({ onDone }: Readonly<{ onDone: () => void }>) {
         const id = setTimeout(() => setN((c) => c + 1), login[n].delay);
         return () => clearTimeout(id);
       }
-      const id = setTimeout(finish, 420);
+      const id = setTimeout(() => setStage("menu"), 420);
       return () => clearTimeout(id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, n]);
+
+  // Countdown that auto-boots the highlighted (desktop) entry, unless the
+  // visitor interacts — then we stop and let them choose deliberately.
+  useEffect(() => {
+    if (stage !== "menu" || paused) return;
+    if (countdown <= 0) {
+      choose(menuEntries[0].id);
+      return;
+    }
+    const id = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, countdown, paused]);
+
+  useEffect(() => {
+    if (stage !== "menu") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setPaused(true);
+        setSel((s) => (s + (e.key === "ArrowDown" ? 1 : menuEntries.length - 1)) % menuEntries.length);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        choose(menuEntries[sel].id);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, sel]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -119,24 +174,75 @@ export function BootSequence({ onDone }: Readonly<{ onDone: () => void }>) {
           </div>
         )}
 
-        {stage === "login" && (
+        {(stage === "login" || stage === "menu") && (
           <div className="mt-4">
-            {login.slice(0, n).map((l) => (
+            {login.slice(0, stage === "login" ? n : login.length).map((l) => (
               <p key={l.text} style={{ color: PHOSPHOR }}>
                 {l.text}
               </p>
             ))}
+            {stage === "menu" && (
+              <p style={{ color: PHOSPHOR }}>$ startx</p>
+            )}
           </div>
         )}
 
-        <span
-          className="ml-0.5 inline-block h-3 w-[7px] animate-blink align-middle"
-          style={{ background: PHOSPHOR }}
-        />
+        {stage === "menu" && (
+          <motion.section
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            aria-label="Choose how to view the profile"
+            onMouseEnter={() => setPaused(true)}
+            className="mt-5 max-w-xl rounded-md border p-3"
+            style={{ borderColor: "rgba(74,222,128,0.3)", background: "rgba(74,222,128,0.05)" }}
+          >
+            <p className="mb-2" style={{ color: "rgb(var(--term-dim))" }}>
+              How would you like to view my profile?
+            </p>
+            <ul className="space-y-1">
+              {menuEntries.map((m, i) => {
+                const active = i === sel;
+                return (
+                  <li key={m.id}>
+                    <button
+                      onClick={() => choose(m.id)}
+                      onMouseEnter={() => {
+                        setPaused(true);
+                        setSel(i);
+                      }}
+                      className="w-full rounded px-2 py-1.5 text-left transition-colors"
+                      style={{ background: active ? "rgba(74,222,128,0.14)" : "transparent" }}
+                    >
+                      <span className="block" style={{ color: active ? PHOSPHOR : "rgb(var(--term-dim))" }}>
+                        {active ? "▸ " : "\u00A0\u00A0"}
+                        {m.label}
+                      </span>
+                      <span className="block pl-4 text-[10px]" style={{ color: "rgb(var(--term-dim))" }}>
+                        {m.note}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-2 text-[10px]" style={{ color: "rgb(var(--term-dim))" }}>
+              Use ↑ ↓ and Enter ·{" "}
+              {paused ? "auto-boot paused" : `booting the highlighted option in ${countdown}s`}
+            </p>
+          </motion.section>
+        )}
+
+        {stage !== "menu" && (
+          <span
+            className="ml-0.5 inline-block h-3 w-[7px] animate-blink align-middle"
+            style={{ background: PHOSPHOR }}
+          />
+        )}
       </div>
 
       <button
-        onClick={finish}
+        onClick={() => choose("desktop")}
         className="absolute right-4 top-4 rounded-md border px-3 py-1.5 font-mono text-[11px] transition-colors"
         style={{
           borderColor: "rgba(74,222,128,0.3)",
@@ -144,7 +250,7 @@ export function BootSequence({ onDone }: Readonly<{ onDone: () => void }>) {
           background: "rgba(74,222,128,0.06)",
         }}
       >
-        skip boot →
+        skip →
       </button>
     </motion.div>
   );

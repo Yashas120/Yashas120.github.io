@@ -4,8 +4,13 @@ export interface AppDef {
   id: string;
   /** Window title bar text, e.g. "yashas@kernel: ~/htop". */
   title: string;
-  /** Short label for the dock and desktop icon. */
+  /** Short jargon label for the dock and desktop icon (e.g. "htop"). */
   short: string;
+  /** Plain-English label shown alongside the jargon so non-technical
+   *  visitors know what an app holds (e.g. "Projects"). */
+  friendly: string;
+  /** One-line description of what's inside, used in tooltips and the app menu. */
+  blurb?: string;
   icon: LucideIcon;
   /** Terminal-family apps get the phosphor/CRT surface instead of a graphite one. */
   terminal?: boolean;

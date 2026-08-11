@@ -78,7 +78,7 @@ export default function DataPlanePage() {
       id: "drivers",
       tag: "drv/",
       node: (
-        <Section tag="drv/" title="Device drivers — projects probe & bind to the bringup device">
+        <Section tag="drv/" title="PSM — optical protection switching (working ⇄ protect)">
           <DriverBus />
         </Section>
       ),
@@ -87,7 +87,7 @@ export default function DataPlanePage() {
       id: "hal",
       tag: "hal/",
       node: (
-        <Section tag="hal/" title="HAL layer — one source file per role">
+        <Section tag="hal/" title="HAL stack — descend from control plane to the metal">
           <HalStack />
         </Section>
       ),

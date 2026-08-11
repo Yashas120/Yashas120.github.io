@@ -6,10 +6,13 @@ import { AlertTriangle } from "lucide-react";
 import { profile } from "@/data/profile";
 import { hexToRgba } from "@/lib/utils";
 import { DesktopProvider } from "./DesktopContext";
+import { DesktopTour } from "./DesktopTour";
 import { Dock } from "./Dock";
 import { MenuBar } from "./MenuBar";
 import { Window } from "./Window";
 import { PHOSPHOR, type AppDef, type WinState } from "./types";
+
+const TOUR_SEEN_KEY = "kernel-tour-seen";
 
 const MOBILE_QUERY = "(max-width: 860px)";
 const MIN_W = 300;
@@ -50,7 +53,18 @@ function useIsMobile(): boolean {
 export function Desktop({
   apps,
   initialOpen,
-}: Readonly<{ apps: AppDef[]; initialOpen: string[] }>) {
+  active = true,
+  openOnEnter,
+  suppressTour = false,
+}: Readonly<{
+  apps: AppDef[];
+  initialOpen: string[];
+  active?: boolean;
+  /** App id to open (and focus) the moment the desktop becomes active. */
+  openOnEnter?: string;
+  /** Skip the first-run tour (e.g. arriving from the pre-boot shell). */
+  suppressTour?: boolean;
+}>) {
   const [wins, setWins] = useState<WinState[]>(() =>
     initialOpen
       .map((id) => apps.find((a) => a.id === id))
@@ -58,6 +72,7 @@ export function Desktop({
       .map((a) => place(a, ASSUMED_W, ASSUMED_H))
   );
   const [panic, setPanic] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const mobile = useIsMobile();
 
@@ -124,6 +139,38 @@ export function Desktop({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // First time the desktop is actually shown, greet a new visitor with the tour.
+  // Persisted so repeat visitors aren't nagged; the ? button reopens it anytime.
+  // Skipped when they arrived from the pre-boot shell — that path is deliberate.
+  useEffect(() => {
+    if (!active || suppressTour) return;
+    let seen = false;
+    try {
+      seen = localStorage.getItem(TOUR_SEEN_KEY) === "1";
+    } catch {
+      /* private mode — showing the tour once is a fine fallback */
+    }
+    if (!seen) setTourOpen(true);
+  }, [active, suppressTour]);
+
+  // If the pre-boot shell asked to open a specific app (e.g. the visitor typed
+  // `man` or `open htop` before booting), open and focus it on entry.
+  const enteredRef = useRef(false);
+  useEffect(() => {
+    if (!active || enteredRef.current) return;
+    enteredRef.current = true;
+    if (openOnEnter) open(openOnEnter);
+  }, [active, openOnEnter, open]);
+
+  const closeTour = useCallback(() => {
+    setTourOpen(false);
+    try {
+      localStorage.setItem(TOUR_SEEN_KEY, "1");
+    } catch {
+      /* ignore storage errors */
+    }
+  }, []);
+
   const visible = wins.filter((w) => !w.minimized);
   const topId = visible.at(-1)?.id ?? null;
   const api = useMemo(
@@ -134,7 +181,12 @@ export function Desktop({
   return (
     <DesktopProvider value={api}>
       <div className="flex h-[100dvh] flex-col overflow-hidden">
-        <MenuBar apps={apps} activeTitle={topId ? byId.get(topId)?.title : undefined} onLaunch={open} />
+        <MenuBar
+          apps={apps}
+          activeTitle={topId ? byId.get(topId)?.title : undefined}
+          onLaunch={open}
+          onHelp={() => setTourOpen(true)}
+        />
 
         <div ref={surfaceRef} className="wallpaper relative min-h-0 flex-1 overflow-hidden">
           {/* Desktop launcher icons */}
@@ -148,6 +200,7 @@ export function Desktop({
                     <li key={a.id}>
                       <button
                         onClick={() => open(a.id)}
+                        title={a.blurb ?? a.friendly}
                         className="flex w-full flex-col items-center gap-1 rounded-lg px-1 py-2 transition-colors hover:bg-line/10"
                       >
                         <span
@@ -159,8 +212,8 @@ export function Desktop({
                         >
                           <Icon className="h-4 w-4" style={{ color: PHOSPHOR }} />
                         </span>
-                        <span className="text-center font-mono text-[9px] leading-tight text-zinc-400">
-                          {a.short}
+                        <span className="w-full truncate text-center text-[9px] leading-tight text-zinc-300">
+                          {a.friendly}
                         </span>
                       </button>
                     </li>
@@ -215,6 +268,8 @@ export function Desktop({
 
         {mobile && <Dock apps={apps} openIds={wins.map((w) => w.id)} activeId={topId} mobile onLaunch={toggle} />}
       </div>
+
+      <DesktopTour open={tourOpen} onClose={closeTour} />
 
       <AnimatePresence>
         {panic && (

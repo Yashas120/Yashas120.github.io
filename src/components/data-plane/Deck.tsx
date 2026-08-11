@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { hexToRgba } from "@/lib/utils";
 
-const ACCENT = "#a78bfa";
+const DEFAULT_ACCENT = "#a78bfa";
 
 // One gesture must equal exactly one slide. Wheel deltas accumulate so a stray
 // nudge never advances, and the lock releases once trackpad momentum goes quiet
@@ -79,10 +79,28 @@ export function useSlideStepper(count: number): readonly [number, (index: number
   return [index, focus] as const;
 }
 
-export function Deck({ slides, headerOffset = 52 }: Readonly<{ slides: DeckSlide[]; headerOffset?: number }>) {
+export function Deck({
+  slides,
+  headerOffset = 52,
+  accent = DEFAULT_ACCENT,
+  onActiveChange,
+  transition = "slide",
+}: Readonly<{
+  slides: DeckSlide[];
+  headerOffset?: number;
+  accent?: string;
+  onActiveChange?: (index: number) => void;
+  // "slide": vertical translate (default). "zoom": depth cross-dissolve that
+  // grows the incoming slide from centre so it doesn't read as page scrolling.
+  transition?: "slide" | "zoom";
+}>) {
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState(1);
   const reduce = useReducedMotion();
+
+  useEffect(() => {
+    onActiveChange?.(active);
+  }, [active, onActiveChange]);
 
   const lockedRef = useRef(false);
   const lastWheelRef = useRef(0);
@@ -245,11 +263,21 @@ export function Deck({ slides, headerOffset = 52 }: Readonly<{ slides: DeckSlide
   );
   const slide = slides[active];
 
-  const variants = {
+  const slideVariants = {
     enter: (dir: number) => (reduce ? { opacity: 0 } : { opacity: 0, y: dir > 0 ? 32 : -32, scale: 0.96 }),
     center: reduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 },
     exit: (dir: number) => (reduce ? { opacity: 0 } : { opacity: 0, y: dir > 0 ? -32 : 32, scale: 0.97 }),
   };
+
+  // Depth cross-dissolve: no vertical travel, so it reads as moving through
+  // slides rather than scrolling a document.
+  const zoomVariants = {
+    enter: reduce ? { opacity: 0 } : { opacity: 0, scale: 0.92, filter: "blur(12px)" },
+    center: reduce ? { opacity: 1 } : { opacity: 1, scale: 1, filter: "blur(0px)" },
+    exit: reduce ? { opacity: 0 } : { opacity: 0, scale: 1.08, filter: "blur(12px)" },
+  };
+
+  const variants = transition === "zoom" ? zoomVariants : slideVariants;
 
   return (
     <DeckContext.Provider value={api}>
@@ -284,7 +312,7 @@ export function Deck({ slides, headerOffset = 52 }: Readonly<{ slides: DeckSlide
               aria-current={isActive ? "true" : undefined}
               className="group flex items-center gap-2"
             >
-              <span className="pointer-events-none whitespace-nowrap font-mono text-[10px] opacity-0 transition-opacity group-hover:opacity-100" style={{ color: ACCENT }}>
+              <span className="pointer-events-none whitespace-nowrap font-mono text-[10px] opacity-0 transition-opacity group-hover:opacity-100" style={{ color: accent }}>
                 {s.tag ?? s.id}
               </span>
               <span
@@ -292,8 +320,8 @@ export function Deck({ slides, headerOffset = 52 }: Readonly<{ slides: DeckSlide
                 style={{
                   height: isActive ? 10 : 6,
                   width: isActive ? 10 : 6,
-                  background: isActive ? ACCENT : "rgb(var(--line) / 0.35)",
-                  boxShadow: isActive ? `0 0 10px ${hexToRgba(ACCENT, 0.9)}` : "none",
+                  background: isActive ? accent : "rgb(var(--line) / 0.35)",
+                  boxShadow: isActive ? `0 0 10px ${hexToRgba(accent, 0.9)}` : "none",
                 }}
               />
             </button>
@@ -303,7 +331,7 @@ export function Deck({ slides, headerOffset = 52 }: Readonly<{ slides: DeckSlide
 
       {/* position + hint */}
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-center justify-center gap-3 font-mono text-[10px] text-zinc-600">
-        <span style={{ color: hexToRgba(ACCENT, 0.7) }}>
+        <span style={{ color: hexToRgba(accent, 0.7) }}>
           {String(active + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
         </span>
         <span>· scroll or ↑↓ to step ·</span>
