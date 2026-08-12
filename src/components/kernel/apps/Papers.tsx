@@ -6,8 +6,10 @@ import { highlights } from "@/data/highlights";
 import { hexToRgba } from "@/lib/utils";
 import { PHOSPHOR } from "../desktop/types";
 import { AppHeader } from "./ui";
+import { useDesktop } from "../desktop/DesktopContext";
 
 export function Papers() {
+  const { openDemo } = useDesktop();
   return (
     <div className="min-h-full">
       <AppHeader
@@ -51,6 +53,11 @@ export function Papers() {
               <ExternalLink className="h-3 w-3" />
               doi:{p.doi}
             </a>
+            {p.id === "swift-isr" && (
+              <button type="button" onClick={() => openDemo("swift")} className="ml-3 mt-3 inline-flex min-h-11 items-center rounded border px-3 font-mono text-[11px]" style={{ borderColor: hexToRgba(PHOSPHOR, 0.35), color: PHOSPHOR }}>
+                Run SWIFT live explainer
+              </button>
+            )}
           </article>
         ))}
 

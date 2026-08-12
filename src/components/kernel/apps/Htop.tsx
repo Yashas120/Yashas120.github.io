@@ -8,11 +8,13 @@ import { kernelPortfolio, workLabels } from "@/data/kernelPortfolio";
 import { kernelProjects as projects } from "@/data/projects";
 import { hexToRgba } from "@/lib/utils";
 import { PHOSPHOR } from "../desktop/types";
+import { useDesktop } from "../desktop/DesktopContext";
 import { Chip } from "./ui";
 
 export function Htop() {
   const [open, setOpen] = useState<string | null>(projects[0]?.id ?? null);
   const reducedMotion = useReducedMotion();
+  const { openDemo } = useDesktop();
 
   return (
     <div className="flex min-h-full flex-col font-mono text-[11px]">
@@ -53,7 +55,7 @@ export function Htop() {
                     <td className="px-2 py-1" style={{ color: PHOSPHOR }}>{workLabels.status[project.status]}</td>
                     <td className="px-2 py-1 text-zinc-400">{project.evidence.length ? `${project.evidence.length} linked fact${project.evidence.length === 1 ? "" : "s"}` : "Contribution record"}</td>
                     <td className="px-2 py-1">
-                      {project.demoUrl ? <Link href={project.demoUrl} className="inline-flex min-h-11 items-center gap-1 text-zinc-300 hover:text-zinc-50">Open <ExternalLink className="h-3 w-3" /></Link> : <span className="text-zinc-600">—</span>}
+                      {project.demoId ? <button type="button" onClick={() => openDemo(project.demoId!)} className="inline-flex min-h-11 items-center gap-1 text-zinc-300 hover:text-zinc-50">Run <ExternalLink className="h-3 w-3" /></button> : <span className="text-zinc-600">—</span>}
                     </td>
                     <td className="px-2 py-1">
                       {project.repoUrl ? <a href={project.repoUrl} target="_blank" rel="noreferrer noopener" className="inline-flex min-h-11 items-center gap-1 text-zinc-300 hover:text-zinc-50">Source <Github className="h-3 w-3" /></a> : <span className="text-zinc-600">Not public</span>}
@@ -77,6 +79,12 @@ export function Htop() {
                                 <div><dt className="text-zinc-500">Outcome</dt><dd className="mt-0.5 leading-relaxed text-zinc-300">{project.outcome}</dd></div>
                               </dl>
                               <div className="mt-2.5 flex flex-wrap gap-1.5">{project.tech.map((tech) => <Chip key={tech}>{tech}</Chip>)}</div>
+                              {project.demoId && (
+                                <div className="mt-3 border-t pt-3" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>
+                                  <p className="whitespace-pre-line font-mono text-[11px] leading-relaxed text-zinc-400" aria-live="polite">{`$ exec ./demo --project=${project.demoId}\n[browser process ready]`}</p>
+                                  <button type="button" onClick={() => openDemo(project.demoId!)} className="mt-2 inline-flex min-h-11 items-center rounded border px-3 font-mono text-[11px]" style={{ borderColor: hexToRgba(PHOSPHOR, 0.4), color: PHOSPHOR }}>Run live demo</button>
+                                </div>
+                              )}
                               <Link href={`/kernel#${kernelPortfolio.featuredProjectIds.includes(project.id as never) ? "systems-projects" : "projects"}`} className="mt-3 inline-flex min-h-11 items-center text-[11px]" style={{ color: PHOSPHOR }}>
                                 View in Portfolio Overview →
                               </Link>

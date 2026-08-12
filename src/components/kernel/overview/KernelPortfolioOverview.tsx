@@ -383,7 +383,7 @@ function ProjectCard({ project, featured = false }: Readonly<{ project: Project;
       <div className={styles.projectLinks}>
         {project.repoUrl ? <a href={project.repoUrl} target="_blank" rel="noreferrer noopener"><Github aria-hidden="true" /> Source</a> : <span>No public source linked</span>}
         {project.caseStudyUrl ? <a href={project.caseStudyUrl}>Case study <ArrowRight aria-hidden="true" /></a> : null}
-        {project.demoUrl ? <Link href={project.demoUrl}>Open live demo <ExternalLink aria-hidden="true" /></Link> : null}
+        {project.demoId ? <Link href={`/kernel/lab?app=demo-lab&demo=${project.demoId}`}>Run live demo in yashOS <ExternalLink aria-hidden="true" /></Link> : null}
       </div>
     </article>
   );
