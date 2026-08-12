@@ -17,10 +17,10 @@ export const themes: ThemeMeta[] = [
     path: "/cluster",
     domain: "distributed",
     label: "Distributed Systems",
-    metaphor: "MapReduce + Raft",
-    tagline: "Roles run as MapReduce jobs; projects commit to a Raft replicated log.",
+    metaphor: "Cluster",
+    tagline: "A cinematic, scroll-driven tour of distributed-systems and infrastructure work.",
     accent: "#22d3ee",
-    prompt: "mapreduce",
+    prompt: "cluster",
   },
   {
     id: "kernel",

@@ -1,14 +1,17 @@
 "use client";
 
 import { MotionConfig } from "framer-motion";
-import { ClusterStory } from "@/components/cluster/ClusterStory";
+import { ClusterFilm } from "@/components/cluster/ClusterFilm";
+import { ClusterThemeProvider } from "@/components/cluster/theme";
 
 export default function ClusterPage() {
   return (
     <MotionConfig reducedMotion="user">
-      <main className="relative min-h-screen text-zinc-300">
-        <ClusterStory />
-      </main>
+      <ClusterThemeProvider>
+        <main id="cluster-content">
+          <ClusterFilm />
+        </main>
+      </ClusterThemeProvider>
     </MotionConfig>
   );
 }

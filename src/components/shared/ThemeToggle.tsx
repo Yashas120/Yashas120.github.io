@@ -9,8 +9,9 @@ export function ThemeToggle() {
   const pathname = usePathname();
 
   // The kernel desktop carries its own tray toggle in the menu bar; a floating
-  // pill would sit on top of the mobile dock.
-  if (pathname === "/kernel") return null;
+  // pill would sit on top of the mobile dock. /cluster is a fixed editorial
+  // canvas with its own palette, so the toggle has nothing to switch there.
+  if (pathname === "/kernel" || pathname === "/cluster") return null;
 
   return (
     <button
