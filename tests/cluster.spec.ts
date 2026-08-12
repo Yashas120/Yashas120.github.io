@@ -45,7 +45,7 @@ test("keeps one sticky stage while left copy enters, holds, and exits", async ({
   const track = page.locator('[data-enhanced="true"]');
   const travel = await track.evaluate((element) => element.scrollHeight - innerHeight);
   const sample = async (progress: number) => {
-    await track.evaluate((element, value) => scrollTo(0, element.offsetTop + (element.scrollHeight - innerHeight) * value), progress);
+    await track.evaluate((element, value) => scrollTo(0, (element as HTMLElement).offsetTop + (element.scrollHeight - innerHeight) * value), progress);
     await page.waitForTimeout(80);
     return page.locator('[data-scene-copy="regional-consequences"]').evaluate((element) => {
       const style = getComputedStyle(element);

@@ -35,6 +35,8 @@ export function BootShell({ onBoot }: Readonly<{ onBoot: (appId?: string) => voi
       close: () => {},
       isOpen: () => false,
       panic: () => onBoot(),
+      openDemo: () => onBoot("htop"),
+      demoId: null,
     }),
     [onBoot]
   );
