@@ -1,3 +1,5 @@
+import type { DemoId } from "@/data/demos";
+
 export type Domain =
   | "distributed"
   | "os"
@@ -111,4 +113,3 @@ export interface Metric {
   context: string;
   domains: Domain[];
 }
-import type { DemoId } from "@/data/demos";
