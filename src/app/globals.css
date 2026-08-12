@@ -286,6 +286,52 @@ html.light .devops {
   color: rgb(var(--dv-muted));
 }
 
+/* Ambient motion for the inspector visuals.
+   Each keyframe set starts *and* ends at a resting state that already reads as a
+   complete diagram, so when the reduced-motion rule below collapses every
+   duration to ~0ms the visitor still sees the finished relationship rather than
+   an empty frame. Nothing here draws information into existence. */
+@keyframes dv-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes dv-flow {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+@keyframes dv-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.dv-orbit {
+  animation: dv-orbit 16s linear infinite;
+}
+
+/* A dashed connector that drifts along its own path: dashed at rest, so the
+   relationship is visible whether or not the animation ever runs. */
+.dv-flow {
+  stroke-dasharray: 4 8;
+  animation: dv-flow 1.4s linear infinite;
+}
+
+.dv-pulse {
+  animation: dv-pulse 2.4s ease-in-out infinite;
+}
+
+/* Ambient motion is suspended while the tab is in the background — the dock sets
+   data-idle from a visibilitychange listener. */
+.devops [data-idle="true"] * {
+  animation-play-state: paused;
+}
+
 /* One focus treatment for the whole route: 2px, offset, always visible. */
 .devops :focus-visible {
   outline: 2px solid rgb(var(--dv-amber));

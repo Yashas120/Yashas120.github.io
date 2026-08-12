@@ -8,6 +8,11 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      screens: {
+        // /devtools docks its inspector beside the document only when there is
+        // room for a 42% panel without squeezing the prose column.
+        dock: "1180px",
+      },
       colors: {
         // Surfaces + neutral text ramp are driven by CSS variables so the whole
         // site flips between light/dark (see globals.css :root / html.light).

@@ -7,6 +7,7 @@
  */
 
 import { cmockaCleared } from "./disclosure";
+import { publicLinks, resumeLink } from "./links";
 
 /* ---------------------------------------------------------------- identity */
 
@@ -21,30 +22,29 @@ import { cmockaCleared } from "./disclosure";
  * To switch to a real download: commit the PDF under `public/` and change only
  * the three fields below — every résumé link on the route reads from here.
  */
-export const resumeLink = {
-  href: "https://www.linkedin.com/in/yashas120",
-  ariaLabel: "Résumé — Yashas Kadambi on LinkedIn (opens in a new tab)",
-  isPdf: false,
-} as const;
+export { resumeLink } from "./links";
 
 export const identity = {
   name: "Yashas Kadambi",
   role: "DevOps & Platform Engineer",
   email: "ykadambi@ucsd.edu",
-  emailHref: "mailto:ykadambi@ucsd.edu",
-  github: "https://github.com/Yashas120",
+  emailHref: publicLinks.email,
+  github: publicLinks.github,
   githubUser: "Yashas120",
-  linkedin: "https://www.linkedin.com/in/yashas120",
+  linkedin: publicLinks.linkedin,
+  demos: publicLinks.demos,
+  portfolioSource: publicLinks.portfolioSource,
 } as const;
 
 export const meta = {
   title: "Yashas Kadambi — DevOps & Platform Engineer",
   description:
-    "Production engineer working across AWS, Terraform, CI/CD, platform reliability, backend systems, observability, and developer tooling. M.S. Computer Science student at UC San Diego.",
+    "Production engineer working across AWS, Terraform, CI/CD, backend reliability, observability, developer tooling, hardware-adjacent systems, research, and teaching.",
   ogTitle: "Yashas Kadambi — DevOps, Platform & Reliability",
   ogDescription:
     "Inspect the delivery systems behind production infrastructure, deployment automation, reliability work, and developer tooling.",
-  url: "https://yashas120.github.io/devtools/",
+  url: "https://yashas120.github.io/devtools",
+  socialImage: "https://yashas120.github.io/devtools-og.svg",
 } as const;
 
 /* -------------------------------------------------------------------- hero */
@@ -59,7 +59,9 @@ export const hero = {
   eyebrow: "DEVOPS · PLATFORM · RELIABILITY",
   heading:
     "I turn infrastructure, delivery, and operational knowledge into repeatable systems.",
-  body: "I’m Yashas Kadambi, a production software engineer with approximately three years of experience across cloud infrastructure, CI/CD, backend platforms, observability, and developer tooling. I begin an M.S. in Computer Science at UC San Diego in September 2026.",
+  body: "I’m Yashas Kadambi, a production software engineer with approximately three years of experience across cloud infrastructure, CI/CD, backend platforms, observability, developer tooling, and hardware-adjacent systems. I begin an M.S. in Computer Science at UC San Diego in September 2026.",
+  roleLens:
+    "This is my complete engineering portfolio, inspected through a DevOps and platform-engineering lens. Production delivery leads the story; systems, optical, research, teaching, and project work remain part of the same evidence base.",
   availability:
     "Relocating to San Diego for graduate study · Open to DevOps, platform, infrastructure, and SRE opportunities",
   proof: {
@@ -80,17 +82,11 @@ export const hero = {
       value: "40% faster",
       detail: "application page-load performance",
     },
-    cmockaCleared
-      ? {
-          evidenceId: "test-loop",
-          value: "30 minutes → ~10 seconds",
-          detail: "hardware-independent unit-test build cycle",
-        }
-      : {
-          evidenceId: "sdk-ci",
-          value: "Python + Java",
-          detail: "automated SDK delivery from API contract changes",
-        },
+    {
+      evidenceId: "aws-cert",
+      value: "AWS Certified",
+      detail: "Developer – Associate · verification link pending",
+    },
   ],
 } as const;
 
@@ -189,7 +185,34 @@ export const reliability = {
    * exact phrasing has not been re-cleared for this route.
    */
   authMigration:
-    "Led or contributed to authentication and gateway modernization using traffic-based dependency discovery, staged validation, deployment-controlled rollout, and production-safe cutover.",
+    "Coordinated or contributed across authentication and API endpoint changes using traffic- and log-based dependency discovery, staged validation, deployment-controlled rollout, and coordinated cutover across consumers.",
+  evidenceCards: [
+    {
+      title: "Deployment dependency diagnosis",
+      body: "Traced configuration, global references, load-balancing behavior, and previous/current logs; changed the operating method to validate smaller increments, retain previous instances until replacements stabilized, add health checks, and verify the complete dependency stack.",
+      evidenceId: "incident",
+    },
+    {
+      title: "Move filtering closer to the data",
+      body: "Application-performance traces exposed large fetches followed by in-memory filtering. Moving work closer to the database and correcting query behavior reduced page-load time by 40%.",
+      evidenceId: "page-load",
+    },
+    {
+      title: "Authentication and API modernization",
+      body: "Used traffic- and log-based dependency discovery, staged validation, deployment-controlled rollout, and coordinated cutover across consumers.",
+      evidenceId: "auth-api",
+    },
+    {
+      title: "Constrained security remediation",
+      body: "Modernized a vulnerable logging dependency in air-gapped legacy environments where normal package and deployment assumptions did not apply.",
+      evidenceId: "constrained-security",
+    },
+    {
+      title: "Cross-layer firmware and hardware diagnosis",
+      body: "Traced a software-visible upgrade crash to a lower-layer FPGA or firmware change while keeping internal release identifiers private.",
+      evidenceId: "firmware-rca",
+    },
+  ],
 } as const;
 
 export const devex = {
@@ -226,8 +249,15 @@ export const devex = {
   },
   environments: {
     title: "Development environments as platform products",
-    body: "Built repeatable local-development paths for legacy and cloud-connected systems, including container tooling, dependency setup, database substitutes, repository setup, and operational documentation. The goal was consistent: replace machine-specific knowledge with a workflow another engineer could run and understand.",
+    body: "Built repeatable local-development and debugging paths for legacy, cloud-connected, and hardware-adjacent systems, including container alternatives, dependency setup, binary build and deploy automation, near-real-time diagnostic streaming, and reusable documentation. The goal was consistent: replace machine-specific knowledge with a workflow another engineer could run and understand.",
   },
+  supporting: [
+    "Improved Swagger and OpenAPI contract quality and documentation.",
+    "Contributed to an AWS Glue-backed data path and backend/web integration.",
+    "Added cross-repository logging and operational documentation.",
+    "Enabled local legacy-service development and DataStax workflows on Apple Silicon.",
+    "Created public-safe, agent-oriented build and deployment guidance for repeatable handoffs.",
+  ],
 } as const;
 
 /* ------------------------------------------------- education & credentials */
@@ -259,4 +289,5 @@ export const contact = {
   heading: "Let’s make the operating path easier to trust.",
   body: "I’m interested in DevOps, platform engineering, infrastructure, SRE, and developer-productivity roles where software design and operational behavior are treated as one system.",
   status: { path: "portfolio.delivery/status", value: "READY FOR REVIEW" },
+  resumeNote: resumeLink.verificationNote,
 } as const;

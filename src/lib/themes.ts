@@ -35,12 +35,12 @@ export const themes: ThemeMeta[] = [
   {
     id: "devtools",
     path: "/devtools",
-    domain: "web",
-    label: "Web Development",
-    metaphor: "DevTools",
-    tagline: "Inspect the DOM, watch the network waterfall, run the console.",
-    accent: "#f59e0b",
-    prompt: "> devtools",
+    domain: "devops",
+    label: "DevOps & Platform",
+    metaphor: "Delivery Inspector",
+    tagline: "Read the portfolio, then inspect the delivery system behind the work.",
+    accent: "#FFB454",
+    prompt: "portfolio://delivery",
   },
   {
     id: "data-plane",
