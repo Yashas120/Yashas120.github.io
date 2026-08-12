@@ -52,7 +52,7 @@ export default function HiddenLauncher() {
         <div className="mt-12">
           <p className="mb-4 font-mono text-xs text-zinc-500">
             <span className="text-cluster">$</span> select --interface{" "}
-            <span className="text-zinc-600">(same resume, six lenses — pick one, or ⌘K here)</span>
+            <span className="text-zinc-600">(same resume, one lens per role — pick one, or ⌘K here)</span>
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {themes.map((t, i) => (

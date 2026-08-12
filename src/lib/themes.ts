@@ -63,6 +63,16 @@ export const themes: ThemeMeta[] = [
     prompt: "agent@px-cloud:~$",
   },
   {
+    id: "fde",
+    path: "/fde",
+    domain: "devops",
+    label: "Forward Deployed Engineering",
+    metaphor: "Field Delivery Workbench",
+    tagline: "Walk an ambiguous operational problem through to a deployed, adopted, reusable system.",
+    accent: "#fb923c",
+    prompt: "discover → codify",
+  },
+  {
     id: "notebook",
     path: "/notebook",
     domain: "ta",
