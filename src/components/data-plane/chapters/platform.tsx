@@ -317,7 +317,7 @@ export function Ch3Cdr({ p, compact }: Readonly<ChapterVisualProps>) {
 
       <Reveal step={send}>
         <Ann x={b.left} y={tableY + tableH + (compact ? 22 : 30)} size={geo.f.tiny} color={MUTED}>
-          migrated across hundreds of use sites
+          migrated across the relevant programming path
         </Ann>
         <Ann x={b.left} y={tableY + tableH + (compact ? 36 : 46)} size={geo.f.tiny} color={VERIFIED}>
           shared-card behavior regression-protected

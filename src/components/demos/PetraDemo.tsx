@@ -65,7 +65,7 @@ function useIsLight(): boolean {
   return light;
 }
 
-export function PetraDemo() {
+export function PetraDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
   const light = useIsLight();
   const [actionIdx, setActionIdx] = useState(0);
   const [stepIdx, setStepIdx] = useState(0);
@@ -145,6 +145,7 @@ export function PetraDemo() {
       subtitle="Not a UI tour: this traces how Petra's full stack actually serves a request. Pick a user action and watch it travel the React SPA → the custom Express API on :3001 → MongoDB (and out to Google for auth) and back — with the real endpoints, DB operations, and the app's own pet-care pricing."
       repoUrl={REPO}
       accent={ACC}
+      embedded={embedded}
       {...cardProps("petra")}
     >
       {/* action tabs */}
@@ -288,6 +289,10 @@ export function PetraDemo() {
       </p>
     </LiveDemo>
   );
+}
+
+export function PetraLab() {
+  return <PetraDemo embedded />;
 }
 
 function CostPanel({ light }: { light: boolean }) {

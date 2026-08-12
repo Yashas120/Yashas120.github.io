@@ -7,14 +7,12 @@
 import { PanelShell } from "./PanelShell";
 import { DeliveryLoop } from "../visuals/DeliveryLoop";
 import { DV } from "../tokens";
+import { deliveryLoop } from "@/data/devops/profile";
 
-const STAGE_EVIDENCE = [
-  { stage: "Define", evidence: "API contracts, infrastructure modules, dependency graph" },
-  { stage: "Provision", evidence: "Terraform and AWS resources" },
-  { stage: "Deliver", evidence: "CI/CD, SDK pipeline, staged rollout" },
-  { stage: "Observe", evidence: "Application traces, logs, health checks" },
-  { stage: "Improve", evidence: "Performance work, prevention steps, developer tooling" },
-];
+const STAGE_EVIDENCE = deliveryLoop.stages.map((stage, index) => ({
+  stage,
+  evidence: deliveryLoop.evidence[index],
+}));
 
 export function OverviewPanel({ live }: Readonly<{ live?: boolean }>) {
   return (

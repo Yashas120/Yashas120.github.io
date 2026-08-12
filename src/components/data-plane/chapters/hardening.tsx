@@ -47,7 +47,7 @@ export function Ch7Harness({ p, compact }: Readonly<ChapterVisualProps>) {
       <Reveal step={real}>
         <rect x={b.left} y={y0} width={w} height={rowH} rx={4} fill={RAISED} stroke={VERIFIED} strokeOpacity={0.55} strokeWidth={1.1} />
         <Ann x={b.left + 10} y={y0 + rowH / 2 + 3.5} size={geo.f.mono} color={TEXT}>
-          122 production C files · compiled for x86_64
+          production C path · compiled for x86_64
         </Ann>
       </Reveal>
 
@@ -66,12 +66,12 @@ export function Ch7Harness({ p, compact }: Readonly<ChapterVisualProps>) {
           strokeDasharray="5 5"
         />
         <Ann x={b.left + 10} y={y0 + rowH + 12 + rowH / 2 + 3.5} size={geo.f.mono} color={SIGNAL}>
-          ≈430 SDK / hardware boundaries stubbed
+          SDK / hardware boundaries stubbed
         </Ann>
       </Reveal>
       <Reveal step={cut}>
         <Ann x={b.left} y={y0 + rowH * 2 + 38} size={geo.f.tiny} color={MUTED}>
-          ≈415 typed strong stubs
+          typed strong stubs
         </Ann>
         <Ann x={b.left} y={y0 + rowH * 2 + (compact ? 50 : 52)} size={geo.f.tiny} color={MUTED}>
           + generated weak fallbacks · per-test linker wrappers
@@ -91,12 +91,12 @@ export function Ch7Harness({ p, compact }: Readonly<ChapterVisualProps>) {
       />
       <motion.g style={{ opacity: slow }}>
         <Ann x={b.cx} y={cy - 2} size={geo.f.mono} color={MUTED} anchor="middle">
-          ≈30 min
+          tens of minutes
         </Ann>
       </motion.g>
       <motion.g style={{ opacity: fast }}>
         <Ann x={b.cx} y={cy - 2} size={geo.f.label} color={VERIFIED} anchor="middle">
-          ≈10 s
+          seconds
         </Ann>
       </motion.g>
       <Reveal step={cut}>

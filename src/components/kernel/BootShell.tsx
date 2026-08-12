@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Power } from "lucide-react";
 import { Terminal } from "./apps/Terminal";
 import { DesktopProvider } from "./desktop/DesktopContext";
@@ -15,6 +15,7 @@ import { PHOSPHOR } from "./desktop/types";
  * the OS and open that app there, so nothing is a dead end.
  */
 export function BootShell({ onBoot }: Readonly<{ onBoot: (appId?: string) => void }>) {
+  const reducedMotion = useReducedMotion();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "F5") {
@@ -43,7 +44,7 @@ export function BootShell({ onBoot }: Readonly<{ onBoot: (appId?: string) => voi
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: reducedMotion ? 0 : 0.25 }}
       className="crt fixed inset-0 z-[70] flex flex-col"
     >
       <div

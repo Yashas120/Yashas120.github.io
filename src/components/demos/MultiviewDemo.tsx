@@ -134,7 +134,7 @@ function project3(
   return { sx: W / 2 + s * x1 * persp, sy: H / 2 - s * y2 * persp, depth: z2, persp };
 }
 
-export function MultiviewDemo() {
+export function MultiviewDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
   const light = useIsLight();
   const reduced = usePrefersReducedMotion();
   const [sceneId, setSceneId] = useState<SceneId>("house");
@@ -485,6 +485,7 @@ export function MultiviewDemo() {
       subtitle="Structure from Motion, live in your browser: two 2D views of a scene are turned back into 3D. Step through detection, matching, epipolar geometry and triangulation to see the point cloud reappear."
       repoUrl={REPO}
       accent={MV}
+      embedded={embedded}
       {...cardProps("multiview")}
     >
       {/* controls */}
@@ -606,6 +607,10 @@ export function MultiviewDemo() {
       </p>
     </LiveDemo>
   );
+}
+
+export function MultiviewLab() {
+  return <MultiviewDemo embedded />;
 }
 
 function StepPipeline({

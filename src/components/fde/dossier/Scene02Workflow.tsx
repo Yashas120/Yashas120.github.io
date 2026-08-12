@@ -86,7 +86,7 @@ export function Scene02Workflow({ p, compact }: Readonly<SceneVisualProps>) {
           SPECIFICATION SPINE
         </Ann>
         <Ann x={SPINE_X + 186} y={TOP + 14} size={9} opacity={0.55}>
-          ~20 feature workflows
+          feature workflows
         </Ann>
         <Ann x={SPINE_X + 186} y={TOP + 32} size={9} opacity={0.55}>
           part → test relationships

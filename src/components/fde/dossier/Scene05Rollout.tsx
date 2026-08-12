@@ -117,7 +117,7 @@ function Lane({ p, y, label, delay, compact }: Readonly<LaneProps>) {
 }
 
 export function Scene05Rollout({ p, compact }: Readonly<SceneVisualProps>) {
-  const module = useRange(p, 0.06, 0.28, 0, 1);
+  const moduleOpacity = useRange(p, 0.06, 0.28, 0, 1);
   const saving = useRange(p, 0.82, 0.98, 0, 1);
 
   return (
@@ -125,7 +125,7 @@ export function Scene05Rollout({ p, compact }: Readonly<SceneVisualProps>) {
       <Lane p={p} y={140} label="region a" delay={0} compact={compact} />
       <Lane p={p} y={302} label="region b" delay={0.06} compact={compact} />
 
-      <motion.g style={{ opacity: module }}>
+      <motion.g style={{ opacity: moduleOpacity }}>
         <rect x={26} y={190} width={30} height={62} fill="none" stroke={COBALT} strokeWidth={0.9} />
         <line x1={56} y1={200} x2={132} y2={140} stroke={COBALT} strokeWidth={0.8} opacity={0.5} />
         <line x1={56} y1={242} x2={132} y2={302} stroke={COBALT} strokeWidth={0.8} opacity={0.5} />
@@ -138,7 +138,7 @@ export function Scene05Rollout({ p, compact }: Readonly<SceneVisualProps>) {
         <line x1={26} y1={412} x2={340} y2={412} stroke={GREEN} strokeWidth={2.4} />
         <line x1={340} y1={412} x2={654} y2={412} stroke="currentColor" strokeWidth={0.9} strokeDasharray="3 4" opacity={0.4} />
         <Ann x={26} y={402} size={9} color={GREEN}>
-          deployment time · ~-50%
+          parallel-safe work · gated prerequisites · verified release
         </Ann>
       </motion.g>
     </g>

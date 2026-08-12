@@ -9,35 +9,20 @@
  *     invented, or extrapolated. In particular there are no reach, OSNR, BER,
  *     latency, temperature or voltage figures anywhere on the route, and no
  *     measured before/after claim for the PM tooling, because none is verified.
- *  2. No internal identifiers beyond the single reviewed codename below: no
- *     daemon names, private module names, source paths, function names,
+ *  2. No internal identifiers: no codenames, daemon names, private module names,
+ *     source paths, function names,
  *     customer identifiers, internal URLs, credentials or log contents.
  *  3. Ownership is stated, never blurred. "Completely owned" and "co-owned"
  *     are separate fields and are rendered as separate groups.
  */
 
+import { evidenceById } from "@/data/evidence";
+import { profile } from "@/data/profile";
+
 /* ------------------------------------------------- disclosure review gate */
 
-/**
- * The one internal platform codename on this route.
- *
- * The owner explicitly asked for it to appear in the hero and the flagship
- * narrative, so `approved` is true and the term renders. It is centralised here
- * so a reviewer can neutralise it everywhere by flipping one flag: set
- * `approved: false` and every headline, body and label falls back to
- * `publicSafe` ("a new optical line-card platform") with no other edits.
- *
- * FLAGGED FOR FINAL PUBLIC-DISCLOSURE REVIEW BEFORE DEPLOYMENT.
- */
-export const codename = {
-  term: "Aquila",
-  publicSafe: "the new line-card platform",
-  approved: true,
-  note: "Internal Cisco platform codename. Owner-requested for this route; confirm it is publicly disclosable before deploy.",
-} as const;
-
-/** The platform name as rendered. Use this, never a hardcoded literal. */
-export const PLATFORM = codename.approved ? codename.term : codename.publicSafe;
+/** Public source contains only the generalized platform name. */
+export const PLATFORM = "the new line-card platform";
 
 /** Possessive / sentence-initial variants so copy stays grammatical either way. */
 const P = PLATFORM;
@@ -53,17 +38,12 @@ export const dpMeta = {
 /* ---------------------------------------------------------------- contact */
 
 export const dpContact = {
-  email: "ykadambi@ucsd.edu",
-  github: "https://github.com/Yashas120",
-  githubUser: "Yashas120",
-  linkedin: "https://www.linkedin.com/in/yashas120",
-  /**
-   * No PDF is committed under `public/`, so the résumé action points at the
-   * LinkedIn profile — the same destination /backend and /fde use. Swap this
-   * for a hosted PDF path once the file actually ships.
-   */
-  resumeHref: "https://www.linkedin.com/in/yashas120",
-  resumeLabel: "Résumé",
+  email: profile.email,
+  github: profile.github,
+  githubUser: profile.githubUser,
+  linkedin: profile.linkedin,
+  demos: "/demos/",
+  resume: profile.resume,
 } as const;
 
 /* ------------------------------------------------------------------- hero */
@@ -78,15 +58,18 @@ export const dpHero = {
   headline: "I build production software where hardware state, software intent, and live traffic have to agree.",
   profile: `Systems software engineer with 3+ years of experience across optical line-card dataplanes, embedded hardware integration, cloud platforms, backend reliability, and developer tooling. At Cisco, I helped bring up ${P} for the NCS 1014 line-card platform—spanning revised CDR integration, secure-boot-aware workflows, high-speed Ethernet modes, warm-boot state recovery, validation infrastructure, and firmware/FPGA diagnosis.`,
   supporting:
-    "From C drivers and PetaLinux to test automation, telemetry, cloud infrastructure, and production recovery.",
+    "My work extends from C drivers, PetaLinux, hardware abstraction, and white-box testing to Terraform, API and database migrations, observability, production recovery, research, and technical teaching.",
+  roleLensDisclosure:
+    "This is my complete engineering portfolio, ordered through a dataplane and systems-software lens.",
   proofPoints: [
-    `${P} platform bring-up`,
+    `${P} bring-up on Cisco NCS 1014`,
     "100G · 400G · 800G feature paths",
-    "122 production C files tested without physical hardware",
-    "~30-minute test build reduced to ~10 seconds",
+    "Mark-and-Sweep warm-reload state reconciliation · completely owned",
+    "Production C tested without physical hardware",
+    "Hardware-independent feedback reduced from tens of minutes to seconds",
   ],
   /** Current context — deliberately not the primary identity. */
-  context: "Incoming UC San Diego MSCS",
+  context: "Incoming UC San Diego MSCS · starts Sep 2026 · expected 2027",
 } as const;
 
 /* -------------------------------------------------- flagship story: chapters */
@@ -121,7 +104,7 @@ export const dpChapters: readonly DpChapter[] = [
     stage: "platform scope",
     eyebrow: "A PLATFORM, NOT A SINGLE FEATURE",
     heading: `${P} was a platform bring-up, not an isolated feature.`,
-    body: `The new line-card platform retained a largely shared software base while changing the boundaries that mattered: revised CDR hardware, secure-boot behavior, lambda-split provisioning, and card-specific resource mappings. I contributed more than half of the platform-specific software work required to take that shared base to release readiness.`,
+    body: `The new line-card platform retained a largely shared software base while changing the boundaries that mattered: revised CDR hardware, secure-boot behavior, lambda-split provisioning, and card-specific resource mappings. I made a substantial contribution to the platform-specific work required for release readiness.`,
     note: "The shared base was built by many engineers over years. The contribution stated here is scoped to the platform-specific work, not to the platform as a whole.",
     diagram: {
       title: "Shared line-card software base with the platform-specific region highlighted",
@@ -134,7 +117,7 @@ export const dpChapters: readonly DpChapter[] = [
     eyebrow: "BRING-UP BEFORE FINAL HARDWARE",
     heading: `We started ${P} bring-up before the final board arrived.`,
     body: `I co-owned the ${P} and revised-CDR bring-up, using precursor hardware to prove the new behavior and implementing the changed lambda-split provisioning path before complete ${P} hardware was available.`,
-    outcome: "Schedule risk moved off the critical path of hardware availability.",
+    outcome: "Hardware availability no longer had to be the first moment the changed software path was exercised.",
     note: "Co-owned. No estimate of days saved is claimed, because none was measured.",
     diagram: {
       title: "Precursor hardware proving new behavior before the final board exists",
@@ -146,13 +129,13 @@ export const dpChapters: readonly DpChapter[] = [
     stage: "cdr integration",
     eyebrow: "INTEGRATE THE REVISED CDR",
     heading: "Program new hardware without regressing the shared platform.",
-    body: "The revised CDR required different programming and tuning behavior across a heavily shared C codebase. I replaced hardcoded tuning with table-driven selection and migrated the programming path across hundreds of relevant use sites.",
+    body: "The revised CDR required different programming and tuning behavior across a heavily shared C codebase. I replaced hardcoded tuning with table-driven selection and migrated the relevant programming path.",
     points: [
       "C implementation",
       "Driver and HAL changes",
       "Hardware-context integration",
       "Stable traffic validation",
-      "Clean FEC and error counters",
+      "FEC and error-counter checks",
       "Warm-restart continuity",
       "Regression protection for existing card behavior",
     ],
@@ -221,9 +204,9 @@ export const dpChapters: readonly DpChapter[] = [
     heading: "Cut the dependency graph at the hardware boundary.",
     body: "I co-designed a standalone CMocka white-box framework and completely implemented the successful third-generation stubbing approach. It compiles the real production path for x86_64 while replacing physical hardware and external SDK boundaries.",
     points: [
-      "122 production C source files",
-      "Approximately 430 external SDK functions stubbed",
-      "Approximately 415 typed strong stubs",
+      "Real production C source paths",
+      "External SDK and hardware boundaries stubbed",
+      "Typed strong stubs plus generated fallbacks",
       "Generated weak fallback stubs",
       "Per-test linker wrappers",
       "Card-specific behavior without rebuilding the common production archive",
@@ -231,7 +214,7 @@ export const dpChapters: readonly DpChapter[] = [
       "Error injection, behavior capture, and a trace-to-test replay path",
     ],
     outcome:
-      "Build cycle reduced from approximately 30 minutes to approximately 10 seconds, and adopted as a mandatory quality gate for newly added code.",
+      "Hardware-independent feedback moved from tens of minutes to seconds, and the framework became part of the validation path for newly added code.",
     note: "This compiles the real production sources. It is not a reimplementation or a simplified model of the production system.",
     diagram: {
       title: "The real production path compiled with hardware and SDK boundaries replaced by test doubles",
@@ -294,10 +277,9 @@ export const validationCampaigns = [
     id: "slice-bundle",
     title: "800GE slice and bundle validation",
     facts: [
-      "More than 20,000 principal configuration combinations",
-      "Approximately 80,000 executions across three testers",
-      "Five slice-mode defects found",
-      "Three bundle-mode defects found",
+      "A large automated campaign across more than 20,000 principal combinations",
+      "Slice and bundle modes exercised as separate validation spaces",
+      "Defect classes isolated and reproduced during development",
     ],
   },
 ] as const;
@@ -321,193 +303,10 @@ export const ownership = {
       "Revised CDR integration",
       "800GE slice mode",
       "800GE bundle mode",
-      "RevC and broader platform qualification",
+      "Board-revision and broader platform qualification",
     ],
   },
 } as const;
 
-/* --------------------------------------------- complete optical experience */
-
-export const opticalRole = {
-  org: "Cisco Systems",
-  title: "Optical Software Development Engineer II",
-  dates: "Jan 2025 – Jan 2026",
-  location: "Bengaluru, India",
-  scope: `Dataplane software for optical line cards on the NCS 1014 platform, centred on ${P} bring-up: hardware and firmware boundaries, high-speed Ethernet feature paths, warm-boot state recovery, and the validation infrastructure that made the work releasable.`,
-  areas: [
-    `${P} platform bring-up`,
-    "Revised CDR hardware integration",
-    "Lambda-split provisioning",
-    "Driver, HAL, and hardware-context work in C",
-    "Secure-boot-aware deployment",
-    "400G QPSK",
-    "800GE slice mode",
-    "800GE bundle and 8x100G distribution",
-    "2x100G",
-    "Warm-boot state reconciliation",
-    "Platform qualification across board and firmware revisions",
-    "Large-scale configuration automation",
-    "White-box CMocka infrastructure",
-    "PM and logging tools",
-    "Firmware/FPGA upgrade diagnosis",
-  ],
-} as const;
-
-export const skillGroups = [
-  { label: "Languages", items: ["C", "Python", "Java", "C++", "TypeScript", "SQL"] },
-  { label: "Systems", items: ["Linux", "PetaLinux", "Drivers & HAL", "Firmware boundaries", "Secure boot", "CDR integration"] },
-  { label: "Networking", items: ["Optical dataplane", "100G / 400G / 800G Ethernet modes", "FEC and error counters", "Telemetry & PM"] },
-  { label: "Verification", items: ["CMocka", "SDK stubbing", "ASan / UBSan", "Static analysis", "Coverage", "Trace replay"] },
-  { label: "Cloud & platform", items: ["AWS", "Terraform", "Docker", "CI/CD", "PostgreSQL", "DynamoDB"] },
-] as const;
-
-/* ------------------------------------ production systems beyond the line card */
-
-export interface SupportingRole {
-  id: string;
-  org: string;
-  title: string;
-  dates: string;
-  summary: string;
-  points: readonly string[];
-  note?: string;
-}
-
-export const supportingRoles: readonly SupportingRole[] = [
-  {
-    id: "cisco-backend",
-    org: "Cisco Systems",
-    title: "Software Development Engineer — Backend & Cloud Platforms",
-    dates: "Aug 2023 – Jan 2025",
-    summary:
-      "Backend and infrastructure engineering for customer-facing cloud services: reusable infrastructure as code, deployment parallelization, database and request performance, and production recovery.",
-    points: [
-      "Reusable Terraform infrastructure across approximately 50 services and 35 Lambda functions",
-      "Development, staging, and production accounts across global regions",
-      "Dependency-aware deployment parallelization, cutting deployment time approximately 50%",
-      "Up to approximately four hours saved during some multi-region database bring-ups",
-      "Coordinated a no-downtime database cutover",
-      "Approximately 40% page-load improvement through request and database analysis",
-      "Root-cause work across production failures and hidden service dependencies",
-      "Authentication and gateway modernization across approximately 50 services, 30 integrations, 12 teams, and 96 endpoint deployments, with zero customer impact during the coordinated production migration",
-      "Modernization of approximately 50 air-gapped VMs from end-of-life logging software to a patched version without downtime",
-    ],
-  },
-  {
-    id: "cisco-intern",
-    org: "Cisco Systems",
-    title: "Technical Intern",
-    dates: "Jan 2023 – Jun 2023",
-    summary:
-      "Developer tooling and data integration: removing repeated manual release work from the SDK pipeline and automating a licensing-constrained developer dependency.",
-    points: [
-      "Automated Python and Java SDK generation and publication",
-      "Reduced approximately four hours of repetitive work per SDK release to zero routine generation and publication effort",
-      "Connected API-change detection, generation, validation, and publishing in CI",
-      "AWS data-integration work",
-      "Automated an approved Docker Desktop alternative, avoiding approximately $1,500 in annual licensing cost",
-    ],
-  },
-  {
-    id: "schneider",
-    org: "Schneider Electric",
-    title: "Software Engineering Intern",
-    dates: "May 2022 – Jul 2022",
-    summary:
-      "Sole software engineer inside a predominantly mechanical switchgear team, translating domain expertise into a working engineering tool end to end.",
-    points: [
-      "Requirements discovery with mechanical engineers",
-      "Translation of domain knowledge into a software model",
-      "Application architecture and implementation",
-      "Test-selection and engineering-discussion workflow reduced from approximately two days to approximately two hours",
-      "Deployment, documentation, demonstration, and knowledge transfer",
-    ],
-  },
-] as const;
-
-/* ------------------------------------------- selected systems and research */
-
-export type DpOwnership = "original" | "collaborative" | "coursework" | "research" | "fork" | "concept";
-
-export const OWNERSHIP_LABEL: Record<DpOwnership, string> = {
-  original: "Original work",
-  collaborative: "Collaborative",
-  coursework: "Coursework",
-  research: "Peer-reviewed research",
-  fork: "Fork",
-  concept: "Concept",
-};
-
-export interface DpProject {
-  id: string;
-  title: string;
-  ownership: DpOwnership;
-  /** Visual weight: 1 leads the section, 2 is secondary, 3 is a compact line. */
-  weight: 1 | 2 | 3;
-  body: string;
-  stack: readonly string[];
-  href?: string;
-  meta?: string;
-}
-
-export const dpProjects: readonly DpProject[] = [
-  {
-    id: "bitcoin",
-    title: "Bitcoin Transactions in Java",
-    ownership: "original",
-    weight: 1,
-    body: "A from-scratch implementation of the protocol and its cryptographic primitives with no external dependencies: hashing, elliptic-curve arithmetic over finite fields, transaction serialization, and script evaluation.",
-    stack: ["Java", "SHA-256", "RIPEMD-160", "Elliptic-curve crypto"],
-    href: "https://github.com/Yashas120/Bitcoin-Transactions-in-java",
-  },
-  {
-    id: "underwater",
-    title: "Underwater Data-Center Monitoring",
-    ownership: "research",
-    weight: 1,
-    body: "Hardware monitoring and sensing for submerged infrastructure, built with redundancy and availability in mind because physical maintenance access is expensive and slow.",
-    stack: ["Arduino", "Sensing", "Redundancy", "Systems integration"],
-    meta: "IEEE CSITSS · 2021 · doi 10.1109/CSITSS54238.2021.9683449",
-  },
-  {
-    id: "multiview",
-    title: "Multiview 3D Reconstruction",
-    ownership: "original",
-    weight: 2,
-    body: "Incremental structure-from-motion producing 3D point clouds from 2D images — feature matching, triangulation and reconstruction geometry, with no deep-learning dependency.",
-    stack: ["Python", "OpenCV", "Structure from Motion"],
-    href: "https://github.com/Yashas120/Multiview-3D-Reconstruction",
-  },
-  {
-    id: "swift",
-    title: "SWIFT — lightweight image super-resolution",
-    ownership: "research",
-    weight: 2,
-    body: "A hybrid transformer and fast-Fourier-convolution model for image super-resolution, using a dual frequency-spatial block to draw on both spatial and frequency-domain features.",
-    stack: ["PyTorch", "Transformers", "FFC"],
-    meta: "Approximately 34% fewer parameters and up to 60% faster inference than the stated comparison baseline.",
-  },
-] as const;
-
-export const teaching = {
-  title: "Teaching Assistant — PES University",
-  dates: "Jul 2022 – May 2023",
-  summary:
-    "Supported 656 learners across computer vision, data analytics, and deep learning: created assignments, labs, grading tools, competition infrastructure, and technical explanations.",
-  courses: ["Image Processing & Computer Vision", "Data Analytics", "Deep Learning"],
-} as const;
-
-/* -------------------------------------------------------------- education */
-
-export const education = [
-  {
-    org: "University of California San Diego",
-    detail: "M.S. Computer Science",
-    dates: "Incoming September 2026 · Expected 2027",
-  },
-  {
-    org: "PES University",
-    detail: "B.Tech. Computer Science and Engineering",
-    dates: "2019 – 2023",
-  },
-] as const;
+/** Canonical role records used by the textual sections on this route. */
+export const canonicalOpticalRole = evidenceById("role-cisco-optical");

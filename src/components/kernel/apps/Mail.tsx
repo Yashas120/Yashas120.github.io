@@ -8,7 +8,7 @@ import { PHOSPHOR } from "../desktop/types";
 import { AppHeader } from "./ui";
 
 const FIELD =
-  "w-full rounded border bg-transparent px-2.5 py-1.5 font-mono text-[12px] text-zinc-200 outline-none transition-colors placeholder:text-zinc-600";
+  "min-h-11 w-full rounded border bg-transparent px-2.5 py-1.5 font-mono text-[12px] text-zinc-200 outline-none transition-colors placeholder:text-zinc-600";
 
 const LINKS = [
   { icon: MailIcon, label: profile.email, href: `mailto:${profile.email}` },
@@ -69,7 +69,7 @@ export function Mail() {
 
         <button
           onClick={send}
-          className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 font-mono text-[11px] transition-colors"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md border px-3 py-1.5 font-mono text-[11px] transition-colors"
           style={{
             borderColor: hexToRgba(PHOSPHOR, 0.4),
             background: hexToRgba(PHOSPHOR, 0.1),
@@ -89,7 +89,7 @@ export function Mail() {
                 href={href}
                 target={href.startsWith("mailto:") ? undefined : "_blank"}
                 rel="noreferrer noopener"
-                className="inline-flex items-center gap-2 font-mono text-[11px] text-zinc-400 transition-colors hover:text-zinc-100"
+                className="inline-flex min-h-11 items-center gap-2 font-mono text-[11px] text-zinc-400 transition-colors hover:text-zinc-100"
               >
                 <Icon className="h-3.5 w-3.5" style={{ color: PHOSPHOR }} />
                 {label}

@@ -116,7 +116,7 @@ export function DependencyPlan() {
     "Some resources and services are genuinely independent. Others cannot start until their prerequisites are healthy.",
     "The independent work runs concurrently, including database bring-up across three regions.",
     "Dependent stages stay gated behind a healthy prerequisite, so faster never means unsafe.",
-    "Overall deployment time drops by approximately 50%, and parallel regional database bring-up saves about four hours where it applies.",
+    "Independent work runs concurrently while prerequisite-bound stages remain behind explicit health gates.",
   ][step];
 
   return (
@@ -154,13 +154,13 @@ export function DependencyPlan() {
         >
           <div className="rounded-md border px-3 py-2" style={{ borderColor: hexToRgba(GREEN, 0.35), background: hexToRgba(GREEN, 0.06) }}>
             <p className="flex items-center gap-1.5 font-mono text-lg font-semibold leading-none" style={{ color: GREEN }}>
-              <Timer className="h-4 w-4" /> ~50%
+              <Timer className="h-4 w-4" /> parallel-safe
             </p>
             <p className="mt-1 text-[11px] leading-snug text-zinc-500">less overall deployment time</p>
           </div>
           <div className="rounded-md border px-3 py-2" style={{ borderColor: hexToRgba(GREEN, 0.35), background: hexToRgba(GREEN, 0.06) }}>
             <p className="font-mono text-lg font-semibold leading-none" style={{ color: GREEN }}>
-              ~4 hours
+              gated release
             </p>
             <p className="mt-1 text-[11px] leading-snug text-zinc-500">
               saved by parallel database bring-up across three regions, in applicable deployments

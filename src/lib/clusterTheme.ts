@@ -18,11 +18,11 @@ export interface Tokens {
 const WARM: Tokens = {
   canvas: "#F3F0E8",
   ink: "#111318",
-  muted: "#626771",
-  line: "#C9C6BE",
-  blue: "#2457FF",
-  coral: "#FF5B45",
-  green: "#15966A",
+  muted: "#565B65",
+  line: "#8A877F",
+  blue: "#1748D7",
+  coral: "#B93628",
+  green: "#0B6D4D",
 };
 
 /** Deep engineering night. Accents lifted for contrast on a dark canvas. */
@@ -30,7 +30,7 @@ const NIGHT: Tokens = {
   canvas: "#0D1117",
   ink: "#F1EFE9",
   muted: "#8B95A5",
-  line: "#2A313C",
+  line: "#5A6677",
   blue: "#7D9BFF",
   coral: "#FF7A66",
   green: "#3FCB95",
@@ -44,7 +44,7 @@ const DEEP: Tokens = {
   canvas: "#06080C",
   ink: "#F1EFE9",
   muted: "#8B95A5",
-  line: "#39424F",
+  line: "#5A6677",
   blue: "#7D9BFF",
   coral: "#FF7A66",
   green: "#3FCB95",

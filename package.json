@@ -6,7 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "validate:evidence": "node scripts/validate-evidence.mjs && node scripts/validate-fde-evidence.mjs",
+    "validate:export": "node scripts/validate-export.mjs",
+    "validate:backend": "node scripts/validate-backend.mjs",
+    "validate:devtools": "node scripts/validate-devtools.mjs",
+    "validate:cluster": "node scripts/validate-cluster.mjs",
+    "test:fde": "playwright test tests/fde.spec.ts",
+    "test:cluster": "playwright test tests/cluster.spec.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -17,6 +24,8 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",

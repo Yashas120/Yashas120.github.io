@@ -5,7 +5,7 @@
 
 "use client";
 
-import type { PanelId } from "@/data/devops/chapters";
+import type { ChapterId, PanelId } from "@/data/devops/chapters";
 import { DevExPanel } from "./DevExPanel";
 import { EvidencePanel } from "./EvidencePanel";
 import { InfrastructurePanel } from "./InfrastructurePanel";
@@ -16,6 +16,7 @@ import { ReliabilityPanel } from "./ReliabilityPanel";
 export interface PanelProps {
   /** Ambient motion runs only in the docked inspector. */
   live?: boolean;
+  chapter?: ChapterId;
 }
 
 export const PANELS: Record<PanelId, (props: PanelProps) => React.JSX.Element> = {
@@ -27,7 +28,7 @@ export const PANELS: Record<PanelId, (props: PanelProps) => React.JSX.Element> =
   evidence: EvidencePanel,
 };
 
-export function Panel({ id, live }: Readonly<{ id: PanelId; live?: boolean }>) {
+export function Panel({ id, live, chapter }: Readonly<{ id: PanelId; live?: boolean; chapter?: ChapterId }>) {
   const Component = PANELS[id];
-  return <Component live={live} />;
+  return <Component live={live} chapter={chapter} />;
 }

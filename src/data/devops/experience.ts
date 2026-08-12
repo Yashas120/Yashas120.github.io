@@ -21,7 +21,7 @@ export const professionalExperience: ProfessionalExperience[] = [
       "Contributed across new optical line-card bring-up, CDR hardware integration, secure-boot-aware software, QPSK and high-speed mode enablement, automated validation, performance-monitoring analysis, developer tooling, and hardware/firmware failure diagnosis. Paired feature delivery with reusable test paths and documentation that shortened later debugging and handoff work.",
     layers: ["OS/process", "Driver/interface", "Hardware/firmware", "Signal/telemetry"],
     evidenceIds: ["optical-platform", "test-loop", "firmware-rca"],
-    verificationNotes: ["[VERIFY BEFORE PUBLICATION: final employment month in 2026]"],
+    verificationNotes: ["The public record intentionally uses the broad 2025–2026 period."],
   },
   {
     id: "cisco-backend",

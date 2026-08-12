@@ -46,7 +46,7 @@ export function InspectorTabs({ active, onSelect, idPrefix, className }: Readonl
       role="tablist"
       aria-label="Inspector panels"
       className={`flex overflow-x-auto border-b no-scrollbar ${className ?? ""}`}
-      style={{ height: TAB_H, borderColor: DV.border, background: DV.inspector }}
+      style={{ minHeight: TAB_H, borderColor: DV.border, background: DV.inspector }}
       onKeyDown={(e) => {
         const key = e.key;
         if (key === "ArrowRight") move(1);
@@ -66,7 +66,7 @@ export function InspectorTabs({ active, onSelect, idPrefix, className }: Readonl
             role="tab"
             id={`${idPrefix}-tab-${id}`}
             aria-selected={selected}
-            aria-controls={`${idPrefix}-panel-${id}`}
+            aria-controls={`${idPrefix}-panel`}
             tabIndex={selected ? 0 : -1}
             onClick={() => onSelect(id)}
             className="whitespace-nowrap border-b-2 px-3 font-mono text-[12px] transition-colors duration-150"

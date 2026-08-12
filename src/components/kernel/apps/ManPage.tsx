@@ -2,14 +2,17 @@
 
 import { profile } from "@/data/profile";
 import { metrics } from "@/data/metrics";
+import { experience } from "@/data/experience";
+import { kernelPortfolio } from "@/data/kernelPortfolio";
+import Link from "next/link";
 import { useDesktop } from "../desktop/DesktopContext";
 import { PHOSPHOR } from "../desktop/types";
 
 const OPTIONS: [string, string][] = [
-  ["--systems", "Linux kernel scheduling (ghOSt), NCS 1014 line-card dataplanes, CDR hardware integration, secure boot, from-scratch cryptography."],
+  ["--systems", "Linux scheduling experiments with ghOSt, optical line-card software, CDR hardware integration, secure boot, production C validation, and from-scratch cryptography."],
   ["--distributed", "Apache Spark streaming pipelines, event-driven workflows over DynamoDB/SQS/SNS, consensus and replication fundamentals."],
-  ["--backend", "PX Cloud and SNTC services at Cisco; Postgres, Mongo, and Cassandra performance work on a $2B-revenue application."],
-  ["--devops", "Terraform IaC across EC2, ECS, Lambda, RDS, DynamoDB, SQS, SNS, and IAM; CI/CD pipelines; a Ping to Okta migration across 7 products."],
+  ["--backend", "Backend and cloud-platform systems at Cisco; Postgres, Mongo, and Cassandra performance work across a mature service estate."],
+  ["--devops", "Terraform IaC across EC2, ECS, Lambda, RDS, DynamoDB, SQS, SNS, and IAM; CI/CD pipelines; staged authentication and gateway modernization."],
   ["--research", "Two published papers, lightweight super-resolution with Transformers and Fourier convolutions, multiview 3D reconstruction."],
   ["--teaching", "Three CSE courses at PES University as a TA; labs, worksheets, and office hours."],
 ];
@@ -46,7 +49,7 @@ export function ManPage() {
       <div className="mt-5">
         <Sec title="NAME">
           <p>
-            <span className="text-zinc-200">yashas</span> — systems and distributed engineer
+            <span className="text-zinc-200">yashas</span> — Systems Software Engineer
           </p>
         </Sec>
 
@@ -58,8 +61,20 @@ export function ManPage() {
         </Sec>
 
         <Sec title="DESCRIPTION">
-          <p>{profile.summary}</p>
-          <p className="mt-2">{profile.tagline}</p>
+          <p><span className="text-zinc-200">{profile.role}.</span> {kernelPortfolio.introduction}</p>
+          <p className="mt-2">{profile.currentContext}</p>
+        </Sec>
+
+        <Sec title="PRODUCTION EXPERIENCE">
+          <div className="space-y-3">
+            {experience.filter((item) => item.kind === "professional").map((item) => (
+              <div key={item.id}>
+                <p className="text-zinc-200">{item.role} · {item.org}</p>
+                <p className="text-zinc-500">{item.start} — {item.end} · {item.location}</p>
+                <p className="mt-1">{item.scope}</p>
+              </div>
+            ))}
+          </div>
         </Sec>
 
         <Sec title="OPTIONS">
@@ -109,6 +124,12 @@ export function ManPage() {
             <br />
             /etc/systemd/system/*.service — career history
           </p>
+        </Sec>
+
+        <Sec title="FULL OVERVIEW">
+          <Link href="/kernel" className="inline-flex min-h-11 items-center underline decoration-dotted underline-offset-2" style={{ color: PHOSPHOR }}>
+            Open the complete Portfolio Overview →
+          </Link>
         </Sec>
 
         <Sec title="SEE ALSO">

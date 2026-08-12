@@ -11,11 +11,13 @@ export const metadata: Metadata = {
     url: meta.url,
     type: "website",
     siteName: "Yashas Kadambi",
+    images: [{ url: meta.socialImage, width: 1200, height: 630, alt: "Yashas Kadambi — DevOps and Platform Engineer" }],
   },
   twitter: {
     card: "summary_large_image",
     title: meta.ogTitle,
     description: meta.ogDescription,
+    images: [meta.socialImage],
   },
 };
 
@@ -32,12 +34,9 @@ const personJsonLd = {
   url: meta.url,
   jobTitle: identity.role,
   description: meta.description,
-  email: identity.emailHref,
+  email: identity.email,
   sameAs: [identity.github, identity.linkedin],
-  alumniOf: [
-    { "@type": "CollegeOrUniversity", name: education.pes.school },
-    { "@type": "CollegeOrUniversity", name: education.ucsd.school },
-  ],
+  alumniOf: [{ "@type": "CollegeOrUniversity", name: education.pes.school }],
 };
 
 export default function DevToolsLayout({ children }: Readonly<{ children: React.ReactNode }>) {

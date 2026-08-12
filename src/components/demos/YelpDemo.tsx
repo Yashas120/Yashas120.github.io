@@ -70,7 +70,7 @@ function useIsLight(): boolean {
 }
 const featLabel = (k: string) => FEATURES.find((f) => f.key === k)?.label ?? k;
 
-export function YelpDemo() {
+export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
   const light = useIsLight();
   usePrefersReducedMotion();
   const accentText = light ? "#be123c" : ACC;
@@ -489,6 +489,7 @@ export function YelpDemo() {
       subtitle="From the Yelp project: a logistic-regression model, trained live in your browser on a seeded restaurant sample, estimates a restaurant's closure risk from its check-ins, reviews, rating and amenities — then shows which features matter, maps the businesses across the city, and surfaces the LDA topics pulled from reviews."
       repoUrl={REPO}
       accent={ACC}
+      embedded={embedded}
       {...cardProps("yelp")}
     >
       {/* mode tabs */}
@@ -738,6 +739,10 @@ export function YelpDemo() {
       </p>
     </LiveDemo>
   );
+}
+
+export function YelpLab() {
+  return <YelpDemo embedded />;
 }
 
 function AxisSelect({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {

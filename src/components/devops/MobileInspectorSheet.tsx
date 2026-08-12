@@ -13,7 +13,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PanelBottomOpen, X } from "lucide-react";
-import { chapterForPanel, panelLabel } from "@/data/devops/chapters";
+import { chapterForPanel, chapters, panelLabel } from "@/data/devops/chapters";
 import { InspectorTabs } from "./InspectorTabs";
 import { Panel } from "./panels/registry";
 import { useInspectorState } from "./useInspectorState";
@@ -22,14 +22,16 @@ import { DV } from "./tokens";
 const FOCUSABLE = 'a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
 
 export function MobileInspectorSheet() {
-  const { panel, select } = useInspectorState();
+  const { panel, chapter, select } = useInspectorState();
   const [open, setOpen] = useState(false);
   const sheet = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
 
   const close = useCallback(() => {
     setOpen(false);
-    trigger.current?.focus();
+    // The trigger is conditionally rendered, so restore focus after React has
+    // committed the closed state and mounted it again.
+    requestAnimationFrame(() => trigger.current?.focus());
   }, []);
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export function MobileInspectorSheet() {
           >
             <div className="flex items-center justify-between gap-2 border-b px-3 py-2" style={{ borderColor: DV.border }}>
               <span className="font-mono text-[12px]" style={{ color: DV.muted }}>
-                {chapterForPanel(panel).path}
+                {chapters.find((item) => item.id === chapter)?.path ?? chapterForPanel(panel).path}
               </span>
               <button
                 type="button"
@@ -107,12 +109,12 @@ export function MobileInspectorSheet() {
             </div>
             <InspectorTabs active={panel} onSelect={select} idPrefix="sheet" />
             <div
-              id={`sheet-panel-${panel}`}
+              id="sheet-panel"
               role="tabpanel"
               aria-labelledby={`sheet-tab-${panel}`}
               className="min-h-0 flex-1 overflow-y-auto"
             >
-              <Panel id={panel} />
+              <Panel id={panel} chapter={chapter} />
             </div>
           </div>
         </>

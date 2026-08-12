@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Cpu, HelpCircle, Moon, Sun, Terminal } from "lucide-react";
+import Link from "next/link";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ArrowLeft, ChevronDown, HelpCircle, Moon, RotateCcw, Sun, Terminal } from "lucide-react";
 import { hexToRgba } from "@/lib/utils";
 import { useTheme } from "@/lib/useTheme";
 import { PHOSPHOR, type AppDef } from "./types";
@@ -13,19 +14,25 @@ export function MenuBar({
   activeTitle,
   onLaunch,
   onHelp,
-}: Readonly<{ apps: AppDef[]; activeTitle?: string; onLaunch: (id: string) => void; onHelp: () => void }>) {
+  onReplayBoot,
+  returnHref,
+}: Readonly<{
+  apps: AppDef[];
+  activeTitle?: string;
+  onLaunch: (id: string) => void;
+  onHelp: () => void;
+  onReplayBoot: () => void;
+  returnHref: string;
+}>) {
   const [now, setNow] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [load, setLoad] = useState(0.42);
   const menuRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
   const { light, toggle } = useTheme();
 
   useEffect(() => {
     setNow(Date.now());
-    const id = setInterval(() => {
-      setNow(Date.now());
-      setLoad(0.28 + Math.random() * 0.4);
-    }, 1000);
+    const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -49,16 +56,16 @@ export function MenuBar({
 
   return (
     <header
-      className="relative z-[50] flex h-9 flex-shrink-0 items-center justify-between border-b px-2 backdrop-blur sm:px-3"
+      className="relative z-[50] flex h-12 flex-shrink-0 items-center justify-between border-b px-2 backdrop-blur sm:h-9 sm:px-3"
       style={{ borderColor: "rgb(var(--line) / 0.1)", background: "rgb(var(--ink-900) / 0.82)" }}
     >
       {/* Applications menu */}
-      <div ref={menuRef} className="relative flex items-center gap-1">
+      <div ref={menuRef} className="relative flex min-w-0 items-center gap-1">
         <button
           onClick={() => setMenuOpen((o) => !o)}
           aria-expanded={menuOpen}
           aria-haspopup="menu"
-          className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-[11px] transition-colors hover:bg-line/10"
+          className="flex min-h-11 items-center gap-1.5 rounded px-2 py-1 font-mono text-[11px] transition-colors hover:bg-line/10 sm:min-h-0"
           style={{ color: PHOSPHOR }}
         >
           <Terminal className="h-3.5 w-3.5" />
@@ -73,8 +80,8 @@ export function MenuBar({
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.12 }}
-              className="absolute left-0 top-9 w-64 overflow-hidden rounded-lg border win-shadow"
+              transition={{ duration: reducedMotion ? 0 : 0.12 }}
+              className="absolute left-0 top-12 w-64 overflow-hidden rounded-lg border win-shadow sm:top-9"
               style={{ borderColor: "rgb(var(--line) / 0.12)", background: "rgb(var(--ink-800))" }}
             >
               <p className="border-b px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-zinc-500" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>
@@ -106,9 +113,30 @@ export function MenuBar({
                   );
                 })}
               </ul>
+              <div className="border-t p-1" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    onReplayBoot();
+                    setMenuOpen(false);
+                  }}
+                  className="flex min-h-11 w-full items-center gap-2.5 rounded px-2.5 py-2 text-left text-[12px] text-zinc-300 transition-colors hover:bg-line/10"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" style={{ color: PHOSPHOR }} />
+                  Replay boot sequence
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
+        <Link
+          href={returnHref}
+          className="flex min-h-11 items-center gap-1.5 rounded px-2 font-mono text-[10px] text-zinc-300 transition-colors hover:bg-line/10 hover:text-zinc-50 sm:min-h-9 sm:text-[11px]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Return to Portfolio Overview</span>
+          <span className="sm:hidden">Overview</span>
+        </Link>
       </div>
 
       {activeTitle && (
@@ -118,27 +146,18 @@ export function MenuBar({
       )}
 
       <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-500 sm:gap-3">
-        <span className="hidden items-center gap-1.5 sm:flex">
-          <Cpu className="h-3 w-3" />
-          <span className="relative h-1.5 w-12 overflow-hidden rounded-full" style={{ background: "rgb(var(--line) / 0.12)" }}>
-            <span
-              className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-1000 ease-linear"
-              style={{ width: `${load * 100}%`, background: PHOSPHOR }}
-            />
-          </span>
-        </span>
         <span className="hidden md:inline">up {now ? formatUptime(now) : "--"}</span>
         <button
           onClick={onHelp}
           aria-label="Show the guided tour"
-          className="rounded p-1 text-zinc-400 transition-colors hover:bg-line/10 hover:text-zinc-100"
+          className="flex h-11 w-11 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-line/10 hover:text-zinc-100 sm:h-8 sm:w-8"
         >
           <HelpCircle className="h-3.5 w-3.5" />
         </button>
         <button
           onClick={toggle}
           aria-label={light ? "Switch to dark theme" : "Switch to light theme"}
-          className="rounded p-1 text-zinc-400 transition-colors hover:bg-line/10 hover:text-zinc-100"
+          className="flex h-11 w-11 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-line/10 hover:text-zinc-100 sm:h-8 sm:w-8"
         >
           {light ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
         </button>

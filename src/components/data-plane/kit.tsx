@@ -35,15 +35,15 @@ export function useMech(progress: MotionValue<number>, index: number, total = SL
   return useTransform(progress, [w.start + 0.14 * w.band, w.end - 0.16 * w.band], [0, 1], { clamp: true });
 }
 
-/** Opacity for a chapter layer: fades in at its start, out before the next. */
+/** Opacity for a chapter layer: adjacent chapters overlap through each boundary. */
 export function useChapterOpacity(progress: MotionValue<number>, index: number, total = SLOTS) {
   const w = chapterWindow(index, total);
   const first = index === 0;
   const last = index === total - 1;
-  const inA = first ? -1 : w.start + 0.01 * w.band;
-  const inB = first ? -0.999 : w.start + 0.16 * w.band;
-  const outA = last ? 2 : w.end - 0.16 * w.band;
-  const outB = last ? 2.001 : w.end - 0.01 * w.band;
+  const inA = first ? -1 : w.start - 0.12 * w.band;
+  const inB = first ? -0.999 : w.start + 0.1 * w.band;
+  const outA = last ? 2 : w.end - 0.1 * w.band;
+  const outB = last ? 2.001 : w.end + 0.12 * w.band;
   return useTransform(progress, [inA, inB, outA, outB], [0, 1, 1, 0], { clamp: true });
 }
 

@@ -143,7 +143,7 @@ function nextAnim(
   return { phase: "done", step: Math.max(0, size - 1) };
 }
 
-export function ChocoLLVMDemo() {
+export function ChocoLLVMDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
   const [source, setSource] = useState(EXAMPLES[0].source);
   const [view, setView] = useState<View>("ir");
   const [anim, setAnim] = useState<{ phase: Phase; step: number }>({ phase: "idle", step: 0 });
@@ -258,6 +258,7 @@ export function ChocoLLVMDemo() {
       subtitle="A compiler frontend, from scratch: type ChocoPy on the left and press run to watch it lower — the lexer sweeps the source, the parser builds the tree, and codegen emits real LLVM IR."
       repoUrl={REPO}
       accent={CHOCO}
+      embedded={embedded}
       {...cardProps("chocollvm")}
     >
       {/* interactive compiler pipeline (also the output selector) */}
@@ -441,6 +442,10 @@ export function ChocoLLVMDemo() {
       </div>
     </LiveDemo>
   );
+}
+
+export function ChocoLLVMLab() {
+  return <ChocoLLVMDemo embedded />;
 }
 
 // ------------------------------- pipeline -------------------------------

@@ -8,7 +8,7 @@ export const highlights: Highlight[] = [
   },
   {
     id: "mrd",
-    label: "Prof. MRD Scholarship",
+    label: "Prof. C. N. R. Rao Merit Scholarship",
     detail: "Awarded for placing in the top 20% of the CSE department at PES University.",
   },
   {

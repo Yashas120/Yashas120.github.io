@@ -35,15 +35,14 @@ export interface Course {
 
 // Teaching-forward summary for the TA page, matching the UCSD TA CV's teaching profile.
 export const teachingSummary =
-  "Prior TA for Image Processing & Computer Vision, Data Analytics, and the graduate Deep Learning Theory & Practices course at PES University — supporting ~670 students. I designed assignments, labs, answer keys, solution notebooks, and instructional recap videos, and built grading workflows for ~740 documented undergraduate submissions plus three graduate-course assignments. I also bring 3+ years of software engineering at Cisco and two peer-reviewed publications.";
+  "Prior TA for Image Processing & Computer Vision, Data Analytics, and the graduate Deep Learning Theory & Practices course at PES University — supporting 656 learners. I designed assignments, labs, answer keys, solution notebooks, and instructional recap videos, and built grading and autograding workflows. I also bring roughly three years of production software engineering at Cisco and two peer-reviewed publications.";
 
 export const teachingStats = {
   courses: 3,
-  students: "~670",
+  students: "656",
   submissions: "~740",
   terms: "2022–2023",
-  gradingSpeedup: "50%",
-  note: "TA at PES University across three CSE courses (~670 students) — I designed labs, answer keys and recap videos, ran office hours, and graded ~740 documented submissions on tight turnarounds.",
+  note: "TA at PES University across three CSE courses (656 learners) — I designed labs, answer keys and recap videos, ran office hours, and built grading and autograding workflows.",
 };
 
 export const courses: Course[] = [
@@ -52,14 +51,13 @@ export const courses: Course[] = [
     name: "Image Processing & Computer Vision",
     instructor: "Prof. Gowri Srinivasa",
     term: "Dec 2022 – May 2023",
-    students: "256 students",
+    students: "122 students",
     approach: "Make it tactile. I authored MATLAB labs where the theory produced a picture you could see — including a lab where answers were hidden with classic LSB steganography so students had to actually apply the techniques to reveal them.",
     summary: "Designed a steganography assignment, a hands-on lab, unit materials, and a full answer key (sampling, intensity transforms, histogram eq, ROI masking, LSB watermarking).",
     stats: [
       { label: "graded", value: "~250 submissions in 1 week" },
       { label: "office hours", value: "5 × 2-hour sessions" },
       { label: "questions answered", value: "~50" },
-      { label: "grading time", value: "−50% (reusable macro)" },
     ],
     labs: [
       {
@@ -135,7 +133,7 @@ export const courses: Course[] = [
     code: "UE20CS312",
     instructor: "Prof. Gowri Srinivasa",
     term: "Aug 2022 – Dec 2022",
-    students: "374 students",
+    students: "494 students",
     approach: "Make it fun. I wrote TV-show-themed worksheets (Brooklyn Nine-Nine's 99th precinct) so students learned Markov chains and A/B testing through a story, and I ran office hours + class forums to keep help accessible.",
     summary: "Authored the themed assignment + answer key/solution notebook + recap videos, and hosted a public Kaggle team competition with an automated grader.",
     stats: [
@@ -154,7 +152,7 @@ export const courses: Course[] = [
       built: [
         "Framed the prediction task and prepared the dataset with a held-out train/test split",
         "Defined the evaluation metric and the public/private leaderboard so scores couldn't be gamed",
-        "Wrote the automated grader that scored 178 teams (494 participants, 1,590 submissions) and returned consistent rankings within a day",
+        "Wrote the automated grader that scored 178 teams (494 participants) and returned consistent rankings within a day",
       ],
       format: ["Team competition", "Public / private split", "Held-out test set", "Automated grading"],
     },

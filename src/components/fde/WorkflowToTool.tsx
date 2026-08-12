@@ -78,7 +78,7 @@ function Meter({ play }: { play: boolean }) {
         </div>
       </div>
       <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">
-        More than 90% less effort, across about 20 feature workflows.
+        More than 90% less engineering effort.
       </p>
     </div>
   );
@@ -101,7 +101,7 @@ export function WorkflowToTool() {
     "The model resolves the affected tests into a generated Excel plan the engineer verifies.",
     "The SSO-protected application is deployed onto the team's own Windows machines.",
     "The measured workflow drops from about two days to about two hours.",
-    "About 35 engineers use it, and the team keeps using it after the internship ends.",
+    "The engineering team uses it, and the workflow remains in use after the internship ends.",
   ][step];
 
   return (
@@ -255,7 +255,7 @@ export function WorkflowToTool() {
                 <Users className="h-4 w-4 flex-shrink-0" style={{ color: adopted ? GREEN : undefined }} />
                 <div className="min-w-0">
                   <p className="font-mono text-[11px]" style={{ color: adopted ? GREEN : "rgb(var(--zinc-500))" }}>
-                    ~35 engineers
+                    engineering users
                   </p>
                   <p className="text-[11px] leading-snug text-zinc-500">still using it after the internship ended</p>
                 </div>

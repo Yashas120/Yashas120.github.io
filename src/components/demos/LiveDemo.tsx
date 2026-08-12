@@ -1,8 +1,9 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, type RefObject } from "react";
 import { Github, Zap, BookOpen } from "lucide-react";
 import { hexToRgba } from "@/lib/utils";
+import { demoEvidence, type DemoId } from "@/data/demos";
 
 interface LiveDemoProps {
   title: string;
@@ -10,19 +11,38 @@ interface LiveDemoProps {
   repoUrl?: string;
   accent: string;
   children: ReactNode;
-  id?: string;
+  id?: DemoId;
   kind?: "interactive" | "explainer";
   tech?: string[];
   role?: string;
   result?: string;
+  embedded?: boolean;
+  contentRef?: RefObject<HTMLDivElement>;
+  contentLabel?: string;
 }
 
 // Shared shell for a project demo card.
 export function LiveDemo({
   title, subtitle, repoUrl, accent, children,
   id, kind = "interactive", tech, role, result,
+  embedded = false, contentRef, contentLabel,
 }: LiveDemoProps) {
   const interactive = kind === "interactive";
+  const evidence = id ? demoEvidence(id) : undefined;
+  const content = (
+    <div
+      ref={contentRef}
+      tabIndex={contentRef ? 0 : undefined}
+      aria-label={contentLabel}
+      className={contentRef ? "rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" : undefined}
+      style={contentRef ? { "--tw-ring-color": accent } as React.CSSProperties : undefined}
+    >
+      {children}
+    </div>
+  );
+
+  if (embedded) return content;
+
   return (
     <div id={id} className="scroll-mt-20 rounded-xl border bg-ink-800" style={{ borderColor: hexToRgba(accent, 0.18) }}>
       <div className="flex items-start justify-between gap-4 border-b px-5 py-4" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>
@@ -44,6 +64,12 @@ export function LiveDemo({
               {result && <span><span className="text-zinc-600">result</span> · {result}</span>}
             </div>
           )}
+          {evidence && (
+            <dl className="mt-3 grid gap-2 text-[12px] leading-relaxed text-zinc-400 sm:grid-cols-2">
+              <div><dt className="font-mono text-[10px] uppercase tracking-wide text-zinc-600">My contribution</dt><dd>{evidence.contribution}</dd></div>
+              <div><dt className="font-mono text-[10px] uppercase tracking-wide text-zinc-600">Browser fidelity</dt><dd>{evidence.simplification}</dd></div>
+            </dl>
+          )}
           {tech && tech.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {tech.map((t) => (
@@ -60,7 +86,19 @@ export function LiveDemo({
           </a>
         )}
       </div>
-      <div className="p-5">{children}</div>
+      {evidence?.warning && (
+        <p role="note" className="border-b px-5 py-3 text-[12px] font-medium leading-relaxed" style={{ borderColor: hexToRgba(accent, 0.2), background: hexToRgba(accent, 0.08), color: accent }}>
+          {evidence.warning}
+        </p>
+      )}
+      <div className="p-5">{content}</div>
+      {evidence && (
+        <div className="flex flex-wrap gap-x-4 gap-y-1 border-t px-5 py-3 font-mono text-[11px]" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>
+          {evidence.projectSourceHref && <a className="min-h-11 py-3 text-zinc-400 hover:text-zinc-100" href={evidence.projectSourceHref} target="_blank" rel="noreferrer noopener">Original project source</a>}
+          {evidence.upstreamHref && <a className="min-h-11 py-3 text-zinc-400 hover:text-zinc-100" href={evidence.upstreamHref} target="_blank" rel="noreferrer noopener">Upstream source</a>}
+          {evidence.browserImplementationHref && <a className="min-h-11 py-3 text-zinc-400 hover:text-zinc-100" href={evidence.browserImplementationHref} target="_blank" rel="noreferrer noopener">Browser implementation source</a>}
+        </div>
+      )}
     </div>
   );
 }

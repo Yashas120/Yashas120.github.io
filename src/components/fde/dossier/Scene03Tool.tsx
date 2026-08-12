@@ -42,7 +42,6 @@ export function Scene03Tool({ p, compact }: Readonly<SceneVisualProps>) {
   const beforeLabel = useTransform(p, [0.6, 0.68], [1, 0], { clamp: true });
 
   const users = useRange(p, 0.84, 0.99, 0, 1);
-  const userCount = compact ? 15 : 35;
 
   return (
     <g>
@@ -89,7 +88,7 @@ export function Scene03Tool({ p, compact }: Readonly<SceneVisualProps>) {
 
       <motion.g style={{ opacity: chrome }}>
         <Ann x={32} y={84} size={8} opacity={0.55}>
-          ~20 workflows in
+          domain model in
         </Ann>
         <Ann x={648} y={84} size={8} anchor="end" color={GREEN}>
           verified test plan out
@@ -114,7 +113,7 @@ export function Scene03Tool({ p, compact }: Readonly<SceneVisualProps>) {
 
       {/* adoption, only after the tool is deployed */}
       <motion.g style={{ opacity: users }}>
-        {Array.from({ length: userCount }, (_, i) => (
+        {Array.from({ length: compact ? 8 : 16 }, (_, i) => (
           <circle
             key={i}
             cx={WIN.x + 12 + (i % (compact ? 5 : 12)) * 14}
@@ -124,7 +123,7 @@ export function Scene03Tool({ p, compact }: Readonly<SceneVisualProps>) {
           />
         ))}
         <Ann x={WIN.x + 12} y={382} size={9} color={GREEN}>
-          ~35 engineers · still in use
+          deployed · documented · still in use
         </Ann>
       </motion.g>
     </g>

@@ -28,7 +28,7 @@ export function SdkPipeline({ live }: Readonly<SdkPipelineProps>) {
     >
       <GNode x={100} y={6} w={160} h={32} lines={[devex.sdk.stages[0].label]} accent={DV.amber} />
       <Edge d={`M ${MID} 38 V 56`} accent={DV.amber} flow={live} head={{ x: MID, y: 56, dir: "down" }} />
-      <GNode x={88} y={56} w={184} h={32} lines={["GitHub Actions trigger"]} accent={DV.amber} />
+      <GNode x={88} y={56} w={184} h={32} lines={[devex.sdk.stages[1].label]} accent={DV.amber} />
 
       <Edge d={`M ${MID} 88 V 106 H 88 V 124`} accent={DV.cyan} flow={live} head={{ x: 88, y: 124, dir: "down" }} />
       <Edge
@@ -38,8 +38,8 @@ export function SdkPipeline({ live }: Readonly<SdkPipelineProps>) {
         delay={140}
         head={{ x: 272, y: 124, dir: "down" }}
       />
-      <GNode x={6} y={124} w={164} h={32} lines={["Generate Python"]} accent={DV.cyan} />
-      <GNode x={190} y={124} w={164} h={32} lines={["Generate Java"]} accent={DV.cyan} />
+      <GNode x={6} y={124} w={164} h={32} lines={[devex.sdk.stages[2].label]} accent={DV.cyan} />
+      <GNode x={190} y={124} w={164} h={32} lines={[devex.sdk.stages[3].label]} accent={DV.cyan} />
 
       <Edge d={`M 88 156 V 178 H ${MID} V 192`} accent={DV.violet} flow={live} />
       <Edge
@@ -49,12 +49,12 @@ export function SdkPipeline({ live }: Readonly<SdkPipelineProps>) {
         delay={140}
         head={{ x: MID, y: 192, dir: "down" }}
       />
-      <GNode x={90} y={192} w={180} h={32} lines={["Choose version"]} accent={DV.violet} tag="human decision" />
+      <GNode x={90} y={192} w={180} h={32} lines={[devex.sdk.stages[4].label]} accent={DV.violet} tag="human decision" />
 
       {/* The retained decision is the one place the path pauses, so this edge is
           never animated and it starts below the "human decision" tag baseline. */}
       <Edge d={`M ${MID} 242 V 260`} accent={DV.green} head={{ x: MID, y: 260, dir: "down" }} />
-      <GNode x={80} y={260} w={200} h={32} lines={["Publish SDK + docs"]} accent={DV.green} />
+      <GNode x={80} y={260} w={200} h={32} lines={[devex.sdk.stages[5].label]} accent={DV.green} />
     </DiagramFrame>
   );
 }

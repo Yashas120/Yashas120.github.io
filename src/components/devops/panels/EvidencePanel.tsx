@@ -10,7 +10,7 @@
 
 "use client";
 
-import { classLabel, evidence } from "@/data/devops/evidence";
+import { classLabel, publicEvidence } from "@/data/devops/evidence";
 import { PanelShell } from "./PanelShell";
 import { DV } from "../tokens";
 
@@ -22,6 +22,8 @@ const CLASS_ACCENT: Record<string, string> = {
   "public-fork": DV.cyan,
   credential: DV.violet,
   illustration: DV.violet,
+  research: DV.violet,
+  teaching: DV.cyan,
 };
 
 export function EvidencePanel(_props: Readonly<{ live?: boolean }>) {
@@ -30,7 +32,10 @@ export function EvidencePanel(_props: Readonly<{ live?: boolean }>) {
       title="Evidence ledger"
       summary="Each capability, the evidence for it, and what kind of evidence it is."
       legendKeys={["verified", "project", "illustration"]}
-      evidenceIds={evidence.map((e) => e.id)}
+      // The complete ledger is already visible in the table. Detailed drawers
+      // live beside the corresponding document evidence, avoiding three large
+      // duplicate copies in the dock, tablet panel, and mobile sheet.
+      evidenceIds={[]}
       caption="No self-scored gauges: every row resolves to a claim that can be discussed in an interview."
     >
       <table className="w-full border-collapse text-left">
@@ -52,7 +57,7 @@ export function EvidencePanel(_props: Readonly<{ live?: boolean }>) {
           </tr>
         </thead>
         <tbody>
-          {evidence.map((e) => (
+          {publicEvidence.map((e) => (
             <tr key={e.id} className="border-b align-top" style={{ borderColor: DV.border }}>
               <th scope="row" className="py-2 pr-2 text-[14px] font-medium leading-snug" style={{ color: DV.text }}>
                 {e.capability}

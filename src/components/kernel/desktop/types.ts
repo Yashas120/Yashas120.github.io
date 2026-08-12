@@ -16,6 +16,8 @@ export interface AppDef {
   terminal?: boolean;
   /** Pinned to the desktop as a launchable icon. */
   onDesktop?: boolean;
+  /** Registered for programmatic launch but omitted from menus and docks. */
+  hiddenLauncher?: boolean;
   size: { w: number; h: number };
   pos: { x: number; y: number };
   render: () => React.ReactNode;

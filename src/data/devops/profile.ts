@@ -12,15 +12,8 @@ import { publicLinks, resumeLink } from "./links";
 /* ---------------------------------------------------------------- identity */
 
 /**
- * Résumé destination — deliberate interim state, matching /backend and /fde.
- *
- * No résumé PDF is servable from this repository: the PDFs live in the *private*
- * `source-documents` submodule, and publishing one from `public/` would cross
- * that boundary. The action therefore points at the verified LinkedIn profile and
- * names that destination in its accessible label rather than implying a download.
- *
- * To switch to a real download: commit the PDF under `public/` and change only
- * the three fields below — every résumé link on the route reads from here.
+ * Résumé destination shared by every action on this route. The public asset is a
+ * two-page résumé, not the private evidence book in `source-documents`.
  */
 export { resumeLink } from "./links";
 
@@ -44,7 +37,7 @@ export const meta = {
   ogDescription:
     "Inspect the delivery systems behind production infrastructure, deployment automation, reliability work, and developer tooling.",
   url: "https://yashas120.github.io/devtools",
-  socialImage: "https://yashas120.github.io/devtools-og.svg",
+  socialImage: "https://yashas120.github.io/devtools-og.png",
 } as const;
 
 /* -------------------------------------------------------------------- hero */
@@ -66,7 +59,7 @@ export const hero = {
     "Relocating to San Diego for graduate study · Open to DevOps, platform, infrastructure, and SRE opportunities",
   proof: {
     label: "DEPLOYMENT PIPELINE",
-    value: "50% faster deployments",
+    value: "Dependency-aware deployments",
     detail:
       "Parallelized independent infrastructure while preserving dependency order for services that required staged bring-up.",
   },
@@ -74,13 +67,13 @@ export const hero = {
   strip: [
     {
       evidenceId: "sdk-ci",
-      value: "4 hours → 0",
+      value: "Manual → CI",
       detail: "routine manual effort removed — SDK generation and publication",
     },
     {
       evidenceId: "page-load",
-      value: "40% faster",
-      detail: "application page-load performance",
+      value: "Query-led",
+      detail: "application and database performance",
     },
     {
       evidenceId: "aws-cert",
@@ -88,6 +81,18 @@ export const hero = {
       detail: "Developer – Associate · verification link pending",
     },
   ],
+} as const;
+
+export const deliveryLoop = {
+  stages: ["Define", "Provision", "Deliver", "Observe", "Improve"],
+  evidence: [
+    "API contracts, infrastructure modules, dependency graph",
+    "Terraform and AWS resources",
+    "CI/CD, SDK pipeline, staged rollout",
+    "Application traces, logs, health checks",
+    "Performance work, prevention steps, developer tooling",
+  ],
+  center: ["delivery loop", "one system"],
 } as const;
 
 /* ------------------------------------------------------- chapter long copy */
@@ -102,7 +107,7 @@ export const delivery = {
     contribution:
       "I worked across reusable Terraform components, networking, IAM, cross-region communication, and service dependency ordering. I separated independent work from true prerequisites so infrastructure could run concurrently without treating the entire deployment graph as safely parallel.",
     outcome:
-      "The resulting plan reduced overall deployment time by approximately 50% while preserving staged controls for dependent services.",
+      "The resulting plan shortened the path by running independent work concurrently while preserving staged controls for dependent services.",
     badges: [
       "Production work",
       "AWS",
@@ -116,6 +121,21 @@ export const delivery = {
     "Built and extended reusable Terraform paths across EC2, ECS, Lambda, RDS, DynamoDB, SQS, SNS, IAM, networking, and shared infrastructure.",
     "Helped turn environment bring-up from manually remembered operations into versioned, reusable components that multiple teams could consume.",
   ],
+  graph: {
+    change: "Change detected",
+    validate: "Validate inputs",
+    plan: "Plan infrastructure",
+    independent: ["Independent", "resources"],
+    dependencyGate: "Dependency gate",
+    dependent: "Dependent services",
+    approval: "Human approval",
+    deploy: "Deploy",
+    verify: "Health verification",
+    observe: "Observe",
+    independentTag: "concurrent",
+    waitingTag: "waits",
+    approvalTag: "human decision",
+  },
 } as const;
 
 export const infrastructure = {
@@ -177,7 +197,7 @@ export const reliability = {
   ],
   performance: {
     title: "Move filtering closer to the data",
-    body: "Using application-performance traces, I identified backend and database operations that fetched large datasets before filtering them in application memory. Moving filtering closer to the database and correcting query behavior reduced page-load time by 40% and lowered unnecessary memory work.",
+    body: "Using application-performance traces, I identified backend and database operations that fetched large datasets before filtering them in application memory. Moving filtering closer to the database and correcting query behavior lowered unnecessary memory work.",
   },
   /**
    * The résumé's cleared wording for the authentication migration is kept, but
@@ -194,7 +214,7 @@ export const reliability = {
     },
     {
       title: "Move filtering closer to the data",
-      body: "Application-performance traces exposed large fetches followed by in-memory filtering. Moving work closer to the database and correcting query behavior reduced page-load time by 40%.",
+      body: "Application-performance traces exposed large fetches followed by in-memory filtering. Moving work closer to the database corrected query behavior and lowered unnecessary memory work.",
       evidenceId: "page-load",
     },
     {
@@ -219,11 +239,11 @@ export const devex = {
   sdk: {
     title: "API contract to SDK, automatically",
     context:
-      "Changes to Swagger/OpenAPI contracts required Python and Java client SDKs to be regenerated and published. The recurring workflow previously required approximately four hours of manual work per SDK.",
+      "Changes to Swagger/OpenAPI contracts required Python and Java client SDKs to be regenerated and published through a repeated manual workflow.",
     contribution:
       "I built the complete GitHub Actions workflow that detected relevant contract changes, generated the language-specific clients, allowed an explicit release-version decision, and published the resulting SDK artifacts and documentation.",
     outcome:
-      "Routine generation and publication effort dropped from approximately four hours per SDK to zero manual work, while the release version remained a human decision.",
+      "Routine generation and publication became automated, while the release version remained a human decision.",
     /** Stages of the pipeline visual. `human` marks the retained decision. */
     stages: [
       { label: "OpenAPI change", human: false },
@@ -237,7 +257,7 @@ export const devex = {
   testing: {
     title: "Shorter feedback loops for hardware-adjacent software",
     body: cmockaCleared
-      ? "Co-designed a CMocka-based framework that compiled 122 production C source files against approximately 430 stubbed external boundaries. It reduced the test-build cycle from roughly 30 minutes to approximately 10 seconds and became a required path for newly added code."
+      ? "Co-designed a hardware-independent C/C++ unit-testing path that isolated external boundaries and reduced feedback from tens of minutes to seconds."
       : "Co-designed a hardware-independent C/C++ unit-testing path that isolated external boundaries, enabled repeatable local testing, and made fast feedback practical for production code that otherwise depended on specialized hardware.",
     loop: [
       "Production source",

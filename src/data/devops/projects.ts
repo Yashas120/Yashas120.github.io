@@ -1,76 +1,288 @@
-/**
- * Selected systems for /devtools.
- *
- * Two projects get full cards because they support the DevOps story; everything
- * else stays compact so public projects never compete visually with production
- * work. Labels are drawn from the route's fixed classification vocabulary.
- */
+import type { Ownership, Status } from "./evidence";
 
-import type { EvidenceClass } from "./evidence";
-
-export interface DevOpsProject {
+export interface ProjectEvidence {
   id: string;
-  /** Classification line shown above the title. */
-  label: string;
-  classification: EvidenceClass;
   title: string;
-  summary: string;
-  demonstrates: string[];
-  link?: { label: string; href: string };
-  /** Evidence record this card resolves to. */
-  evidenceId: string;
+  problem: string;
+  constraints: string[];
+  system: string;
+  contribution: string;
+  outcome: string;
+  ownership: Ownership;
+  status: Status;
+  domain: string[];
+  stack: string[];
+  links: { kind: "repo" | "demo" | "paper" | "site"; label: string; href: string }[];
+  whyItMatters: string;
+  evidenceId?: string;
+  verificationNotes?: string[];
 }
 
-export const projects: DevOpsProject[] = [
+export const selectedProjects: ProjectEvidence[] = [
   {
     id: "cloud-hack",
-    label: "Cloud-native coursework · public repository",
-    classification: "coursework",
-    title: "Containerized service deployment with explicit configuration boundaries",
-    summary:
-      "Packaged a Flask and MongoDB application with Docker and Kubernetes, separating application configuration, credentials, service discovery, and administrative access.",
-    demonstrates: [
-      "Docker image construction",
-      "Kubernetes Deployments and Services",
-      "ConfigMaps and Secrets",
-      "Environment-based configuration",
-      "MongoDB service operation",
-      "Small-scale cloud-native deployment reasoning",
-    ],
-    link: { label: "Inspect repository", href: "https://github.com/Yashas120/Cloud-Hack" },
+    title: "Cloud-Hack — Containerized blogging microservices",
+    problem: "Package a Flask and MongoDB application as a reproducible, orchestrated course system.",
+    constraints: ["Four-person course team", "Configuration kept outside images", "No verified production deployment"],
+    system: "Docker images and Kubernetes Deployments, Services, ConfigMaps, Secrets, Mongo Express, and environment-based service configuration.",
+    contribution: "The public README assigns Yashas sections 1.1–1.3, including the MongoDB deployment configuration; this is not a claim of ownership of the full team project.",
+    outcome: "Completed coursework with a public repository; no dedicated live demo is currently verified.",
+    ownership: "coursework",
+    status: "completed-coursework",
+    domain: ["Containers", "Orchestration", "Configuration"],
+    stack: ["Docker", "Kubernetes", "Flask", "MongoDB"],
+    links: [{ kind: "repo", label: "Repository", href: "https://github.com/Yashas120/Cloud-Hack" }],
+    whyItMatters: "It makes configuration, credentials, service discovery, and orchestration boundaries inspectable.",
     evidenceId: "containers",
   },
   {
     id: "cloud-rdbms",
-    label: "Team database/cloud project · public fork · contribution boundary to confirm",
-    classification: "team-project",
-    title: "Enforcing infrastructure constraints through a relational control model",
-    summary:
-      "Built a database-backed system for allocating cloud hardware and modeling projects, zones, quotas, cost, inventory, and virtual-machine lifecycle operations.",
-    demonstrates: [
-      "PostgreSQL and PL/pgSQL",
-      "Quota and availability constraints",
-      "Transaction-sensitive lifecycle operations",
-      "Node.js backend structure",
-      "React interface",
-      "Triggers, roles, and access control",
+    title: "Cloud Provisioning Using an RDBMS",
+    problem: "Represent cloud inventory, quotas, costs, and virtual-machine lifecycle rules in an enforceable data model.",
+    constraints: ["Collaborative course project", "Public fork", "Exact commit-level contribution boundary still needs verification"],
+    system: "PostgreSQL and PL/pgSQL model projects, zones, users, quotas, inventory, cost, and lifecycle operations, exposed through Node.js and React components.",
+    contribution: "Contributed across the relational constraint model and application integration without claiming sole authorship.",
+    outcome: "Completed collaborative coursework with a public repository and interactive stored-procedure demo.",
+    ownership: "collaborative",
+    status: "completed-coursework",
+    domain: ["Cloud control plane", "Data integrity", "Transactions"],
+    stack: ["PostgreSQL", "PL/pgSQL", "Node.js", "React"],
+    links: [
+      { kind: "repo", label: "Repository", href: "https://github.com/Yashas120/Cloud-Provisioning-using-RDBMS" },
+      { kind: "demo", label: "Demo", href: "/demos#cloud" },
     ],
-    link: {
-      label: "Inspect repository",
-      href: "https://github.com/Yashas120/Cloud-Provisioning-using-RDBMS",
-    },
+    whyItMatters: "It treats provisioning policy as explicit constraints and lifecycle transitions rather than informal application convention.",
     evidenceId: "cloud-rdbms",
+    verificationNotes: ["Exact commit-level contribution boundary is not public."],
+  },
+  {
+    id: "ghost-scheduler",
+    title: "Performance Analysis of the Google ghOSt Scheduler",
+    problem: "Compare kernel and user-space scheduling behavior under controlled workload and machine configurations.",
+    constraints: ["Course-scale experimental environment", "Bursty and sustained load", "Multiple thread and memory configurations"],
+    system: "A repeatable Linux and ghOSt setup comparing CFS, FIFO, and user-space policies on RocksDB and backend workloads.",
+    contribution: "Built the experimental environment, structured the workload matrix, and analyzed scheduler behavior without asserting unsupported benchmark winners.",
+    outcome: "Completed systems-performance project; a canonical public repository link has not been verified.",
+    ownership: "coursework",
+    status: "completed-coursework",
+    domain: ["Operating systems", "Performance", "Experiment design"],
+    stack: ["Linux", "ghOSt", "C/C++", "RocksDB"],
+    links: [],
+    whyItMatters: "Platform work improves when performance claims come from reproducible experiments and controlled variables.",
+    evidenceId: "ghost",
+    verificationNotes: ["No canonical public repository or demo is verified."],
+  },
+  {
+    id: "technical-portfolio",
+    title: "Technical Portfolio — Six Systems Interfaces",
+    problem: "Tailor a portfolio to distinct engineering roles without fragmenting or erasing the underlying evidence.",
+    constraints: ["One typed evidence universe", "Static export", "Responsive and reduced-motion interfaces", "Public source"],
+    system: "One data model rendered through multiple role-native interfaces using server-rendered content and selectively hydrated interaction.",
+    contribution: "Designed and built the evidence architecture, role-native routes, responsive interaction, semantic diagrams, and static deployment path.",
+    outcome: "Original, active static web application with public source.",
+    ownership: "original",
+    status: "active",
+    domain: ["Developer experience", "Web platform", "Information architecture"],
+    stack: ["Next.js 14", "TypeScript", "React", "Tailwind", "Framer Motion"],
+    links: [
+      { kind: "site", label: "Current site", href: "/" },
+      { kind: "repo", label: "Source", href: "https://github.com/Yashas120/Yashas120.github.io" },
+    ],
+    whyItMatters: "The implementation itself demonstrates typed evidence, static delivery, progressive enhancement, and interface reliability.",
+    evidenceId: "portfolio-system",
   },
 ];
 
-/**
- * Kept deliberately compact: it demonstrates benchmarking discipline and
- * performance reasoning, and it is not presented as DevOps production work. No
- * repository is published for it, so it carries no link.
- */
-export const supportingProject = {
-  title: "Performance Analysis of the Google ghOSt Scheduler",
-  label: "Systems performance project",
-  summary:
-    "Built a repeatable environment for comparing kernel and user-space scheduling policies across RocksDB and backend-server workloads under different load, concurrency, and memory conditions.",
-} as const;
+export const completeWork: ProjectEvidence[] = [
+  {
+    id: "swift",
+    title: "SWIFT — Lightweight Image Super-Resolution",
+    problem: "Reduce the parameter and inference cost of image super-resolution while preserving the paper's stated comparison target.",
+    constraints: ["Collaborative research", "Public fork", "Baseline qualifier must remain visible"],
+    system: "SwinV2 and Fourier-domain processing with a Dual Frequency Spatial block.",
+    contribution: "Contributed to the research model and associated public implementation.",
+    outcome: "Published in 2025 (online 2024); approximately 34% fewer parameters and up to 60% faster inference than the stated SwinIR lightweight baseline.",
+    ownership: "research",
+    status: "published",
+    domain: ["Research", "Computer vision", "Efficient ML"],
+    stack: ["PyTorch", "SwinV2", "Fourier processing"],
+    links: [
+      { kind: "repo", label: "Repo", href: "https://github.com/Yashas120/SWIFT" },
+      { kind: "paper", label: "Paper", href: "https://doi.org/10.47852/bonviewAIA42021930" },
+      { kind: "demo", label: "Demo", href: "/demos#swift" },
+    ],
+    whyItMatters: "It connects performance constraints to model architecture and measured comparison.",
+    evidenceId: "swift-research",
+  },
+  {
+    id: "multiview",
+    title: "Multiview 3D Reconstruction",
+    problem: "Recover three-dimensional structure from multiple two-dimensional views.",
+    constraints: ["Traditional computer vision", "No deep-learning dependency", "Public implementation"],
+    system: "Incremental structure from motion using SIFT, epipolar geometry, PnP/RANSAC, triangulation, and bundle adjustment.",
+    contribution: "Implemented the public end-to-end reconstruction pipeline.",
+    outcome: "Completed original implementation with a live point-cloud demo.",
+    ownership: "original",
+    status: "shipped",
+    domain: ["Computer vision", "Geometry"],
+    stack: ["Python", "OpenCV", "NumPy", "SciPy"],
+    links: [
+      { kind: "repo", label: "Repo", href: "https://github.com/Yashas120/Multiview-3D-Reconstruction" },
+      { kind: "demo", label: "Demo", href: "/demos#multiview" },
+    ],
+    whyItMatters: "It demonstrates explicit data flow and failure-sensitive geometric estimation.",
+  },
+  {
+    id: "bitcoin",
+    title: "Bitcoin Transactions from Scratch in Java",
+    problem: "Expose transaction and cryptographic mechanics below wallet and library abstractions.",
+    constraints: ["Independent implementation", "Core primitives built without external cryptographic packages"],
+    system: "SHA-256, RIPEMD-160, secp256k1/ECDSA, P2PKH, serialization, signing, and a testnet transaction path.",
+    contribution: "Implemented the cryptographic and transaction pipeline from primitives through signed testnet behavior.",
+    outcome: "Completed original public implementation with an interactive explainer.",
+    ownership: "original",
+    status: "shipped",
+    domain: ["Security", "Protocols", "Systems"],
+    stack: ["Java", "SHA-256", "RIPEMD-160", "secp256k1", "ECDSA"],
+    links: [
+      { kind: "repo", label: "Repo", href: "https://github.com/Yashas120/Bitcoin-Transactions-in-java" },
+      { kind: "demo", label: "Demo", href: "/demos#bitcoin" },
+    ],
+    whyItMatters: "It makes trust boundaries, serialization, and verification behavior inspectable.",
+  },
+  {
+    id: "chocollvm",
+    title: "Chocollvm",
+    problem: "Translate a typed language through parsing and semantic analysis to executable output.",
+    constraints: ["Collaborative coursework", "Public fork", "Never presented as solo work"],
+    system: "Parsing, typed AST, Python and LLVM output, execution, and tests.",
+    contribution: "Contributed within the course compiler pipeline; exact module boundary is not overstated.",
+    outcome: "Completed collaborative coursework with a public repository and live compiler explainer.",
+    ownership: "public-fork",
+    status: "completed-coursework",
+    domain: ["Compilers", "Systems"],
+    stack: ["Python", "LLVM IR", "llvmlite", "PyTest"],
+    links: [
+      { kind: "repo", label: "Repo", href: "https://github.com/Yashas120/chocollvm" },
+      { kind: "demo", label: "Demo", href: "/demos#chocollvm" },
+    ],
+    whyItMatters: "It demonstrates staged transformation, validation, and testable intermediate representations.",
+  },
+  {
+    id: "spark-cifar",
+    title: "SSML Spark Streaming for Machine Learning",
+    problem: "Stream CIFAR-10 data into a distributed training workflow.",
+    constraints: ["Collaborative coursework", "Public fork", "Micro-batch data path"],
+    system: "Spark, PySpark, and Kafka-style streaming stages for CIFAR-10 classification and batch-size analysis.",
+    contribution: "Worked on the streaming, training, and batch-size analysis workflow.",
+    outcome: "Completed team big-data project with a public repository and browser demo.",
+    ownership: "public-fork",
+    status: "completed-coursework",
+    domain: ["Distributed data", "Machine learning"],
+    stack: ["Spark", "PySpark", "Kafka", "CIFAR-10"],
+    links: [
+      { kind: "repo", label: "Repo", href: "https://github.com/Yashas120/SSML-spark-streaming-for-machine-learning" },
+      { kind: "demo", label: "Demo", href: "/demos#cifar" },
+    ],
+    whyItMatters: "It exposes backpressure, batching, and distributed data-flow concerns.",
+  },
+  {
+    id: "yelp",
+    title: "Restaurant Closure-Risk Analysis with Yelp Data",
+    problem: "Explore which business and review signals correlate with restaurant closure risk.",
+    constraints: ["Collaborative public fork", "Exact contribution boundary to verify", "Analysis, not a production predictor"],
+    system: "Exploratory analysis, classification, and LDA topic modeling over Yelp business and review data.",
+    contribution: "Contributed to the analysis workflow; the exact boundary remains explicitly unclaimed.",
+    outcome: "Completed team analysis with a public repository and illustrative browser demo.",
+    ownership: "public-fork",
+    status: "shipped",
+    domain: ["Data analysis", "Applied ML"],
+    stack: ["Python", "Logistic regression", "LDA", "Yelp dataset"],
+    links: [
+      { kind: "repo", label: "Repo", href: "https://github.com/Yashas120/Restaurant-analysis-using-YELP-dataset" },
+      { kind: "demo", label: "Demo", href: "/demos#yelp" },
+    ],
+    whyItMatters: "It demonstrates analytical traceability and careful separation of evidence from prediction claims.",
+    verificationNotes: ["Exact personal contribution boundary is not public."],
+  },
+  {
+    id: "parallel",
+    title: "Systems and Parallel Programming Experiments",
+    problem: "Make thread behavior and memory-locality effects observable.",
+    constraints: ["Coursework", "Repository URL not verified for publication"],
+    system: "C and Python experiments covering threads, races, loop variants, memory layout, profiling, and cache locality.",
+    contribution: "Implemented and analyzed systems-performance exercises and documented the mechanisms they expose.",
+    outcome: "Completed coursework with a live explanatory demo.",
+    ownership: "coursework",
+    status: "completed-coursework",
+    domain: ["Concurrency", "Performance", "Systems"],
+    stack: ["C", "Python", "pthreads", "Profiling"],
+    links: [{ kind: "demo", label: "Demo", href: "/demos#parallel" }],
+    whyItMatters: "It connects performance outcomes to scheduling and memory behavior.",
+    verificationNotes: ["No canonical public repository URL is verified."],
+  },
+  {
+    id: "petra",
+    title: "PeTra",
+    problem: "Build a multi-step hotel and pet-sitter booking workflow.",
+    constraints: ["Three-person equal-contribution team", "Public fork", "Archived coursework"],
+    system: "React booking workflow integrated with a separately maintained backend.",
+    contribution: "Contributed to the React workflow and team integration without claiming unverified authentication or pricing behavior.",
+    outcome: "Completed, archived coursework with a repository and explainer demo.",
+    ownership: "public-fork",
+    status: "archived",
+    domain: ["Web application", "Team delivery"],
+    stack: ["React", "JavaScript", "Node.js"],
+    links: [
+      { kind: "repo", label: "Repo", href: "https://github.com/Yashas120/Petra" },
+      { kind: "demo", label: "Demo", href: "/demos#petra" },
+    ],
+    whyItMatters: "It shows early full-stack collaboration and interface-to-service integration.",
+  },
+  {
+    id: "rag-farmers",
+    title: "Multilingual RAG Voice Assistant for Farmers",
+    problem: "Make government subsidy and relief information easier to explore through speech and retrieval.",
+    constraints: ["CPU-only prototype", "No verified public repository", "Prototype measurement only"],
+    system: "Multilingual speech input and retrieval-grounded responses running without a GPU.",
+    contribution: "Worked on the voice, retrieval, and CPU-only application path.",
+    outcome: "Applied-AI prototype with latency, freshness, retrieval quality, and attribution identified as production concerns; not presented as a shipped system.",
+    ownership: "collaborative",
+    status: "prototype",
+    domain: ["Applied AI", "Voice", "Retrieval"],
+    stack: ["Python", "RAG", "Speech", "CPU inference"],
+    links: [],
+    whyItMatters: "It demonstrates designing around compute constraints and grounding responses in retrieved material.",
+  },
+  {
+    id: "underwater",
+    title: "Underwater Data Center Monitoring and Alert Prototype",
+    problem: "Monitor infrastructure that is expensive and slow to access physically.",
+    constraints: ["Published prototype", "Not a deployed production system"],
+    system: "Arduino and IoT sensing, monitoring, alerting, and redundancy concepts.",
+    contribution: "Contributed to the monitoring and redundancy design described in the publication.",
+    outcome: "Peer-reviewed prototype published at IEEE CSITSS in 2021.",
+    ownership: "research",
+    status: "published",
+    domain: ["Research", "Monitoring", "IoT"],
+    stack: ["Arduino", "IoT", "Sensing", "Alerting"],
+    links: [{ kind: "paper", label: "Paper", href: "https://doi.org/10.1109/CSITSS54238.2021.9683449" }],
+    whyItMatters: "It extends observability thinking to infrastructure with difficult maintenance access.",
+    evidenceId: "underwater-research",
+  },
+];
+
+export const exclusionRegister = [
+  {
+    name: "SunSET / UCSD academic-history utility",
+    disposition: "Public fork; excluded as authored work until exact contribution is verified.",
+  },
+  {
+    name: "OOAD-Project-Blockchain",
+    disposition: "Excluded as a likely duplicate or precursor until distinct scope is proven.",
+  },
+  {
+    name: "Packet-to-Photon Lab",
+    disposition: "Concept or in-development only; not presented as implemented or shipped without a working public repository or deployment.",
+  },
+] as const;

@@ -4,6 +4,8 @@
 /.next-*/
 /dev-build/
 /out/
+/test-results/
+/playwright-report/
 /build
 *.pem
 .DS_Store

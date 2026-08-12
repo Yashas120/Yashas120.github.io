@@ -4,7 +4,7 @@
  * Scene 04 — the dossier becomes an x-ray of a running system. One real request
  * trace moves through the topology; dependencies that no configuration record
  * listed only appear when the trace reaches them; the authentication path turns
- * signal orange; four repository layers separate and two JARs open beneath.
+ * signal orange; application and compiled-dependency layers separate beneath.
  *
  * Every line here stands for something named in the copy. Nothing is decorative
  * traffic.
@@ -160,36 +160,36 @@ export function Scene04Production({ p, compact }: Readonly<SceneVisualProps>) {
         </Ann>
       </motion.g>
 
-      {/* four repositories separating, then two JARs opening beneath */}
+      {/* application layers separating, then compiled dependencies opening beneath */}
       <g transform={compact ? "translate(300 300) scale(0.8)" : "translate(392 288)"}>
-        {[0, 1, 2, 3].map((i) => (
+        {[0, 1, 2].map((i) => (
           <RepoLayer key={i} p={p} i={i} opacity={layers} />
         ))}
-        {[0, 1].map((i) => (
+        {[0].map((i) => (
           <motion.g key={`jar-${i}`} style={{ opacity: jars }}>
             <rect x={16 + i * 92} y={104} width={72} height={14} fill="none" stroke={ORANGE} strokeWidth={0.9} strokeDasharray="3 3" />
             <Ann x={22 + i * 92} y={114} size={8} color={ORANGE}>
-              {`jar ${i + 1}`}
+              compiled dependency
             </Ann>
           </motion.g>
         ))}
       </g>
 
-      {/* scale annotations attached to the mechanism they describe */}
+      {/* public-safe method annotations attached to the mechanism */}
       <motion.g style={{ opacity: scale }}>
         <Ann x={46} y={134} size={8} opacity={0.6}>
-          ~500k calls / day
+          observed production traffic
         </Ann>
         <Ann x={534} y={172} size={8} anchor="middle" opacity={0.6}>
-          ~50 services
+          active consumer
         </Ann>
         {!compact && (
           <>
             <Ann x={24} y={54} size={8} opacity={0.5}>
-              30 integrations · 12 teams
+              documentation incomplete
             </Ann>
             <Ann x={656} y={54} size={8} anchor="end" opacity={0.5}>
-              96 endpoints
+              owners mapped from evidence
             </Ann>
           </>
         )}

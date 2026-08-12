@@ -1,81 +1,48 @@
 "use client";
 
-/**
- * Final state — handoff. Everything built across the previous scenes collapses
- * into one small completed field brief, stamped in the order the work happened.
- */
+/** Scene 11 — the film opens into the complete semantic record below. */
 
 import { motion } from "framer-motion";
 import { Ann, COBALT, GREEN, RegMark, useRange } from "./kit";
-import { handoff } from "@/data/fdeDossier";
 import type { SceneVisualProps } from "./types";
 
-const PLATE = { x: 178, y: 104, w: 324, h: 252 };
+const ROLES = ["CISCO OPTICAL", "CISCO BACKEND + CLOUD", "CISCO INTERNSHIP", "SCHNEIDER", "PES TEACHING"] as const;
+const DOMAINS = ["PRODUCTION", "CLOUD", "OPTICAL", "SYSTEMS", "ML / CV", "TEACHING"] as const;
 
-const STAMP_POS = [
-  { x: 210, y: 158, rot: -2.5, color: COBALT },
-  { x: 318, y: 200, rot: 1.5, color: COBALT },
-  { x: 210, y: 244, rot: -1, color: GREEN },
-  { x: 300, y: 292, rot: 2, color: GREEN },
-];
-
-function Stamp({
-  p,
-  i,
-  label,
-}: Readonly<{ p: SceneVisualProps["p"]; i: number; label: string }>) {
-  const pos = STAMP_POS[i];
-  const a = 0.44 + i * 0.12;
-  const opacity = useRange(p, a, a + 0.07, 0, 1);
-  const scale = useRange(p, a, a + 0.07, 1.14, 1);
+function RoleRow({ p, role, index, compact }: Readonly<{ p: SceneVisualProps["p"]; role: string; index: number; compact: boolean }>) {
+  const opacity = useRange(p, 0.16 + index * 0.09, 0.34 + index * 0.09, 0, 1);
+  const x = compact ? 112 : 170;
+  const width = compact ? 456 : 340;
+  const y = 108 + index * 42;
   return (
-    <motion.g style={{ opacity, scale, originX: 0, originY: 0, x: pos.x, y: pos.y, rotate: pos.rot }}>
-      <rect width={label.length * 7.6 + 18} height={24} fill="none" stroke={pos.color} strokeWidth={1.1} />
-      <Ann x={9} y={16} size={10} color={pos.color}>
-        {label}
-      </Ann>
+    <motion.g style={{ opacity }}>
+      <line x1={x} y1={y + 24} x2={x + width} y2={y + 24} stroke="currentColor" strokeWidth={0.7} opacity={0.28} />
+      <Ann x={x} y={y + 16} size={9}>{String(index + 1).padStart(2, "0")} · {role}</Ann>
+      <Ann x={x + width} y={y + 16} size={8} anchor="end" color={GREEN}>VERIFIED</Ann>
     </motion.g>
   );
 }
 
 export function SceneHandoff({ p, compact }: Readonly<SceneVisualProps>) {
-  // the production topology collapsing into a single small document
-  const collapse = useRange(p, 0, 0.34, 1, 0.34);
-  const fade = useRange(p, 0.04, 0.3, 0.5, 0);
-  const plate = useRange(p, 0.22, 0.46, 0, 1);
-
+  const plate = useRange(p, 0.04, 0.28, 0, 1);
+  const rule = useRange(p, 0.58, 0.96, 0, 1);
+  const domains = useRange(p, 0.52, 0.78, 0, 1);
   return (
     <g>
-      <motion.g style={{ opacity: fade, scale: collapse, originX: 0.5, originY: 0.5 }}>
-        <g stroke="currentColor" strokeWidth={0.9} fill="none">
-          <rect x={60} y={90} width={120} height={40} />
-          <rect x={280} y={200} width={120} height={40} />
-          <rect x={500} y={320} width={120} height={40} />
-          <line x1={180} y1={110} x2={280} y2={220} />
-          <line x1={400} y1={220} x2={500} y2={340} />
-        </g>
-      </motion.g>
-
       <motion.g style={{ opacity: plate }}>
-        <rect x={PLATE.x} y={PLATE.y} width={PLATE.w} height={PLATE.h} fill="none" stroke="currentColor" strokeWidth={1} opacity={0.6} />
-        <line x1={PLATE.x} y1={PLATE.y + 30} x2={PLATE.x + PLATE.w} y2={PLATE.y + 30} stroke="currentColor" strokeWidth={0.8} opacity={0.4} />
-        <Ann x={PLATE.x + 14} y={PLATE.y + 20} size={9} opacity={0.7}>
-          FIELD BRIEF · CLOSED
-        </Ann>
-        <Ann x={PLATE.x + PLATE.w - 14} y={PLATE.y + 20} size={9} anchor="end" opacity={0.5}>
-          {handoff.slug}
-        </Ann>
-        {!compact && (
-          <>
-            <RegMark x={PLATE.x - 18} y={PLATE.y - 18} />
-            <RegMark x={PLATE.x + PLATE.w + 18} y={PLATE.y + PLATE.h + 18} />
-          </>
-        )}
+        <rect x={compact ? 92 : 148} y={52} width={compact ? 496 : 384} height={344} fill="none" stroke="currentColor" strokeWidth={1} opacity={0.62} />
+        <line x1={compact ? 92 : 148} y1={88} x2={compact ? 588 : 532} y2={88} stroke="currentColor" strokeWidth={0.8} opacity={0.4} />
+        <Ann x={compact ? 108 : 164} y={76} size={9} color={COBALT}>VERIFIED RECORD · INDEX</Ann>
+        {!compact && <RegMark x={130} y={34} />}
       </motion.g>
-
-      {handoff.stamps.map((s, i) => (
-        <Stamp key={s} p={p} i={i} label={s} />
-      ))}
+      {ROLES.map((role, index) => <RoleRow key={role} p={p} role={role} index={index} compact={compact} />)}
+      <motion.g style={{ opacity: domains }}>
+        {DOMAINS.map((domain, i) => (
+          <Ann key={domain} x={(compact ? 112 : 170) + (i % 3) * (compact ? 152 : 112)} y={344 + Math.floor(i / 3) * 20} size={8} color={COBALT}>{domain}</Ann>
+        ))}
+      </motion.g>
+      <motion.line x1={340} y1={396} x2={340} y2={452} stroke={GREEN} strokeWidth={1.5} style={{ scaleY: rule, originY: 0 }} />
+      <Ann x={340} y={438} size={8} anchor="middle" color={GREEN}>CONTINUES BELOW</Ann>
     </g>
   );
 }

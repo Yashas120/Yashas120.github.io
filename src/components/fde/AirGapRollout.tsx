@@ -76,8 +76,8 @@ export function AirGapRollout() {
           </div>
 
           <div className="rounded-lg border border-line/10 bg-ink-900/50 p-3">
-            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-600">~50 VM environments</p>
-            <div className="grid grid-cols-10 gap-1.5" role="img" aria-label="Approximately 50 air-gapped environments moving from an end-of-life logging library to a patched release, three of them requiring deeper remediation">
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-600">air-gapped environments</p>
+            <div className="grid grid-cols-10 gap-1.5" role="img" aria-label="Air-gapped environments moving from an end-of-life logging library to a patched release, with difficult hosts requiring deeper remediation">
               {Array.from({ length: TOTAL }, (_, i) => {
                 const isHard = HARD.includes(i);
                 const patched = rolling && (!isHard || hard);

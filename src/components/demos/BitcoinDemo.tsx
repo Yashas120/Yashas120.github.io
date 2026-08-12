@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LiveDemo } from "./LiveDemo";
 import { KeysSection } from "./bitcoin/KeysSection";
 import { Sha256Section } from "./bitcoin/Sha256Section";
@@ -63,7 +63,8 @@ function isValidPrivHex(hex: string): boolean {
   return /^[0-9a-fA-F]{64}$/.test(hex.trim());
 }
 
-export function BitcoinDemo() {
+export function BitcoinDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
+  const labRef = useRef<HTMLDivElement>(null);
   const [privHex, setPrivHex] = useState<string>(SSR_PRIV_HEX);
 
   // Swap the deterministic placeholder for a real random key once mounted.
@@ -101,6 +102,7 @@ export function BitcoinDemo() {
   // Left/right arrow keys advance the story (ignored while typing in a field).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (!labRef.current?.contains(document.activeElement)) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       if (e.key === "ArrowRight") goTo(index + 1);
@@ -120,6 +122,9 @@ export function BitcoinDemo() {
       subtitle="Follow one key as it becomes an address, signs a transaction, and lands in a mined block — all built from scratch and running live in this tab."
       repoUrl={REPO}
       accent={BTC}
+      embedded={embedded}
+      contentRef={labRef}
+      contentLabel="Bitcoin educational computation lab. Focus here to use Left and Right Arrow shortcuts."
       {...cardProps("bitcoin")}
     >
       {/* Guided progress rail */}
@@ -279,6 +284,10 @@ export function BitcoinDemo() {
       </div>
     </LiveDemo>
   );
+}
+
+export function BitcoinLab() {
+  return <BitcoinDemo embedded />;
 }
 
 // A titled artifact in the end-of-journey recap grid.

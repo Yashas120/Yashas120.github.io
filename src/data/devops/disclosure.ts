@@ -11,15 +11,10 @@
 export type DisclosureState = "public" | "approval-required" | "private";
 
 /**
- * CMocka figures (122 production sources, ~430 stubbed boundaries,
- * ~30 minutes → ~10 seconds).
- *
- * Owner-authorised for this route: the same numbers are already published on
- * `/fde` (see src/data/fdeDossier.ts). Setting this to false swaps every
- * affected string on the page to the public-safe variant, which keeps the
- * mechanism and drops the measurements.
+ * Detailed employer validation figures remain outside this public repository.
+ * The route keeps the public-safe mechanism and broad before/after statement.
  */
-export const cmockaCleared = true;
+export const cmockaCleared = false;
 
 /**
  * Employer-scale figures that remain withheld by default on this route:

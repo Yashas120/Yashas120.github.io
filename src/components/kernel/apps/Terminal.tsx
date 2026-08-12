@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { profile } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { kernelProjects as projects } from "@/data/projects";
 import { skills } from "@/data/skills";
 import { experience } from "@/data/experience";
 import { publications } from "@/data/publications";
+import { workLabels } from "@/data/kernelPortfolio";
 import { useDesktop } from "../desktop/DesktopContext";
 import { BOOT_LABEL } from "../desktop/uptime";
 import { PHOSPHOR } from "../desktop/types";
@@ -24,14 +25,13 @@ const LOGO = [
 // clock-derived value would drift from the client and trip a hydration mismatch.
 // The live uptime counter lives in the menu bar tray instead.
 const FACTS: [string, string][] = [
-  ["OS", "yashOS 6.11 (ghOSt-enabled)"],
+  ["Interface", "yashOS portfolio lab"],
   ["Host", "UC San Diego · ex-Cisco"],
-  ["Kernel", "6.11.0-yashas"],
-  ["Uptime", `since ${BOOT_LABEL}`],
-  ["Shell", "/bin/yash"],
+  ["Focus", "Systems software · Linux · hardware"],
+  ["Session", `since ${BOOT_LABEL}`],
+  ["Shell", "interactive portfolio"],
   ["Packages", `${projects.length} projects, ${publications.length} papers`],
-  ["CPU", "Systems + Distributed (5 cores)"],
-  ["Memory", "Python, Java, C/C++, TypeScript"],
+  ["Languages", "Python, Java, C/C++, TypeScript"],
   ["Locale", profile.location],
 ];
 
@@ -84,7 +84,7 @@ export function Terminal({ autoFocus = false }: Readonly<{ autoFocus?: boolean }
           "builtin commands:",
           "  neofetch          system summary",
           "  whoami            identity + summary",
-          "  ps                running projects",
+          "  ps                project evidence index",
           "  lsmod             loaded skills",
           "  jobs              career history",
           "  man yashas        the full resume",
@@ -104,12 +104,10 @@ export function Terminal({ autoFocus = false }: Readonly<{ autoFocus?: boolean }
         break;
       case "ps":
         out = [
-          "  PID %CPU %MEM STAT COMMAND",
+          "CONTEXT       OWNERSHIP              STATUS       PROJECT",
           ...projects.map(
             (p) =>
-              `${String(p.pid).padStart(5)} ${p.cpu.toFixed(1).padStart(4)} ${p.mem
-                .toFixed(1)
-                .padStart(4)} ${p.state.padEnd(4)} ${p.title}`
+              `${workLabels.context[p.context].padEnd(13)} ${workLabels.ownership[p.ownership].padEnd(22)} ${workLabels.status[p.status].padEnd(12)} ${p.title}`
           ),
           "",
           "run `open htop` for details.",
@@ -122,7 +120,7 @@ export function Terminal({ autoFocus = false }: Readonly<{ autoFocus?: boolean }
         ];
         break;
       case "jobs":
-        out = experience.map(
+        out = experience.filter((e) => e.kind === "professional").map(
           (e) => `[${e.end === "Present" ? "+" : "-"}] ${e.start}–${e.end}  ${e.role} @ ${e.org}`
         );
         break;
@@ -157,7 +155,7 @@ export function Terminal({ autoFocus = false }: Readonly<{ autoFocus?: boolean }
         break;
       case "uname":
         out = [
-          "yashOS kernel 6.11.0-yashas #1 SMP PREEMPT_RT systems+distributed x86_64 GNU/Linux",
+          "yashOS portfolio-lab — interactive interface; not a production operating system",
         ];
         break;
       case "sudo":

@@ -32,7 +32,7 @@ export function Dock({
               onClick={() => onLaunch(a.id)}
               aria-current={active ? "page" : undefined}
               title={a.friendly}
-              className="flex min-w-[68px] max-w-[76px] flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 transition-colors"
+              className="flex min-h-11 min-w-[68px] max-w-[76px] flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 transition-colors"
               style={{ background: active ? hexToRgba(PHOSPHOR, 0.12) : "transparent" }}
             >
               <Icon

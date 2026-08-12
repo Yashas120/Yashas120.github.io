@@ -17,7 +17,7 @@ const DOCUMENTED = ["consumer-1", "consumer-2", "consumer-3"];
 // `discoveryFacts.approved` is the single switch for both.
 const TEAMS = discoveryFacts.approved ? "12" : "multiple";
 const INTEGRATIONS_LABEL = discoveryFacts.approved ? "~30" : "many";
-const TRAFFIC_LABEL = discoveryFacts.approved ? "~500,000 API calls / day" : "high, continuous request volume";
+const TRAFFIC_LABEL = "observed production request volume";
 /** Marker count is a visual density, not a published figure. */
 const MARKERS = 30;
 

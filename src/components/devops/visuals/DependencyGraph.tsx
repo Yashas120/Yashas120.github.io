@@ -11,6 +11,7 @@
 
 import { DV } from "../tokens";
 import { DiagramFrame, Edge, GLabel, GNode } from "./parts";
+import { delivery } from "@/data/devops/profile";
 
 const MID = 180;
 const L = 88;
@@ -28,11 +29,11 @@ export function DependencyGraph({ live }: Readonly<DependencyGraphProps>) {
       height={472}
     >
       {/* trunk */}
-      <GNode x={110} y={6} w={140} h={32} lines={["Change detected"]} accent={DV.amber} />
+      <GNode x={110} y={6} w={140} h={32} lines={[delivery.graph.change]} accent={DV.amber} />
       <Edge d={`M ${MID} 38 V 56`} accent={DV.amber} flow={live} head={{ x: MID, y: 56, dir: "down" }} />
-      <GNode x={110} y={56} w={140} h={32} lines={["Validate inputs"]} accent={DV.amber} />
+      <GNode x={110} y={56} w={140} h={32} lines={[delivery.graph.validate]} accent={DV.amber} />
       <Edge d={`M ${MID} 88 V 106`} accent={DV.amber} flow={live} head={{ x: MID, y: 106, dir: "down" }} />
-      <GNode x={100} y={106} w={160} h={32} lines={["Plan infrastructure"]} accent={DV.cyan} />
+      <GNode x={100} y={106} w={160} h={32} lines={[delivery.graph.plan]} accent={DV.cyan} />
 
       {/* split */}
       <Edge d={`M ${MID} 138 V 150 H ${L} V 162`} accent={DV.green} flow={live} head={{ x: L, y: 162, dir: "down" }} />
@@ -44,10 +45,10 @@ export function DependencyGraph({ live }: Readonly<DependencyGraphProps>) {
         head={{ x: R, y: 162, dir: "down" }}
       />
 
-      <GNode x={6} y={162} w={164} h={44} lines={["Independent", "resources"]} accent={DV.green} tag="concurrent" />
-      <GNode x={190} y={162} w={164} h={32} lines={["Dependency gate"]} accent={DV.amber} />
+      <GNode x={6} y={162} w={164} h={44} lines={[...delivery.graph.independent]} accent={DV.green} tag={delivery.graph.independentTag} />
+      <GNode x={190} y={162} w={164} h={32} lines={[delivery.graph.dependencyGate]} accent={DV.amber} />
       <Edge d={`M ${R} 194 V 214`} accent={DV.muted} flow={live} delay={700} head={{ x: R, y: 214, dir: "down" }} />
-      <GNode x={190} y={214} w={164} h={32} lines={["Dependent services"]} accent={DV.muted} waiting tag="waits" />
+      <GNode x={190} y={214} w={164} h={32} lines={[delivery.graph.dependent]} accent={DV.muted} waiting tag={delivery.graph.waitingTag} />
 
       {/* converge */}
       {/* starts below the "concurrent" tag baseline so the label stays legible */}
@@ -60,13 +61,13 @@ export function DependencyGraph({ live }: Readonly<DependencyGraphProps>) {
         head={{ x: MID, y: 272, dir: "down" }}
       />
 
-      <GNode x={88} y={272} w={184} h={32} lines={["Human approval"]} accent={DV.violet} tag="human decision" />
+      <GNode x={88} y={272} w={184} h={32} lines={[delivery.graph.approval]} accent={DV.violet} tag={delivery.graph.approvalTag} />
       <Edge d={`M ${MID} 304 V 336` } accent={DV.violet} flow={live} head={{ x: MID, y: 336, dir: "down" }} />
-      <GNode x={110} y={336} w={140} h={32} lines={["Deploy"]} accent={DV.amber} />
+      <GNode x={110} y={336} w={140} h={32} lines={[delivery.graph.deploy]} accent={DV.amber} />
       <Edge d={`M ${MID} 368 V 386`} accent={DV.amber} flow={live} head={{ x: MID, y: 386, dir: "down" }} />
-      <GNode x={96} y={386} w={168} h={32} lines={["Health verification"]} accent={DV.green} />
+      <GNode x={96} y={386} w={168} h={32} lines={[delivery.graph.verify]} accent={DV.green} />
       <Edge d={`M ${MID} 418 V 436`} accent={DV.green} flow={live} head={{ x: MID, y: 436, dir: "down" }} />
-      <GNode x={125} y={436} w={110} h={32} lines={["Observe"]} accent={DV.green} />
+      <GNode x={125} y={436} w={110} h={32} lines={[delivery.graph.observe]} accent={DV.green} />
 
       <GLabel x={6} y={152} text="independent" accent={DV.green} />
       <GLabel x={354} y={152} text="prerequisite" accent={DV.amber} anchor="end" />

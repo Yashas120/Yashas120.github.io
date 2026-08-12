@@ -7,13 +7,15 @@
  * are the two actions a recruiter came for.
  */
 
-import { FileText, Github, Mail, Menu } from "lucide-react";
+import { FileText, Github, Mail, Menu, PlayCircle } from "lucide-react";
 import { identity, resumeLink } from "@/data/devops/profile";
 import { ACTION, DV, HEADER_H, MAX_WIDTH } from "./tokens";
 
 const LINKS = [
-  { label: "Experience", href: "#delivery" },
-  { label: "Systems", href: "#systems" },
+  { label: "Experience", href: "#experience" },
+  { label: "Projects", href: "#systems" },
+  { label: "Research & teaching", href: "#complete-work" },
+  { label: "Demos", href: "/demos" },
 ];
 
 export function PortfolioHeader() {
@@ -30,14 +32,16 @@ export function PortfolioHeader() {
           <span className="truncate text-[15px] font-semibold" style={{ color: DV.text }}>
             {identity.name}
           </span>
-          <span className="dv-chip hidden sm:inline-flex" style={{ color: DV.amber }}>
-            {identity.role}
+          <span className="hidden dock:inline">
+            <span className="dv-chip" style={{ color: DV.amber }}>
+              {identity.role}
+            </span>
           </span>
         </div>
 
         <nav aria-label="Primary" className="flex items-center gap-0.5 sm:gap-1">
           {LINKS.map((l) => (
-            <a key={l.href} href={l.href} className={`${ACTION} hidden sm:inline-flex`} style={{ color: DV.muted }}>
+            <a key={l.label} href={l.href} className={`${ACTION} hidden dock:inline-flex`} style={{ color: DV.muted }}>
               {l.label}
             </a>
           ))}
@@ -45,6 +49,7 @@ export function PortfolioHeader() {
             href={resumeLink.href}
             target="_blank"
             rel="noreferrer noopener"
+            download={resumeLink.isPdf ? true : undefined}
             aria-label={resumeLink.ariaLabel}
             className={ACTION}
             style={{ color: DV.text }}
@@ -56,7 +61,7 @@ export function PortfolioHeader() {
             target="_blank"
             rel="noreferrer noopener"
             aria-label={`GitHub — ${identity.githubUser} (opens in a new tab)`}
-            className={`${ACTION} hidden sm:inline-flex`}
+            className={`${ACTION} hidden md:inline-flex`}
             style={{ color: DV.muted }}
           >
             <Github className="h-4 w-4" aria-hidden /> GitHub
@@ -68,11 +73,11 @@ export function PortfolioHeader() {
             style={{ color: DV.muted }}
           >
             <Mail className="h-4 w-4" aria-hidden />
-            <span className="hidden sm:inline">Email</span>
+            <span className="hidden md:inline">Email</span>
           </a>
 
           {/* Narrow viewports: the remaining links, in an ordinary labelled menu. */}
-          <details className="relative sm:hidden">
+          <details className="relative dock:hidden">
             <summary
               className={`${ACTION} list-none [&::-webkit-details-marker]:hidden`}
               style={{ color: DV.muted }}
@@ -85,7 +90,8 @@ export function PortfolioHeader() {
               style={{ borderColor: DV.border, background: DV.raised }}
             >
               {LINKS.map((l) => (
-                <a key={l.href} href={l.href} className={ACTION} style={{ color: DV.text }}>
+                <a key={l.label} href={l.href} className={ACTION} style={{ color: DV.text }}>
+                  {l.label === "Demos" && <PlayCircle className="h-4 w-4" aria-hidden />}
                   {l.label}
                 </a>
               ))}
@@ -94,7 +100,7 @@ export function PortfolioHeader() {
                 target="_blank"
                 rel="noreferrer noopener"
                 aria-label={`GitHub — ${identity.githubUser} (opens in a new tab)`}
-                className={ACTION}
+                className={`${ACTION} md:hidden`}
                 style={{ color: DV.text }}
               >
                 <Github className="h-4 w-4" aria-hidden /> GitHub

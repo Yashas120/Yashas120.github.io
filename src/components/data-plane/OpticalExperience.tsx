@@ -12,7 +12,7 @@
  * groups and never merged into one list.
  */
 
-import { opticalRole, ownership, skillGroups } from "@/data/dataPlane";
+import { canonicalOpticalRole, ownership } from "@/data/dataPlane";
 import { AMBER, CANVAS, FAINT, MUTED, RULE, SIGNAL, SURFACE, TEXT, VERIFIED } from "./palette";
 
 function OwnershipGroup({
@@ -46,32 +46,32 @@ function OwnershipGroup({
 
 export function OpticalExperience() {
   return (
-    <section id="experience" className="scroll-mt-20 px-5 py-16 sm:px-8 md:px-10 md:py-24" style={{ background: CANVAS }}>
+    <section id="optical-experience" className="scroll-mt-20 px-5 py-16 sm:px-8 md:px-10 md:py-24" style={{ background: CANVAS }}>
       <div className="mx-auto max-w-5xl">
         <p className="font-mono text-[11px] uppercase tracking-[0.24em]" style={{ color: SIGNAL }}>
           Optical dataplane experience
         </p>
         <h2 className="mt-3 text-[clamp(1.4rem,2.4vw,2.1rem)] font-semibold tracking-[-0.02em]" style={{ color: TEXT }}>
-          {opticalRole.org} · {opticalRole.title}
+          {canonicalOpticalRole.title}
         </h2>
         <p className="mt-1.5 font-mono text-[11px]" style={{ color: FAINT }}>
-          {opticalRole.dates} · {opticalRole.location}
+          {canonicalOpticalRole.dates} · {canonicalOpticalRole.location}
         </p>
         <p className="mt-4 max-w-[70ch] text-[0.95rem] leading-[1.62]" style={{ color: MUTED }}>
-          {opticalRole.scope}
+          {canonicalOpticalRole.publicCopy}
         </p>
 
-        <h3 className="mt-10 font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: FAINT }}>
-          Areas of work
-        </h3>
-        <ul className="mt-4 grid gap-x-8 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          {opticalRole.areas.map((area) => (
-            <li key={area} className="flex items-start gap-2.5 text-[0.88rem] leading-[1.5]" style={{ color: MUTED }}>
-              <span aria-hidden className="mt-[0.6em] block h-[1px] w-3 shrink-0" style={{ background: SIGNAL }} />
-              {area}
-            </li>
-          ))}
-        </ul>
+        <div className="mt-9 grid gap-4 lg:grid-cols-3">
+          {(canonicalOpticalRole.details ?? []).map((detail) => {
+            const [label, copy] = detail.split(" · ", 2);
+            return (
+              <article key={detail} className="rounded-lg border p-4" style={{ borderColor: RULE, background: SURFACE }}>
+                <h3 className="font-mono text-[10.5px] uppercase tracking-[0.14em]" style={{ color: SIGNAL }}>{label}</h3>
+                <p className="mt-2 text-[0.86rem] leading-[1.58]" style={{ color: MUTED }}>{copy}</p>
+              </article>
+            );
+          })}
+        </div>
 
         <h3 className="mt-12 font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: FAINT }}>
           Ownership
@@ -91,21 +91,6 @@ export function OpticalExperience() {
           />
         </div>
 
-        <h3 className="mt-12 font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: FAINT }}>
-          Technical skills
-        </h3>
-        <dl className="mt-4 grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
-          {skillGroups.map((g) => (
-            <div key={g.label}>
-              <dt className="text-[0.82rem] font-semibold" style={{ color: TEXT }}>
-                {g.label}
-              </dt>
-              <dd className="mt-1.5 font-mono text-[0.78rem] leading-[1.6]" style={{ color: MUTED }}>
-                {g.items.join(" · ")}
-              </dd>
-            </div>
-          ))}
-        </dl>
       </div>
     </section>
   );

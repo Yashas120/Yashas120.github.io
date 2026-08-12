@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { hexToRgba } from "@/lib/utils";
 import { PHOSPHOR } from "./types";
@@ -48,6 +48,9 @@ const placementClass: Record<Placement, string> = {
 
 export function DesktopTour({ open, onClose }: Readonly<{ open: boolean; onClose: () => void }>) {
   const [i, setI] = useState(0);
+  const dialogRef = useRef<HTMLElement>(null);
+  const restoreRef = useRef<HTMLElement | null>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (open) setI(0);
@@ -55,20 +58,37 @@ export function DesktopTour({ open, onClose }: Readonly<{ open: boolean; onClose
 
   useEffect(() => {
     if (!open) return;
+    restoreRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    window.requestAnimationFrame(() => dialogRef.current?.querySelector<HTMLElement>("button")?.focus());
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight" || e.key === "Enter") setI((s) => Math.min(s + 1, steps.length - 1));
       if (e.key === "ArrowLeft") setI((s) => Math.max(s - 1, 0));
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = [...dialogRef.current.querySelectorAll<HTMLElement>("button, a[href], [tabindex]:not([tabindex='-1'])")];
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable.at(-1) ?? first;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   const step = steps[i];
   const last = i === steps.length - 1;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={() => restoreRef.current?.focus()}>
       {open && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -79,25 +99,30 @@ export function DesktopTour({ open, onClose }: Readonly<{ open: boolean; onClose
           onClick={onClose}
         >
           <motion.aside
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="desktop-tour-title"
+            aria-describedby="desktop-tour-description"
             key={i}
             initial={{ opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.16 }}
+            transition={{ duration: reducedMotion ? 0 : 0.16 }}
             onClick={(e) => e.stopPropagation()}
             className={`absolute w-[min(20rem,calc(100vw-1.5rem))] rounded-xl border p-4 win-shadow ${placementClass[step.placement]}`}
             style={{ borderColor: hexToRgba(PHOSPHOR, 0.35), background: "rgb(var(--ink-800))" }}
           >
             <div className="flex items-start justify-between gap-2">
-              <h2 className="text-sm font-semibold text-zinc-100">{step.title}</h2>
+              <h2 id="desktop-tour-title" className="text-sm font-semibold text-zinc-100">{step.title}</h2>
               <button
                 onClick={onClose}
                 aria-label="Close guide"
-                className="rounded p-0.5 text-zinc-500 transition-colors hover:bg-line/10 hover:text-zinc-200"
+                className="flex h-11 w-11 items-center justify-center rounded text-zinc-500 transition-colors hover:bg-line/10 hover:text-zinc-200"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-zinc-400">{step.body}</p>
+            <p id="desktop-tour-description" className="mt-1.5 text-[13px] leading-relaxed text-zinc-400">{step.body}</p>
 
             <div className="mt-4 flex items-center justify-between">
               <div className="flex gap-1.5" aria-hidden>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { profile } from "@/data/profile";
 import { hexToRgba } from "@/lib/utils";
@@ -11,8 +11,6 @@ import { Dock } from "./Dock";
 import { MenuBar } from "./MenuBar";
 import { Window } from "./Window";
 import { PHOSPHOR, type AppDef, type WinState } from "./types";
-
-const TOUR_SEEN_KEY = "kernel-tour-seen";
 
 const MOBILE_QUERY = "(max-width: 860px)";
 const MIN_W = 300;
@@ -54,16 +52,20 @@ export function Desktop({
   apps,
   initialOpen,
   active = true,
-  openOnEnter,
-  suppressTour = false,
+  routeAppId,
+  onAppOpen,
+  onRoutedAppClose,
+  onReplayBoot,
+  returnHref,
 }: Readonly<{
   apps: AppDef[];
   initialOpen: string[];
   active?: boolean;
-  /** App id to open (and focus) the moment the desktop becomes active. */
-  openOnEnter?: string;
-  /** Skip the first-run tour (e.g. arriving from the pre-boot shell). */
-  suppressTour?: boolean;
+  routeAppId?: string;
+  onAppOpen?: (id: string) => void;
+  onRoutedAppClose?: () => void;
+  onReplayBoot: () => void;
+  returnHref: string;
 }>) {
   const [wins, setWins] = useState<WinState[]>(() =>
     initialOpen
@@ -74,7 +76,11 @@ export function Desktop({
   const [panic, setPanic] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const surfaceRef = useRef<HTMLDivElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const openersRef = useRef(new Map<string, HTMLElement>());
+  const panicOpenerRef = useRef<HTMLElement | null>(null);
   const mobile = useIsMobile();
+  const reducedMotion = useReducedMotion();
 
   const byId = useMemo(() => new Map(apps.map((a) => [a.id, a])), [apps]);
 
@@ -91,7 +97,7 @@ export function Desktop({
     });
   }, []);
 
-  const open = useCallback(
+  const openWindow = useCallback(
     (id: string) => {
       const app = byId.get(id);
       if (!app) return;
@@ -104,9 +110,22 @@ export function Desktop({
     [byId, spawn]
   );
 
+  const open = useCallback(
+    (id: string) => {
+      if (document.activeElement instanceof HTMLElement) openersRef.current.set(id, document.activeElement);
+      openWindow(id);
+      onAppOpen?.(id);
+    },
+    [onAppOpen, openWindow]
+  );
+
   const close = useCallback((id: string) => {
     setWins((ws) => ws.filter((w) => w.id !== id));
-  }, []);
+    if (routeAppId === id) onRoutedAppClose?.();
+    const opener = openersRef.current.get(id);
+    openersRef.current.delete(id);
+    window.requestAnimationFrame(() => opener?.focus());
+  }, [onRoutedAppClose, routeAppId]);
 
   const update = useCallback((id: string, patch: Partial<WinState>) => {
     setWins((ws) => ws.map((w) => (w.id === id ? { ...w, ...patch } : w)));
@@ -139,53 +158,59 @@ export function Desktop({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // First time the desktop is actually shown, greet a new visitor with the tour.
-  // Persisted so repeat visitors aren't nagged; the ? button reopens it anytime.
-  // Skipped when they arrived from the pre-boot shell — that path is deliberate.
+  const previousRouteApp = useRef<string>();
   useEffect(() => {
-    if (!active || suppressTour) return;
-    let seen = false;
-    try {
-      seen = localStorage.getItem(TOUR_SEEN_KEY) === "1";
-    } catch {
-      /* private mode — showing the tour once is a fine fallback */
+    if (!active) return;
+    const previous = previousRouteApp.current;
+    if (previous && previous !== routeAppId) {
+      setWins((ws) => ws.filter((win) => win.id !== previous));
     }
-    if (!seen) setTourOpen(true);
-  }, [active, suppressTour]);
+    if (routeAppId) openWindow(routeAppId);
+    previousRouteApp.current = routeAppId;
+  }, [active, openWindow, routeAppId]);
 
-  // If the pre-boot shell asked to open a specific app (e.g. the visitor typed
-  // `man` or `open htop` before booting), open and focus it on entry.
-  const enteredRef = useRef(false);
   useEffect(() => {
-    if (!active || enteredRef.current) return;
-    enteredRef.current = true;
-    if (openOnEnter) open(openOnEnter);
-  }, [active, openOnEnter, open]);
+    if (!shellRef.current) return;
+    shellRef.current.inert = !active || tourOpen || panic;
+  }, [active, panic, tourOpen]);
+
+  useEffect(() => {
+    if (!panic) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPanic(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.requestAnimationFrame(() => panicOpenerRef.current?.focus());
+    };
+  }, [panic]);
 
   const closeTour = useCallback(() => {
     setTourOpen(false);
-    try {
-      localStorage.setItem(TOUR_SEEN_KEY, "1");
-    } catch {
-      /* ignore storage errors */
-    }
   }, []);
 
   const visible = wins.filter((w) => !w.minimized);
   const topId = visible.at(-1)?.id ?? null;
+  const triggerPanic = useCallback(() => {
+    panicOpenerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setPanic(true);
+  }, []);
   const api = useMemo(
-    () => ({ open, close, isOpen: (id: string) => wins.some((w) => w.id === id), panic: () => setPanic(true) }),
-    [open, close, wins]
+    () => ({ open, close, isOpen: (id: string) => wins.some((w) => w.id === id), panic: triggerPanic }),
+    [open, close, triggerPanic, wins]
   );
 
   return (
     <DesktopProvider value={api}>
-      <div className="flex h-[100dvh] flex-col overflow-hidden">
+      <div ref={shellRef} aria-hidden={!active || undefined} className="flex h-[100dvh] flex-col overflow-hidden">
         <MenuBar
           apps={apps}
           activeTitle={topId ? byId.get(topId)?.title : undefined}
           onLaunch={open}
           onHelp={() => setTourOpen(true)}
+          onReplayBoot={onReplayBoot}
+          returnHref={returnHref}
         />
 
         <div ref={surfaceRef} className="wallpaper relative min-h-0 flex-1 overflow-hidden">
@@ -274,24 +299,33 @@ export function Desktop({
       <AnimatePresence>
         {panic && (
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="kernel-panic-title"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: reducedMotion ? 0 : 0.16 }}
             className="fixed inset-0 z-[90] flex items-center justify-center p-6"
             style={{ background: "#0000aa" }}
-            onClick={() => setPanic(false)}
           >
             <div className="max-w-lg font-mono text-[13px] text-zinc-50">
-              <p className="mb-3 flex items-center gap-2 font-semibold">
+              <p id="kernel-panic-title" className="mb-3 flex items-center gap-2 font-semibold">
                 <AlertTriangle className="h-5 w-5" /> Kernel panic - not syncing: Attempted to kill init!
               </p>
-              <pre className="whitespace-pre-wrap leading-relaxed opacity-90">{`CPU: 0 PID: 1 Comm: yashas Tainted: G  (curiosity)
-Call Trace:
+              <pre className="whitespace-pre-wrap leading-relaxed opacity-90">{`Portfolio call trace (illustrative):
   hire_this_engineer+0x0/0xff
   read_the_resume+0x2a
   send_email+0x1c [${profile.email}]
 
-Kidding. Nothing broke. Click anywhere to reboot.`}</pre>
+Kidding. Nothing broke.`}</pre>
+              <button
+                autoFocus
+                onClick={() => setPanic(false)}
+                className="mt-5 min-h-11 rounded border border-white/50 px-4 text-left hover:bg-white/10"
+              >
+                Return to yashOS
+              </button>
             </div>
           </motion.div>
         )}

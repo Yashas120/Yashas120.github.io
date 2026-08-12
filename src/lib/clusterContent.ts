@@ -1,418 +1,616 @@
 import { profile } from "@/data/profile";
 
-// Typed content for /cluster. The animation carries abstract distributed-systems
-// mechanisms; this copy stays first-person, literal and evidence-bound.
-//
-// Accuracy boundaries observed throughout: no consensus/Raft/Paxos, no leader
-// election, no replication protocol or database engine, no sharding, no
-// exactly-once processing, no Kubernetes operator, no custom broker, no
-// production Spark platform or cloud provider.
+/**
+ * Publication-safe source of truth for /cluster.
+ *
+ * Keep relationship and status separate. This module deliberately contains no
+ * disclosure switches, private-source notes, employer measurements, or draft
+ * verification markers: anything imported here is safe to render and bundle.
+ */
+
+export type Relationship =
+  | "Professional"
+  | "Original"
+  | "Collaborative"
+  | "Coursework"
+  | "Research"
+  | "Fork"
+  | "Teaching"
+  | "Concept"
+  | "Planned/In development";
+
+export type EvidenceStatus =
+  | "Shipped"
+  | "Active"
+  | "Archived"
+  | "In development"
+  | "Concept"
+  | "Unknown/requires verification";
+
+export interface PublicLink {
+  label: string;
+  href: string;
+  external?: boolean;
+  detail?: string;
+}
 
 export const links = {
-  github: profile.github,
-  email: `mailto:${profile.email}`,
-  emailPlain: profile.email,
-  linkedin: profile.linkedin,
-};
+  github: { label: "GitHub", href: profile.github, external: true } satisfies PublicLink,
+  linkedin: { label: "LinkedIn", href: profile.linkedin, external: true } satisfies PublicLink,
+  email: { label: "Email", href: "mailto:ykadambi@ucsd.edu" } satisfies PublicLink,
+  resume: {
+    label: "Résumé",
+    href: profile.resume.href,
+    external: true,
+    detail: "PDF, 2 pages",
+  } satisfies PublicLink,
+  demos: { label: "Demos", href: "/demos" } satisfies PublicLink,
+} as const;
 
-/* ---------------- disclosure review ---------------- */
+export const proofLinks = [links.resume, links.github, links.linkedin, links.email];
 
-/**
- * Sensitive employer scale figures are held behind an explicit review flag.
- * Until `approved` is flipped to true, the public-safe `fallback` is rendered.
- * `exact` is never displayed while `approved` is false.
- */
-export interface Disclosure {
-  approved: boolean;
-  exact: string[];
-  fallback: string;
-  /** Internal reviewer note. Never rendered. */
+export const hero = {
+  eyebrow: "Production systems · Infrastructure · Reliability",
+  heading: "I make coordinated systems safer to change.",
+  proof:
+    "About three years at Cisco across multi-region cloud services and optical line-card software.",
+  body:
+    "I build, migrate, and debug infrastructure, event flows, databases, deployments, and hardware/software state—then verify that the system converges under real operating constraints.",
+  context: "Incoming M.S. Computer Science, UC San Diego · September 2026",
+  disclosure: "This is my complete engineering portfolio, ordered through a distributed-systems lens.",
+} as const;
+
+export interface StoryScene {
+  id: string;
+  span: number;
+  eyebrow: string;
+  heading: string;
+  body: string;
+  support?: string;
+  transcript: string[];
+  tone: "paper" | "night";
+  visual: "events" | "change" | "reconcile" | "evidence" | "handoff";
+}
+
+export const storyScenes: StoryScene[] = [
+  {
+    id: "identity",
+    span: 100,
+    eyebrow: hero.eyebrow,
+    heading: hero.heading,
+    body: hero.body,
+    support: hero.proof,
+    transcript: [
+      "A source service emits an event through managed AWS messaging.",
+      "Regional services consume the event and apply corresponding SQL changes.",
+      "The topology is illustrative and does not represent employer scale.",
+    ],
+    tone: "paper",
+    visual: "events",
+  },
+  {
+    id: "regional-consequences",
+    span: 130,
+    eyebrow: "Production · multi-region integration",
+    heading: "One event. Regional consequences.",
+    body: "Regional services consumed the event and applied corresponding changes to their SQL stores.",
+    support:
+      "AWS supplied the messaging primitives; my work connected the infrastructure and service boundaries and made the deployment path safer.",
+    transcript: [
+      "A source service emits a change event.",
+      "AWS-managed messaging carries the event across the service boundary.",
+      "Regional services consume the event.",
+      "Each service applies the corresponding change to its SQL store.",
+    ],
+    tone: "paper",
+    visual: "events",
+  },
+  {
+    id: "change-safely",
+    span: 250,
+    eyebrow: "Production · safe change",
+    heading: "Safe change starts with the dependency graph.",
+    body:
+      "A deployment plan became safer as infrastructure order, active consumers, database boundaries, and hidden coupling became explicit.",
+    support:
+      "The recovery changed the procedure: smaller stages, stronger health checks, retained capacity, and verification across the complete dependency path.",
+    transcript: [
+      "Make order explicit: independent Terraform modules can proceed while dependent work waits for prerequisites.",
+      "Discover consumers and owners: observability evidence replaces an assumed dependency map.",
+      "Move the database boundary in stages: old and new endpoints coexist while services transition deliberately.",
+      "Treat recovery as a design input: a hidden dependency interrupts rollout, diagnosis expands health-check coverage, and the service returns to a verified state.",
+    ],
+    tone: "paper",
+    visual: "change",
+  },
+  {
+    id: "reconcile-state",
+    span: 140,
+    eyebrow: "Production · platform software",
+    heading: "Recovery is complete when state converges.",
+    body:
+      "Across warm restart, I made desired, observed, and programmed hardware state explicit, then verified that software and the line card returned to agreement.",
+    support:
+      "Platform bring-up, table-driven programming, secure-boot-aware deployment, validation, test infrastructure, and upgrade diagnosis made that loop operable.",
+    transcript: [
+      "Before restart, desired, software-observed, and programmed-hardware state agree.",
+      "An interruption breaks the software-observed state.",
+      "Restart reconstructs state and compares it with desired and programmed state.",
+      "Only mismatched state receives corrective programming; the result is explicitly verified.",
+    ],
+    tone: "night",
+    visual: "reconcile",
+  },
+  {
+    id: "public-systems-evidence",
+    span: 160,
+    eyebrow: "Systems evidence",
+    heading: "Public work, with the boundary left intact.",
+    body: "Coursework and open code support the lens. They do not become production claims.",
+    transcript: [
+      "Spark Streaming for Machine Learning: TCP input becomes micro-batch RDD work and incremental classifier updates.",
+      "Cloud Provisioning using RDBMS: PostgreSQL models quota- and rack-aware state transitions.",
+      "Bitcoin Transactions in Java: keys and signing lead to an educational transaction, with no consensus implementation.",
+      "SSP: pthread, perf, and memory-layout coursework; race and cache views are illustrative models.",
+    ],
+    tone: "paper",
+    visual: "evidence",
+  },
+  {
+    id: "story-handoff",
+    span: 120,
+    eyebrow: "Complete profile",
+    heading: "The systems lens is the opening, not the whole record.",
+    body:
+      "The story above follows the production moments where dependencies, state, and change had to be made explicit. The record below is the complete profile: every professional role, the strongest systems evidence, work beyond this lens, research, teaching, education, recognition, and direct proof.",
+    transcript: ["Experience", "Systems", "Beyond", "Research", "Teaching", "Education", "Leadership"],
+    tone: "paper",
+    visual: "handoff",
+  },
+];
+
+export const totalStorySpan = storyScenes.reduce((sum, scene) => sum + scene.span, 0);
+
+export interface ExperienceRole {
+  org: string;
+  role: string;
+  dates: string;
+  labels: string[];
+  summary: string;
+  responsibilities: string[];
   note?: string;
 }
 
-export function disclose(d: Disclosure): string[] {
-  return d.approved ? d.exact : [d.fallback];
+export const experience: ExperienceRole[] = [
+  {
+    org: "Cisco",
+    role: "Software Engineer II, Optical Systems",
+    dates: "2025–2026",
+    labels: ["Production · personal contribution", "Platform software"],
+    summary:
+      "Built and debugged software for a new optical line-card platform, where correctness crossed process, restart, deployment, test, and hardware-programming boundaries.",
+    responsibilities: [
+      "Supported platform bring-up and pre-hardware validation across optical and client-mode workflows.",
+      "Implemented table-driven programming and CDR integration while keeping desired, observed, and programmed state explicit.",
+      "Made state recovery safer across warm restart and verified that software and hardware converged after interruption.",
+      "Built secure-boot-aware deployment, validation, logging, and test automation; diagnosed upgrade and FPGA/FPD failure paths.",
+      "Developed CMocka-based test infrastructure, a PM-analysis prototype, and documentation that made repeatable diagnosis easier.",
+    ],
+    note: "Public product documentation establishes platform capability; this entry describes only my approved contribution.",
+  },
+  {
+    org: "Cisco",
+    role: "Software Engineer, Backend & Cloud",
+    dates: "2023–2025",
+    labels: ["Production · personal contribution", "Multi-region cloud"],
+    summary:
+      "Engineered infrastructure and service changes across regions, accounts, managed messaging, SQL stores, deployment dependencies, and operational ownership.",
+    responsibilities: [
+      "Built reusable Terraform modules and made resource dependencies explicit so deployments followed a safer order.",
+      "Integrated managed AWS event paths across regional services. Regional services consumed the event and applied corresponding changes to their SQL stores.",
+      "Used observability data to discover consumers and owners before migration, replacing an assumed dependency graph with an evidenced one.",
+      "Supported a staged database cutover that kept old and new stores available during an evidence-driven endpoint transition.",
+      "Investigated application/database performance, diagnosed hidden coupling during rollout, and strengthened health checks and release procedure before recovery.",
+      "Contributed to entitlement operations, authentication modernization, gateway and legacy-environment migration, authorization/security response, cross-repository logging, dependency/lifecycle compatibility, and cross-platform developer fixes.",
+      "Built internal prototypes and engineering tooling, documented operational paths, and mentored and onboarded teammates.",
+    ],
+    note: "AWS supplied the messaging primitives; my work connected the infrastructure and service boundaries and made the deployment path safer.",
+  },
+  {
+    org: "Cisco",
+    role: "Technical Intern, PX Cloud",
+    dates: "Jan–Jul 2023",
+    labels: ["Professional internship", "Automation + backend"],
+    summary:
+      "Automated contract-driven SDK delivery and contributed to cloud-platform API, data-pipeline, documentation, and developer-environment work.",
+    responsibilities: [
+      "Connected API-contract changes to CI generation and publication of an SDK.",
+      "Improved OpenAPI documentation and Java API/filtering behavior, including a production-defect correction.",
+      "Built an AWS Glue data-path proof of concept and improved local development with Colima.",
+    ],
+    note: "The Glue work was a PoC, not a claimed production pipeline.",
+  },
+  {
+    org: "Schneider Electric",
+    role: "Summer Intern",
+    dates: "Jun–Aug 2022",
+    labels: ["Internal tool · deployed", "Independent ownership"],
+    summary:
+      "Independently built and deployed a Python/Tkinter decision-support tool that converted Excel-backed dependencies into repeatable test-plan guidance.",
+    responsibilities: [
+      "Owned the workflow from requirements and data model through interface, test-plan generation, deployment, and handoff.",
+      "Reduced a multi-step manual planning workflow without publishing employer-specific timing claims.",
+    ],
+  },
+];
+
+export interface EvidenceItem {
+  name: string;
+  relationship: Relationship;
+  status: EvidenceStatus;
+  labels: string[];
+  description: string;
+  boundary?: string;
+  contribution: string;
+  domain: string;
+  links: PublicLink[];
 }
 
-/* ---------------- hero ---------------- */
+export const featuredSystems: EvidenceItem[] = [
+  {
+    name: "Spark Streaming for Machine Learning",
+    relationship: "Coursework",
+    status: "Archived",
+    labels: ["Coursework · team", "Public repository · fork"],
+    description:
+      "A four-person course project that streamed CIFAR-10 batches from a TCP producer into Spark Streaming. DStreams were processed per RDD and used for incremental classifier updates, with MLP, SVM, K-means, and deep-feature variants in the repository.",
+    boundary:
+      "The inspected default is local and the MLP path collects columns to the driver before partial_fit. No multi-worker training claim is made.",
+    contribution: "Four-person team; exact personal scope is not documented in the public repository.",
+    domain: "Distributed data / ML",
+    links: [
+      {
+        label: "Source repository",
+        href: "https://github.com/Yashas120/SSML-spark-streaming-for-machine-learning",
+        external: true,
+      },
+    ],
+  },
+  {
+    name: "Cloud Provisioning using RDBMS",
+    relationship: "Coursework",
+    status: "Archived",
+    labels: ["Coursework · team", "Public repository · fork"],
+    description:
+      "A course project modeling project, zone, rack, quota, and VM state transitions in PostgreSQL functions and procedures, with a Node and React application boundary.",
+    boundary:
+      "This course project modeled quota- and rack-aware resource allocation in PostgreSQL; it was not a production cloud provider.",
+    contribution: "Team/fork; exact personal contribution is not documented in the public repository.",
+    domain: "Databases / cloud",
+    links: [
+      {
+        label: "Source repository",
+        href: "https://github.com/Yashas120/Cloud-Provisioning-using-RDBMS",
+        external: true,
+      },
+    ],
+  },
+  {
+    name: "Bitcoin Transactions in Java",
+    relationship: "Original",
+    status: "Archived",
+    labels: ["Public repository · original", "Protocol / crypto foundations"],
+    description:
+      "An educational Java implementation of core transaction primitives: SHA-256, RIPEMD-160, elliptic-curve operations, wallet/address generation, testnet transaction construction, and signing.",
+    boundary:
+      "This Java project implements transaction and cryptographic primitives; it does not implement Bitcoin consensus.",
+    contribution: "Original public repository; solo status is not independently established.",
+    domain: "Protocol / security",
+    links: [
+      {
+        label: "Source repository",
+        href: "https://github.com/Yashas120/Bitcoin-Transactions-in-java",
+        external: true,
+      },
+    ],
+  },
+  {
+    name: "SSP",
+    relationship: "Coursework",
+    status: "Archived",
+    labels: ["Systems-performance coursework", "Public repository · original"],
+    description:
+      "Assignments exploring pthread creation, parallel work division, perf-based cache and branch observation, and multidimensional memory traversal.",
+    boundary:
+      "SSP remains the canonical repository name. The browser race is a what-if model, and cache outcomes are illustrative rather than guaranteed hardware misses.",
+    contribution: "Original repository; individual/team status is unresolved.",
+    domain: "Systems performance",
+    links: [
+      { label: "Source repository", href: "https://github.com/Yashas120/SSP", external: true },
+    ],
+  },
+];
 
-export const hero = {
-  eyebrow: "Distributed systems · Infrastructure · Reliability",
-  name: profile.shortName,
-  statement: "I build and debug systems where correctness depends on coordination.",
-  body:
-    "My production work spans multi-region AWS infrastructure, asynchronous event flows, dependency-aware deployments, live database migration, consumer discovery, and hardware/software state reconciliation. I am entering UC San Diego's M.S. in Computer Science to deepen that foundation in distributed systems and operating systems.",
-  evidence: [
-    "Cross-region event propagation",
-    "Dependency-aware deployment",
-    "Live-system migration",
-    "State reconciliation",
-    "Linux performance",
-  ],
-};
+export const beyondLens: EvidenceItem[] = [
+  {
+    name: "SWIFT · efficient image super-resolution",
+    relationship: "Research",
+    status: "Archived",
+    labels: ["Research · co-authored", "Public repository · fork"],
+    description:
+      "Co-authored research combining SwinV2-style transformer blocks and frequency-domain components for lightweight single-image super-resolution. Comparisons are paper/team-reported, not personal production metrics.",
+    contribution: "One of five co-authors; exact personal scope is unresolved.",
+    domain: "ML / computer vision",
+    links: [
+      { label: "Publication DOI", href: "https://doi.org/10.47852/bonviewAIA42021930", external: true },
+      { label: "Source repository", href: "https://github.com/Yashas120/SWIFT", external: true },
+    ],
+  },
+  {
+    name: "Multiview 3D Reconstruction",
+    relationship: "Original",
+    status: "Archived",
+    labels: ["Public repository · original", "Collaboration unresolved"],
+    description:
+      "An incremental sparse structure-from-motion implementation using feature matching, epipolar geometry, triangulation, PnP, and bundle adjustment.",
+    boundary: "Dense multiview reconstruction was future work; this is not labeled as a solo project.",
+    contribution: "Original repository; collaboration is unresolved.",
+    domain: "Computer vision",
+    links: [
+      {
+        label: "Source repository",
+        href: "https://github.com/Yashas120/Multiview-3D-Reconstruction",
+        external: true,
+      },
+    ],
+  },
+  {
+    name: "ChocoLLVM",
+    relationship: "Fork",
+    status: "Archived",
+    labels: ["Compiler-design coursework", "Public repository · fork"],
+    description:
+      "A compiler frontend lowering a ChocoPy subset to readable LLVM IR, with parse, typecheck, Python, LLVM, and test modes.",
+    boundary: "The browser experience is a simplified derived explainer; the project is not labeled solo.",
+    contribution: "Forked compiler-design coursework with upstream-derived portions.",
+    domain: "Compilers",
+    links: [
+      { label: "Source repository", href: "https://github.com/Yashas120/chocollvm", external: true },
+    ],
+  },
+  {
+    name: "Yelp Restaurant Analysis",
+    relationship: "Fork",
+    status: "Archived",
+    labels: ["Data coursework · team", "Public repository · fork"],
+    description:
+      "A notebook-based analysis of check-ins, reviews, and amenities to identify restaurants at risk of closure and explore improvement signals.",
+    boundary: "The browser demo's seeded logistic regression is separate from the original notebooks.",
+    contribution: "Team/fork; exact personal scope is unresolved.",
+    domain: "Data / ML",
+    links: [
+      {
+        label: "Source repository",
+        href: "https://github.com/Yashas120/Restaurant-analysis-using-YELP-dataset",
+        external: true,
+      },
+    ],
+  },
+  {
+    name: "Petra",
+    relationship: "Coursework",
+    status: "Archived",
+    labels: ["Coursework · three-person team", "Public repository · fork"],
+    description:
+      "A React and Express/MongoDB pet-care booking application with authentication boundaries. It is a historical project, not a current live deployment.",
+    contribution: "Three-person team with equal contribution.",
+    domain: "Web / backend",
+    links: [
+      { label: "Source repository", href: "https://github.com/Yashas120/Petra", external: true },
+    ],
+  },
+];
 
-/* ---------------- cinematic scenes ---------------- */
+const repo = (label: string, href: string): PublicLink => ({ label, href, external: true });
 
-export interface SceneCopy {
-  id: string;
-  /** Role label, or project category. */
-  kicker: string;
-  heading: string;
-  /** Primary copy. */
-  body: string;
-  /** Secondary paragraph. */
-  support?: string;
-  /** Literal architecture path, rendered in mono. */
-  arch?: string;
-  /** At most three contribution details. */
-  highlights: string[];
-  /** Sensitive figures behind disclosure review. */
-  scale?: Disclosure;
-  /** Visible ownership label (projects, proofs of concept). */
-  ownership?: string;
-  repo?: string;
-  stack?: string;
-  /** "inverted" flips the canvas for one high-impact chapter. */
-  tone?: "base" | "inverted";
-}
+export const projectLedger: EvidenceItem[] = [
+  {
+    name: "Performance Analysis of the ghOSt Scheduler",
+    relationship: "Coursework",
+    status: "Unknown/requires verification",
+    labels: ["Systems-performance study", "Report not public"],
+    description: "A scheduler/performance study whose context, authorship, workloads, and results await a public report.",
+    contribution: "Authorship and exact scope require verification; no solo claim is made.",
+    domain: "OS / performance",
+    links: [],
+  },
+  ...featuredSystems,
+  ...beyondLens.filter((item) => item.name !== "Petra"),
+  {
+    name: "Cloud-Hack",
+    relationship: "Coursework",
+    status: "Archived",
+    labels: ["Coursework · team", "Public repository · original"],
+    description: "A Flask and MongoDB application deployed with Docker and Kubernetes.",
+    contribution: "Four-person team; Yashas's documented scope was Mongo image/config, Kubernetes Deployment, and Secret.",
+    domain: "Cloud / container foundations",
+    links: [repo("Source repository", "https://github.com/Yashas120/Cloud-Hack")],
+  },
+  beyondLens[4],
+  {
+    name: "Underwater Data-Center Monitoring",
+    relationship: "Research",
+    status: "Archived",
+    labels: ["Research · co-authored", "Published prototype"],
+    description: "An Arduino-based monitoring and alerting prototype for underwater data-center concepts.",
+    contribution: "Co-authored research.",
+    domain: "IoT / monitoring",
+    links: [repo("Publication DOI", "https://doi.org/10.1109/CSITSS54238.2021.9683449")],
+  },
+  {
+    name: "Webex / Multilingual RAG PoC",
+    relationship: "Professional",
+    status: "Archived",
+    labels: ["Internal prototype · PoC"],
+    description: "Internal retrieval and multilingual-assistant exploration.",
+    contribution: "Professional contribution; no production or customer claim.",
+    domain: "Applied AI",
+    links: [],
+  },
+  {
+    name: "Engineering Analytics Dashboard",
+    relationship: "Professional",
+    status: "Archived",
+    labels: ["Internal tool · hackathon"],
+    description: "Backend work for an internal engineering-analytics dashboard.",
+    contribution: "Professional contribution; continued use is not claimed.",
+    domain: "Backend / analytics",
+    links: [],
+  },
+  {
+    name: "CX Agent UI",
+    relationship: "Professional",
+    status: "Archived",
+    labels: ["Internal prototype · PoC"],
+    description: "A product-interface exploration for an internal agent concept.",
+    contribution: "Professional contribution; prototype status remains explicit.",
+    domain: "Frontend / product",
+    links: [],
+  },
+  {
+    name: "PM Analyzer",
+    relationship: "Professional",
+    status: "Archived",
+    labels: ["Internal prototype · PoC"],
+    description: "An optical performance-monitoring analysis exploration.",
+    contribution: "Professional contribution; not labeled as shipped product work.",
+    domain: "Optical tooling",
+    links: [],
+  },
+  {
+    name: "AWS Glue Data Path",
+    relationship: "Professional",
+    status: "Archived",
+    labels: ["Internal prototype · PoC"],
+    description: "A data-pipeline exploration during the PX Cloud internship.",
+    contribution: "Professional internship contribution.",
+    domain: "Cloud / data",
+    links: [],
+  },
+  {
+    name: "Schneider Decision Tool",
+    relationship: "Professional",
+    status: "Shipped",
+    labels: ["Internal tool · deployed"],
+    description: "An Excel-backed dependency and test-plan workflow.",
+    contribution: "Independently built and handed off.",
+    domain: "Automation / productivity",
+    links: [],
+  },
+  {
+    name: "Technical Portfolio",
+    relationship: "Original",
+    status: "Active",
+    labels: ["Public repository · original"],
+    description: "A data-driven Next.js and TypeScript technical portfolio.",
+    contribution: "Original public repository.",
+    domain: "Web / presentation",
+    links: [repo("Source repository", "https://github.com/Yashas120/Yashas120.github.io")],
+  },
+];
 
-const BACKEND_ROLE = "Cisco Systems · Software Engineer, Backend & Cloud Platforms · 2023–2025";
-const OPTICAL_ROLE = "Cisco Systems · Optical Software Development Engineer II · 2025–2026";
-const INTERN_ROLE = "Cisco Systems · Software Development / Technical Intern · Jan–Jul 2023";
+export const publicExplorations: EvidenceItem[] = [
+  {
+    name: "SunSET / ucsd",
+    relationship: "Fork",
+    status: "Archived",
+    labels: ["Public repository · fork / exploration"],
+    description: "A public fork retained for provenance; no Yashas-specific change is asserted.",
+    contribution: "No verified Yashas-specific contribution.",
+    domain: "Exploration",
+    links: [repo("Source repository", "https://github.com/Yashas120/ucsd")],
+  },
+  {
+    name: "US Stocks Tax Calculator",
+    relationship: "Fork",
+    status: "Archived",
+    labels: ["Public repository · fork"],
+    description: "A public fork included for a complete repository record; it is not systems evidence.",
+    contribution: "No verified Yashas-specific contribution.",
+    domain: "Finance utility",
+    links: [repo("Source repository", "https://github.com/Yashas120/us-stocks-tax-calculator")],
+  },
+];
 
-export const scenes: SceneCopy[] = [
+export const publications = [
   {
-    id: "events",
-    tone: "inverted",
-    kicker: BACKEND_ROLE,
-    heading: "One change, propagated across regions",
-    body:
-      "I worked on the Terraform and service integration for an asynchronous cross-region workflow: a DynamoDB insert published an SNS notification, SNS fanned the event out to regional SQS queues, and region-specific services consumed the event and synchronized related SQL databases.",
-    support:
-      "The workflow let one source event drive downstream regional updates without encoding the system as one long synchronous service chain.",
-    arch: "DynamoDB → SNS → regional SQS queues → regional services → SQL databases",
-    highlights: [
-      "Connected infrastructure and service dependencies across DynamoDB, SNS, SQS, regional consumers, and databases.",
-      "Worked through cross-region networking, IAM, service dependencies, and bring-up order.",
-      "Integrated event-triggered backend paths across independently deployed components.",
-    ],
+    title: "Toward Faster and Efficient Lightweight Image Super-Resolution Using Transformers and Fourier Convolutions",
+    meta: "Co-authored research · online 2024 / issue 2025",
+    description:
+      "A collaborative study of a lightweight super-resolution architecture. Any parameter or inference comparison is attributed to the paper and team.",
+    link: repo("Publication DOI", "https://doi.org/10.47852/bonviewAIA42021930"),
   },
   {
-    id: "backend",
-    kicker: BACKEND_ROLE,
-    heading: "Parallelize what is independent. Gate what is not.",
-    body:
-      "I built and maintained reusable Terraform components across EC2, ECS, Lambda, RDS, DynamoDB, SQS, SNS, and IAM, while serving as a technical contact for shared infrastructure, cross-region communication, networking, and dependency ordering.",
-    support:
-      "I separated independent resources and services from prerequisite-bound stages so safe work could execute concurrently, preserving deployment order while reducing overall deployment time.",
-    highlights: [
-      "Deployment time reduced by approximately 50%.",
-      "Parallel database bring-up across three regions saved approximately four hours in applicable deployments.",
-      "Technical contact for shared modules, cross-region communication, and dependency ordering.",
-    ],
-    scale: {
-      approved: false,
-      note: "Cisco estate figures — hold until cleared for public disclosure.",
-      exact: [
-        "Approximately 50 backend services, 35 Lambda functions and four databases.",
-        "Three AWS accounts across three geographic regions.",
-        "Approximately 40 engineers supported through shared modules, guidance, or migration coordination.",
-      ],
-      fallback: "A multi-service, multi-account, multi-region AWS estate.",
-    },
+    title: "Monitoring and Alert Systems for Underwater Data Centers using Arduino",
+    meta: "Co-authored · IEEE, 2021",
+    description:
+      "An Arduino-based prototype and paper exploring environmental monitoring and alerting for underwater data-center concepts.",
+    link: repo("Publication DOI", "https://doi.org/10.1109/CSITSS54238.2021.9683449"),
+  },
+];
+
+export const teaching = [
+  "Teaching Assistant · Image Processing & Computer Vision · 122 students · Dec 2022–May 2023",
+  "Teaching Assistant · Data Analytics · 494 students and a 178-team Kaggle component · Aug–Dec 2022",
+  "Teaching Assistant · Graduate Deep Learning · about 40 students · Jul–Dec 2022",
+];
+
+export const education = [
+  {
+    institution: "University of California San Diego",
+    degree: "M.S. Computer Science · incoming September 2026 · expected 2027",
+    detail: "Planned focus: distributed systems, operating systems, and applied machine learning.",
   },
   {
-    id: "discovery",
-    kicker: BACKEND_ROLE,
-    heading: "The dependency map was in the traffic",
-    body:
-      "I used Splunk traffic analysis to identify the systems actually consuming affected APIs, instead of relying only on incomplete ownership and configuration records.",
-    support:
-      "The analysis connected active integrations to their owning teams before authentication and API-gateway changes reached production.",
-    highlights: [
-      "Used production traffic analysis rather than trusting configuration records alone.",
-      "Supported deployment-controlled feature flags and staged validation.",
-      "Helped migrate consumers ahead of the production cutover.",
-    ],
-    scale: {
-      approved: false,
-      note: "Cisco traffic/integration figures — hold until cleared for public disclosure.",
-      exact: [
-        "Approximately 30 integrations across 12 teams, in a service estate handling approximately 500,000 API calls per day.",
-        "96 staging and production endpoint deployments.",
-        "Production cutover completed without customer impact.",
-      ],
-      fallback:
-        "Used production traffic analysis to discover undocumented consumers across dozens of services and integrations, then supported staged, deployment-controlled migration without customer impact.",
-    },
+    institution: "PES University",
+    degree: "B.Tech. Computer Science · 2019–2023",
+    detail: "Completed undergraduate foundation in computer science and engineering.",
+  },
+];
+
+export const leadership = [
+  {
+    title: "Mentorship and operational enablement",
+    detail:
+      "Mentored and onboarded teammates; improved documentation and repeatable development, validation, and operational paths.",
+  },
+];
+
+export const scopeBands = [
+  {
+    title: "Cloud and backend systems",
+    detail:
+      "Terraform, AWS-managed messaging integration, Java services and APIs, SQL stores, deployment dependencies, cutovers, authentication and gateway work, and observability.",
   },
   {
-    id: "cutover",
-    kicker: BACKEND_ROLE,
-    heading: "Move the state before moving the traffic",
-    body:
-      "I contributed the analysis and migration approach for replacing a database without taking the existing system offline. The old database stayed available while the replacement was created, transaction logs synchronized the new state, services moved through a coordinated cutover, and the old database was removed only after traffic had shifted.",
-    support: "The correction completed without customer-visible downtime.",
-    highlights: [
-      "Kept the existing database serving while its replacement was built.",
-      "Used transaction logs to synchronize state before any traffic moved.",
-      "Removed the old database only after the cutover had settled.",
-    ],
+    title: "Platform and hardware-facing software",
+    detail:
+      "C and C++, line-card bring-up, CDR and table-driven programming, desired/observed/programmed state, warm restart, secure-boot-aware deployment, validation, and test infrastructure.",
   },
   {
-    id: "rollout",
-    kicker: BACKEND_ROLE,
-    heading: "“Microservice” did not mean independent",
-    body:
-      "I diagnosed a production failure caused by a non-obvious deployment order and hidden dependencies in global URLs and load-balancer behavior. I traced deployment YAML, service routing, and previous-versus-current logs to find where the environment diverged.",
-    support:
-      "The resulting rollout process introduced smaller staged changes, retained old pods until replacements became stable, added health-check APIs, verified the complete dependency stack, and used safer timeout margins.",
-    highlights: [
-      "Traced hidden load-balancer and deployment-order coupling between services.",
-      "Retained old pods until replacements passed health checks.",
-      "Verified the full dependency stack before shifting traffic.",
-    ],
+    title: "Systems foundations",
+    detail:
+      "Linux scheduling and performance study, pthread and perf coursework, Spark Streaming coursework, PostgreSQL allocation modeling, transaction cryptography, and compiler lowering.",
   },
   {
-    id: "reconcile",
-    kicker: OPTICAL_ROLE,
-    heading: "Desired state versus programmed state",
-    body:
-      "I designed the core state-reconciliation logic used during optical line-card warm reloads. The software compared desired state in its database with resources already programmed in hardware, preserved matching resources to avoid unnecessary teardown, and triggered corrective programming when the states diverged.",
-    support:
-      "I generalized the data model so later feature modes could supply their own state representation without repeatedly modifying the highest-risk reconciliation algorithm.",
-    highlights: [
-      "Preserved matching resources instead of tearing down and reprogramming.",
-      "Triggered corrective programming only where the two states diverged.",
-      "Co-authored a CMocka white-box framework (122 source files against ~430 stubbed SDK boundaries) that cut the hardware-independent build cycle from ~30 minutes to ~10 seconds.",
-    ],
-    scale: {
-      approved: false,
-      note: "Cisco validation-scale figures — hold until cleared for public disclosure.",
-      exact: [
-        "Approximately 10 million exhaustive configurations, with approximately 24,000 essential regression configurations.",
-        "Approximately two minutes per manual warm reload — roughly 800 hours of sequential execution for one complete manual pass.",
-        "Five corner cases found during development.",
-      ],
-      fallback:
-        "Validated across millions of configurations with a representative regression set in the tens of thousands; automation found five corner cases during development.",
-    },
-  },
-  {
-    id: "pipeline",
-    kicker: INTERN_ROLE,
-    ownership: "Proof of concept",
-    heading: "From object arrival to queryable state",
-    body:
-      "I developed a Python AWS Glue proof of concept in which an S3/data-lake event triggered filtering and enrichment before the processed data was loaded into DynamoDB for a new backend data path.",
-    arch: "Data lake → S3 event → Python/AWS Glue → filtering and enrichment → DynamoDB",
-    highlights: [
-      "Event-triggered filtering and enrichment ahead of the load step.",
-      "Built the complete GitHub Actions workflow that regenerated and published Python and Java client SDKs when Swagger/OpenAPI contracts changed, replacing roughly four hours of manual work per SDK.",
-    ],
-    scale: {
-      approved: false,
-      note: "Cisco data-volume figure — hold until cleared for public disclosure.",
-      exact: ["Processed approximately 500 GB at an expected weekly cadence."],
-      fallback: "Ran at an expected weekly cadence over a large data-lake object set.",
-    },
-  },
-  {
-    id: "ghost",
-    kicker: "Systems-performance project",
-    ownership: "Individual project",
-    heading: "Performance analysis of the Google ghOSt scheduler",
-    body:
-      "I built and instrumented a Linux environment around Google's ghOSt framework to compare user-space scheduling policies with conventional kernel schedulers under representative storage and backend workloads.",
-    highlights: [
-      "Built a custom kernel and ghOSt-compatible environment.",
-      "Compared CFS and FIFO with ghOSt policies including Shinjuku, on RocksDB and a backend-server workload.",
-      "Varied 16/32-thread and 16/32-GB configurations under bursty and sustained load.",
-    ],
-    stack: "Linux kernel · ghOSt · C/C++ · RocksDB · scheduling · benchmarking",
-  },
-  {
-    id: "streaming",
-    kicker: "Big-data project",
-    ownership: "Team project · public fork",
-    repo: "https://github.com/Yashas120/SSML-spark-streaming-for-machine-learning",
-    heading: "Streaming machine learning with Apache Spark",
-    body:
-      "I worked on a distributed streaming machine-learning pipeline that moved CIFAR-10 image batches through Kafka/Python components, used Spark/PySpark as the distributed processing layer, and connected the data path to TensorFlow/Keras training.",
-    highlights: [
-      "Structured the system around streaming, orchestration, data loading, and training components.",
-      "Worked with TensorFlowOnSpark, SparkDL, and TensorFrames.",
-      "Examined batch size as an experimental variable affecting precision and accuracy.",
-    ],
-    stack: "Spark · PySpark · Kafka · Hadoop · TensorFlow · Keras",
-  },
-  {
-    id: "provisioning",
-    kicker: "Transactional systems project",
-    ownership: "Team project · public fork",
-    repo: "https://github.com/Yashas120/Cloud-Provisioning-using-RDBMS",
-    heading: "Cloud provisioning using an RDBMS",
-    body:
-      "I worked on a database-backed cloud-allocation system that represented hardware inventory, zones, projects, users, quotas, costs, and virtual-machine lifecycle state.",
-    highlights: [
-      "Used PostgreSQL and PL/pgSQL for hardware-availability checks and quota enforcement.",
-      "Modeled concurrency-sensitive VM create and delete operations.",
-      "Used transactions, triggers, roles, and access controls to maintain lifecycle consistency.",
-    ],
-    stack: "PostgreSQL · PL/pgSQL · transactions · triggers · Node.js · React",
-  },
-  {
-    id: "now",
-    kicker: "Now",
-    heading: "University of California San Diego · M.S. Computer Science",
-    body:
-      "Incoming September 2026. Planned focus: distributed systems, operating systems, and applied machine learning — building on the systems coursework I completed at PES University.",
-    highlights: [
-      "Distributed Systems (A−) · Cloud Computing (A−) · Operating Systems (A−)",
-      "Software and Systems Performance (A) · Computer Architecture (A)",
-      "Computer Networks (A−) · Database Management Systems (A−)",
-    ],
+    title: "ML, computer vision, and technical communication",
+    detail:
+      "Super-resolution research, multiview reconstruction, analytics, three teaching appointments, publications, and mentorship.",
   },
 ];
 
 export const contact = {
-  kicker: "Contact",
-  heading: "Let's build reliable systems.",
-  body: "Open to distributed systems, infrastructure, and systems engineering roles.",
+  heading: "Let's talk about systems that have to change safely.",
+  body:
+    "I'm interested in production systems, infrastructure, platform software, reliability, and the mechanisms that make complex change understandable.",
 };
-
-/* ---------------- evidence index ---------------- */
-
-export interface EvidenceRole {
-  org: string;
-  role: string;
-  dates: string;
-  location: string;
-  points: string[];
-}
-
-export const evidenceExperience: EvidenceRole[] = [
-  {
-    org: "Cisco Systems",
-    role: "Optical Software Development Engineer II",
-    dates: "2025 – 2026",
-    location: "Bengaluru, India",
-    points: [
-      "Designed the core state-reconciliation logic for optical line-card warm reloads, comparing desired state in the database against resources already programmed in hardware.",
-      "Generalized the reconciliation data model so later feature modes could supply their own state representation without changing the highest-risk algorithm.",
-      "Co-authored a CMocka-based white-box test framework compiling 122 production source files against approximately 430 stubbed SDK boundaries, reducing the hardware-independent build cycle from approximately 30 minutes to approximately 10 seconds (about 99.4%). The framework became mandatory for newly added code.",
-      "Built software for the line cards on the Cisco NCS 1014 series.",
-      "Validated across millions of configurations with a representative regression set in the tens of thousands; automation found five corner cases during development.",
-    ],
-  },
-  {
-    org: "Cisco Systems",
-    role: "Software Engineer, Backend & Cloud Platforms",
-    dates: "2023 – 2025",
-    location: "Bengaluru, India",
-    points: [
-      "Worked on Terraform and service integration for an asynchronous cross-region workflow: DynamoDB → SNS → regional SQS queues → regional services → SQL databases.",
-      "Built and maintained reusable Terraform components across EC2, ECS, Lambda, RDS, DynamoDB, SQS, SNS, and IAM.",
-      "Separated independent resources from prerequisite-bound stages, reducing deployment time by approximately 50%; parallel database bring-up across three regions saved approximately four hours in applicable deployments.",
-      "Used Splunk traffic analysis to discover the systems actually consuming affected APIs, then supported staged, deployment-controlled migration without customer impact.",
-      "Contributed the analysis and migration approach for replacing a database without downtime, using transaction-log synchronization and a coordinated cutover.",
-      "Diagnosed a production failure caused by deployment order and hidden global-URL and load-balancer dependencies; helped introduce staged rollout, health-check APIs, and safer timeout margins.",
-      "Improved database performance across PostgreSQL, MongoDB, and Cassandra.",
-      "Traffic analysis and production monitoring with Splunk and AppDynamics.",
-      "Scope: a multi-service, multi-account, multi-region AWS estate.",
-    ],
-  },
-  {
-    org: "Cisco Systems",
-    role: "Software Development / Technical Intern",
-    dates: "Jan – Jul 2023",
-    location: "Bengaluru, India",
-    points: [
-      "Developed a Python AWS Glue proof of concept where an S3/data-lake event triggered filtering and enrichment before loading into DynamoDB. It ran at an expected weekly cadence over a large data-lake object set.",
-      "Built the complete GitHub Actions workflow that regenerated and published Python and Java client SDKs when Swagger/OpenAPI contracts changed, replacing approximately four hours of manual work per SDK across roughly 200 API operations.",
-    ],
-  },
-];
-
-export interface EvidenceProject {
-  title: string;
-  ownership: string;
-  detail: string;
-  tech: string[];
-  href?: string;
-}
-
-/** Smaller projects, kept out of the cinematic narrative. */
-export const supportingProjects: EvidenceProject[] = [
-  {
-    title: "Cloud-Hack",
-    ownership: "Cloud-native coursework",
-    detail:
-      "Deployed a Flask/MongoDB application through Docker and Kubernetes using Deployments, Services, ConfigMaps, Secrets, and explicit service discovery.",
-    tech: ["Docker", "Kubernetes", "Flask", "MongoDB"],
-    href: "https://github.com/Yashas120/Cloud-Hack",
-  },
-  {
-    title: "Bitcoin transactions from scratch",
-    ownership: "Independent protocol implementation",
-    detail:
-      "Implemented hashing, secp256k1 elliptic-curve operations, ECDSA signing, P2PKH scripts, transaction serialization, and testnet broadcast without external cryptography dependencies for the core primitives.",
-    tech: ["Java", "secp256k1", "ECDSA"],
-    href: "https://github.com/Yashas120/Bitcoin-Transactions-in-java",
-  },
-  {
-    title: "Systems and parallel programming",
-    ownership: "Coursework repository",
-    detail:
-      "Focused C and Python experiments around threads, shared state, parallel computation, profiling, cache behavior, and memory locality.",
-    tech: ["C", "Python", "threads", "profiling"],
-    href: "https://github.com/Yashas120/SSP",
-  },
-];
-
-/** Deliberately de-emphasized on this endpoint. */
-export const additionalWork = [
-  "SWIFT — lightweight image super-resolution (Swin-Transformer + Fast Fourier Convolution). Artificial Intelligence and Applications, 2025, published online in 2024.",
-  "Monitoring and alert systems for underwater data centers (IEEE CSITSS, 2021).",
-  "Multiview 3D reconstruction — incremental structure-from-motion pipeline.",
-  "Teaching assistant for three computer science courses at PES University.",
-  "Schneider Electric — switchgear test-planning tool, summer internship, 2022.",
-];
-
-export const education = {
-  current: "University of California San Diego · M.S. Computer Science · Incoming September 2026",
-  focus: "Planned focus: distributed systems, operating systems, and applied machine learning.",
-  prior: "B.Tech in Computer Science, PES University. U.S.-equivalent GPA: 3.78/4.00, based on a credential evaluation.",
-  coursework: [
-    "Distributed Systems — A−",
-    "Cloud Computing — A−",
-    "Software and Systems Performance — A",
-    "Operating Systems — A−",
-    "Computer Networks — A−",
-    "Database Management Systems — A−",
-    "Computer Architecture — A",
-  ],
-};
-
-export const skills = [
-  {
-    label: "Distributed communication",
-    items: ["SNS", "SQS", "Kafka", "asynchronous event flow", "fan-out", "cross-region service integration"],
-  },
-  {
-    label: "Infrastructure and deployment",
-    items: ["AWS", "Terraform", "EC2", "ECS", "Lambda", "RDS", "DynamoDB", "IAM", "Docker", "Kubernetes", "CI/CD", "dependency sequencing"],
-  },
-  {
-    label: "State and data",
-    items: ["PostgreSQL", "MongoDB", "Cassandra", "DynamoDB", "transaction logs", "PL/pgSQL", "transactions", "triggers", "state reconciliation"],
-  },
-  {
-    label: "Runtime and performance",
-    items: ["Linux", "ghOSt", "RocksDB", "C", "C++", "Java", "Python", "scheduling", "concurrency", "profiling"],
-  },
-  {
-    label: "Reliability and observability",
-    items: ["Splunk", "AppDynamics", "health checks", "staged rollout", "consumer discovery", "root-cause analysis", "deployment safety"],
-  },
-];

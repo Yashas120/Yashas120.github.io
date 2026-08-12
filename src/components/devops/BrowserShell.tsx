@@ -8,6 +8,9 @@
  *    argument is traceable evidence.
  *  - The window controls are decoration, so they are `aria-hidden` and are dropped
  *    entirely below 768px where they would only consume vertical space.
+ *  - The frame uses overflow clipping rather than `overflow: hidden`; hidden
+ *    would become the inspector's non-scrolling containing block and defeat its
+ *    sticky positioning.
  */
 
 import { CHROME_H, DV, MAX_WIDTH } from "./tokens";
@@ -20,7 +23,7 @@ export function BrowserShell({ children }: Readonly<BrowserShellProps>) {
   return (
     <div className="mx-auto w-full px-0 sm:px-6 sm:py-6" style={{ maxWidth: MAX_WIDTH }}>
       <div
-        className="overflow-hidden border-y sm:rounded-[14px] sm:border"
+        className="overflow-clip border-y sm:rounded-[14px] sm:border"
         style={{ borderColor: DV.border, background: DV.browser }}
       >
         {/* Browser chrome: desktop and tablet only. */}

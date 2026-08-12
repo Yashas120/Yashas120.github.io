@@ -33,7 +33,7 @@ function rgba(hex: string, a: number): string {
   return `rgba(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)}, ${a})`;
 }
 
-export function CloudDemo() {
+export function CloudDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
   const reduced = usePrefersReducedMotion();
   const [db, setDb] = useState<CloudDB>(() => seedDB());
   const [trace, setTrace] = useState<Trace | null>(null);
@@ -109,6 +109,7 @@ export function CloudDemo() {
       subtitle="Not a cloud console — a look inside the RDBMS implementation. Provisioning is one deeply-nested composite argument to create_VM, which threads a call chain of quota functions. Build the call and step through it: watch the nested LIMIT_QUOTAS lookups, the RAM-block bin-packing over rack IDs, and the dotted-path composite UPDATE that commits the allocation."
       repoUrl={REPO}
       accent={ACC}
+      embedded={embedded}
       {...cardProps("cloud")}
     >
       {/* composite-argument builder */}
@@ -312,6 +313,10 @@ export function CloudDemo() {
       </p>
     </LiveDemo>
   );
+}
+
+export function CloudLab() {
+  return <CloudDemo embedded />;
 }
 
 function Ctl({ label, children }: { label: string; children: React.ReactNode }) {

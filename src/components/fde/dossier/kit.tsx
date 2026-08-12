@@ -29,13 +29,8 @@ export const ORANGE = "var(--fde-orange)";
 export const GREEN = "var(--fde-green)";
 export const RULE = "var(--fde-rule)";
 
-/** Scenes that sit on the deeper panel of the active theme. */
-export function isDeepScene(index: number) {
-  return index === 3 || index === 4;
-}
-
-/** Scene count that owns a viewport slot (07 scenes + the handoff plate). */
-export const SLOTS = 8;
+/** Fallback scene count; callers pass the registry length explicitly. */
+export const SLOTS = 11;
 
 /** The single coordinate space every scene draws the dossier in. */
 export const SHEET = { w: 680, h: 460 };
@@ -114,8 +109,9 @@ export interface CopyProps {
   notes?: string[];
   outcome?: string;
   hero?: boolean;
+  compact?: boolean;
   /** Heading level: the hero owns the h1, later scenes are h2. */
-  as?: "h1" | "h2";
+  as?: "h1" | "h2" | "h3" | "div";
   children?: ReactNode;
 }
 
@@ -128,13 +124,14 @@ export function CopyBlock({
   notes,
   outcome,
   hero = false,
+  compact = false,
   as = "h2",
   children,
 }: Readonly<CopyProps>) {
   const Heading = as;
   return (
-    <div className="max-w-[600px]">
-      <p className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-current opacity-45">
+    <div className="min-w-0 max-w-[600px]" data-fde-copy>
+      <p className={`flex items-center font-mono uppercase text-current opacity-45 ${compact ? "gap-2 text-[10px] tracking-[0.14em]" : "gap-3 text-[10px] tracking-[0.22em]"}`}>
         <span aria-hidden className="inline-block h-[1px] w-6 bg-current align-middle" />
         {`scene ${scene}`}
         <span className="opacity-60">/ {slug}</span>
@@ -142,7 +139,7 @@ export function CopyBlock({
 
       {eyebrow && (
         <p
-          className="mt-5 font-mono text-[11px] uppercase tracking-[0.28em]"
+          className={compact ? "mt-3 font-mono text-[10px] uppercase tracking-[0.2em]" : "mt-5 font-mono text-[11px] uppercase tracking-[0.28em]"}
           style={{ color: COBALT }}
         >
           {eyebrow}
@@ -152,11 +149,17 @@ export function CopyBlock({
       <Heading
         className={
           hero
-            ? "mt-4 font-semibold leading-[0.92] tracking-[-0.03em]"
-            : "mt-4 font-semibold leading-[1.02] tracking-[-0.025em]"
+            ? `${compact ? "mt-2" : "mt-4"} font-semibold leading-[0.92] tracking-[-0.03em]`
+            : `${compact ? "mt-2" : "mt-4"} font-semibold leading-[1.02] tracking-[-0.025em]`
         }
         style={{
-          fontSize: hero ? "clamp(1.9rem, 5vw, 5.4rem)" : "clamp(1.75rem, 3.4vw, 3.25rem)",
+          fontSize: compact
+            ? hero
+              ? "clamp(1.68rem, 7.2vw, 1.9rem)"
+              : "clamp(1.45rem, 6vw, 1.75rem)"
+            : hero
+              ? "clamp(1.9rem, 5vw, 4.4rem)"
+              : "clamp(1.75rem, 3.4vw, 3.25rem)",
         }}
       >
         {headline}
@@ -164,7 +167,7 @@ export function CopyBlock({
 
       {body && (
         <p
-          className="mt-6 max-w-[38ch] text-[1rem] leading-[1.55] opacity-75 md:text-[1.15rem] md:leading-[1.6]"
+          className={compact ? "mt-3 max-w-[42ch] text-[15px] leading-[1.45] opacity-75" : "mt-5 max-w-[38ch] text-[1rem] leading-[1.55] opacity-75"}
         >
           {body}
         </p>
@@ -172,7 +175,7 @@ export function CopyBlock({
 
       {outcome && (
         <p
-          className="mt-6 font-mono text-[clamp(1.4rem,2.6vw,2.25rem)] font-medium tracking-[-0.02em]"
+          className={compact ? "mt-3 font-mono text-[1.2rem] font-medium tracking-[-0.02em]" : "mt-5 font-mono text-[clamp(1.4rem,2.6vw,2.25rem)] font-medium tracking-[-0.02em]"}
           style={{ color: GREEN }}
         >
           {outcome}
@@ -182,7 +185,7 @@ export function CopyBlock({
       {notes?.map((n) => (
         <p
           key={n}
-          className="mt-5 max-w-[52ch] border-l pl-4 font-mono text-[11px] leading-[1.6] opacity-70 md:text-[12px]"
+          className={compact ? "mt-3 max-w-[52ch] border-l pl-3 font-mono text-[10px] leading-[1.5] opacity-70" : "mt-4 max-w-[52ch] border-l pl-4 font-mono text-[11px] leading-[1.6] opacity-70"}
           style={{ borderColor: "currentColor" }}
         >
           {n}

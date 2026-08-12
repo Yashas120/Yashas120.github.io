@@ -1,25 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { PHOSPHOR } from "./desktop/types";
 
 const post = [
-  "yashOS BIOS v6.11 — Yashas Srinivasan Kadambi",
-  "Detecting hardware ...",
-  "  CPU0: engineer, 5 logical interfaces .......... OK",
-  "  MEM:  8 projects, 2 publications .............. OK",
-  "Booting from /dev/sda1 ...",
+  "yashOS portfolio lab — Yashas Srinivasan Kadambi",
+  "Reading verified profile data ...",
+  "  ROLE: Systems Software Engineer ................ OK",
+  "  INDEX: projects, experience, evidence .......... OK",
+  "Starting optional desktop interface ...",
 ];
 
 const dmesg: { t: string; msg: string; ok?: boolean }[] = [
-  { t: "0.000000", msg: "Booting yashas-kernel 6.x (ghOSt-enabled) ..." },
-  { t: "0.004211", msg: "CPU: detected engineer, 5 logical interfaces online" },
-  { t: "0.019887", msg: "mem: loading identity — Yashas Srinivasan Kadambi" },
+  { t: "0.000000", msg: "Starting the optional yashOS portfolio interface ..." },
+  { t: "0.004211", msg: "profile: Systems Software Engineer" },
+  { t: "0.019887", msg: "identity: Yashas Srinivasan Kadambi" },
   { t: "0.041002", msg: "edu: PES University, B.Tech CSE — GPA 3.78 / 4", ok: true },
-  { t: "0.088150", msg: "sched: registering ghOSt scheduling class over CFS/FIFO/Shinjuku" },
-  { t: "0.132774", msg: "cisco: NCS 1014 line-card dataplane module loaded (Aquila)", ok: true },
-  { t: "0.201339", msg: "crypto: secure-boot verified; CDR hardware attached" },
+  { t: "0.088150", msg: "sched: ghOSt experiment; CFS and FIFO baselines indexed" },
+  { t: "0.132774", msg: "cisco: optical line-card contribution indexed", ok: true },
+  { t: "0.201339", msg: "hardware: secure-boot and CDR integration evidence indexed" },
   { t: "0.256610", msg: "net: 2 publications, AWS Developer Associate cert mounted", ok: true },
   { t: "0.301998", msg: "init: reached target multi-user — 8 services ready" },
   { t: "0.334120", msg: "systemd: starting display manager ..." },
@@ -42,12 +42,12 @@ const AUTO_SECONDS = 6;
 const menuEntries = [
   {
     id: "desktop",
-    label: "yashOS 6.11 — graphical desktop",
-    note: "explore my work as apps · easiest if you're not technical",
+    label: "yashOS — graphical desktop",
+    note: "explore the optional portfolio lab as applications",
   },
   {
     id: "terminal",
-    label: "yashOS 6.11 — pre-boot shell",
+    label: "yashOS — pre-boot shell",
     note: "type commands to explore first · press F5 there to boot the desktop",
   },
 ];
@@ -63,6 +63,7 @@ export function BootSequence({
   const [paused, setPaused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const done = useRef(false);
+  const reducedMotion = useReducedMotion();
 
   const choose = (id: string) => {
     if (done.current) return;
@@ -71,8 +72,15 @@ export function BootSequence({
     else onDone();
   };
 
+  useEffect(() => {
+    if (!reducedMotion || done.current) return;
+    done.current = true;
+    onDone();
+  }, [onDone, reducedMotion]);
+
   // Type out POST -> dmesg -> login, then hand off to the boot menu.
   useEffect(() => {
+    if (reducedMotion) return;
     if (stage === "post") {
       if (n < post.length) {
         const id = setTimeout(() => setN((c) => c + 1), n === 0 ? 180 : 120);
@@ -106,7 +114,7 @@ export function BootSequence({
       return () => clearTimeout(id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage, n]);
+  }, [stage, n, reducedMotion]);
 
   // Countdown that auto-boots the highlighted (desktop) entry, unless the
   // visitor interacts — then we stop and let them choose deliberately.
@@ -145,7 +153,7 @@ export function BootSequence({
   return (
     <motion.div
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: reducedMotion ? 0 : 0.35 }}
       className="crt fixed inset-0 z-[70] overflow-hidden"
     >
       <div

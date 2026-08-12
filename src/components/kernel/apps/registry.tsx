@@ -10,7 +10,7 @@ import {
   Server,
   TerminalSquare,
 } from "lucide-react";
-import { projects } from "@/data/projects";
+import { kernelProjects as projects } from "@/data/projects";
 import type { AppDef } from "../desktop/types";
 import { Htop } from "./Htop";
 import { Mail } from "./Mail";

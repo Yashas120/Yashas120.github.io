@@ -32,9 +32,9 @@ export interface InspectorState {
 }
 
 export function useInspectorState(): InspectorState {
-  const [chapter, setChapter] = useState<ChapterId>("hero");
+  const [chapter, setChapter] = useState<ChapterId>("overview");
   const [pinned, setPinned] = useState<PanelId | null>(null);
-  const chapterRef = useRef<ChapterId>("hero");
+  const chapterRef = useRef<ChapterId>("overview");
 
   // Explicit selection from the URL, on load and on back/forward.
   useEffect(() => {
@@ -70,7 +70,7 @@ export function useInspectorState(): InspectorState {
           return null;
         });
       },
-      { rootMargin: "-45% 0px -55% 0px", threshold: 0 },
+      { rootMargin: "-44% 0px -55% 0px", threshold: 0 },
     );
 
     sections.forEach((s) => observer.observe(s));

@@ -75,6 +75,7 @@ export function EvidenceDrawer({ ids, defaultOpen = false, label }: Readonly<Evi
               </span>
             </div>
             <dl className="mt-2 mb-0 divide-y" style={{ borderColor: DV.border }}>
+              <Row label="source" value={f.sourceLabel} />
               <Row label="problem" value={f.problem} />
               <Row label="contribution" value={f.contribution} />
               <Row label="outcome" value={f.outcome} />
@@ -93,6 +94,18 @@ export function EvidenceDrawer({ ids, defaultOpen = false, label }: Readonly<Evi
                 {l.label} <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
               </a>
             ))}
+            {f.sourceHref && !f.links?.some((link) => link.href === f.sourceHref) && (
+              <a
+                href={f.sourceHref}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={`Open source record — ${f.shortClaim} (opens in a new tab)`}
+                className="mt-2 inline-flex min-h-[44px] items-center gap-1 text-[14px]"
+                style={{ color: DV.cyan }}
+              >
+                Open source record <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+              </a>
+            )}
           </li>
         ))}
       </ul>

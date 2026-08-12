@@ -1,17 +1,19 @@
-"use client";
-
-import { MotionConfig } from "framer-motion";
 import { ClusterFilm } from "@/components/cluster/ClusterFilm";
+import { ClusterShell } from "@/components/cluster/ClusterShell";
+import { ClusterProjectLabs } from "@/components/cluster/ClusterProjectLabs";
+import { CompleteProfileIndex } from "@/components/cluster/CompleteProfileIndex";
 import { ClusterThemeProvider } from "@/components/cluster/theme";
 
 export default function ClusterPage() {
   return (
-    <MotionConfig reducedMotion="user">
-      <ClusterThemeProvider>
-        <main id="cluster-content">
+    <ClusterThemeProvider>
+      <ClusterShell>
+        <main id="cluster-main">
           <ClusterFilm />
+          <ClusterProjectLabs />
+          <CompleteProfileIndex />
         </main>
-      </ClusterThemeProvider>
-    </MotionConfig>
+      </ClusterShell>
+    </ClusterThemeProvider>
   );
 }

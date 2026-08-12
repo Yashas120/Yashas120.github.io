@@ -3,8 +3,8 @@
 /**
  * Scene 07 — enterprise AI under real constraints. The automation rail becomes an
  * ingestion path. Retrieval results must pass a group-membership gate: an
- * unauthorized request visibly stops there, and the model only becomes active
- * once retrieval and authorization both succeed.
+ * unauthorized request visibly stops there, and a draft only advances after
+ * access checks and a human approval gate.
  */
 
 import { motion, useTransform } from "framer-motion";
@@ -53,7 +53,7 @@ export function Scene07Rag({ p, compact }: Readonly<SceneVisualProps>) {
   return (
     <g>
       <Ann x={44} y={74} size={9} opacity={0.6}>
-        10 webex groups · scheduled ingestion
+        approved conversations · scheduled ingestion
       </Ann>
       {Array.from({ length: nDocs }, (_, i) => (
         <Doc key={i} p={p} i={i} compact={compact} />
@@ -130,11 +130,11 @@ export function Scene07Rag({ p, compact }: Readonly<SceneVisualProps>) {
       />
       <motion.g style={{ opacity: active }}>
         <Ann x={MODEL.x + 10} y={MODEL.y + 30} size={9} color={GREEN}>
-          GPT-4 · approved
+          draft answer
         </Ann>
       </motion.g>
-      <Ann x={MODEL.x} y={MODEL.y + MODEL.h + 20} size={8} opacity={0.6}>
-        proof of concept
+      <Ann x={MODEL.x} y={MODEL.y + MODEL.h + 20} size={8} color={ORANGE}>
+        HUMAN GATE · PROOF OF CONCEPT
       </Ann>
     </g>
   );

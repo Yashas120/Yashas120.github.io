@@ -12,6 +12,7 @@
 
 import { DV } from "../tokens";
 import { DiagramFrame, Edge, GLabel, GNode } from "./parts";
+import { infrastructure } from "@/data/devops/profile";
 
 const MID = 180;
 
@@ -26,11 +27,11 @@ export function EventFlow({ live }: Readonly<EventFlowProps>) {
       desc="A data change is written to DynamoDB. DynamoDB notifies an SNS fan-out, which delivers to one SQS queue per region. Regional service consumers read their queue and apply database updates. This is an illustration of the mechanism, not a production topology."
       height={344}
     >
-      <GNode x={110} y={6} w={140} h={32} lines={["Data change"]} accent={DV.muted} />
+      <GNode x={110} y={6} w={140} h={32} lines={[infrastructure.flow[0]]} accent={DV.muted} />
       <Edge d={`M ${MID} 38 V 56`} accent={DV.cyan} flow={live} head={{ x: MID, y: 56, dir: "down" }} />
-      <GNode x={110} y={56} w={140} h={32} lines={["DynamoDB"]} accent={DV.cyan} />
+      <GNode x={110} y={56} w={140} h={32} lines={[infrastructure.flow[1]]} accent={DV.cyan} />
       <Edge d={`M ${MID} 88 V 106`} accent={DV.cyan} flow={live} head={{ x: MID, y: 106, dir: "down" }} />
-      <GNode x={100} y={106} w={160} h={32} lines={["SNS fan-out"]} accent={DV.cyan} tag="one → many" />
+      <GNode x={100} y={106} w={160} h={32} lines={[infrastructure.flow[2]]} accent={DV.cyan} tag="one → many" />
 
       <Edge d={`M ${MID} 138 V 158 H 88 V 176`} accent={DV.cyan} flow={live} head={{ x: 88, y: 176, dir: "down" }} />
       <Edge
@@ -51,9 +52,9 @@ export function EventFlow({ live }: Readonly<EventFlowProps>) {
         delay={200}
         head={{ x: MID, y: 246, dir: "down" }}
       />
-      <GNode x={60} y={246} w={240} h={32} lines={["Service consumers"]} accent={DV.green} />
+      <GNode x={60} y={246} w={240} h={32} lines={[infrastructure.flow[4]]} accent={DV.green} />
       <Edge d={`M ${MID} 278 V 296`} accent={DV.green} flow={live} head={{ x: MID, y: 296, dir: "down" }} />
-      <GNode x={80} y={296} w={200} h={32} lines={["Database updates"]} accent={DV.green} />
+      <GNode x={80} y={296} w={200} h={32} lines={[infrastructure.flow[5]]} accent={DV.green} />
 
       <GLabel x={6} y={168} text="per-region queue" accent={DV.muted} />
       <GLabel x={354} y={168} text="explicit dependency" accent={DV.muted} anchor="end" />

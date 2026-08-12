@@ -55,13 +55,10 @@ export function Papers() {
         ))}
 
         <div className="pt-1">
-          <p className="mb-2 font-mono text-[11px] text-zinc-600">$ dmesg | grep -i award</p>
+          <p className="mb-2 font-mono text-[11px] text-zinc-600">Verified awards and highlights</p>
           <ul className="space-y-1.5 font-mono text-[11px]">
-            {highlights.map((h, i) => (
+            {highlights.map((h) => (
               <li key={h.id} className="flex flex-wrap gap-x-2">
-                <span className="flex-shrink-0 text-zinc-600">
-                  [{(120.4 + i * 3.17).toFixed(6)}]
-                </span>
                 <span className="flex-1">
                   <span style={{ color: PHOSPHOR }}>[ OK ] </span>
                   <span className="text-zinc-200">{h.label}</span>

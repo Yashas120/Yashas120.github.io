@@ -139,7 +139,7 @@ function Stage({
       role="img"
       aria-labelledby={labelledBy}
     >
-      <LineCardBase geo={geo} phase={phase} />
+      <LineCardBase geo={geo} phase={phase} idPrefix={labelledBy.split(" ")[0]} />
       {children}
     </svg>
   );
@@ -163,14 +163,17 @@ function ChapterCopyLayer({ index, progress }: Readonly<{ index: number; progres
   const mech = useMech(progress, index);
   const visibility = useTransform(opacity, (o) => (o < 0.02 ? "hidden" : "visible"));
   const pointerEvents = useTransform(opacity, (o) => (o < 0.7 ? "none" : "auto"));
+  const zIndex = useTransform(opacity, (o) => Math.round(o * 100));
   const y = useTransform(mech, [0, 1], [8, -8]);
 
   return (
     <motion.div
-      style={{ opacity, visibility, pointerEvents, y }}
+      style={{ visibility, pointerEvents, zIndex, background: CANVAS }}
       className="absolute inset-y-0 left-0 flex w-[46%] items-center overflow-y-auto pb-8 pl-10 pr-6 pt-[calc(var(--dp-header)+24px)] xl:pl-14"
     >
-      <ChapterCopy index={index} />
+      <motion.div style={{ opacity, y }}>
+        <ChapterCopy index={index} />
+      </motion.div>
     </motion.div>
   );
 }

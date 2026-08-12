@@ -6,15 +6,11 @@ export const publicLinks = {
   portfolioSource: "https://github.com/Yashas120/Yashas120.github.io",
 } as const;
 
-/**
- * No canonical public PDF was available during the evidence audit. The visible
- * action therefore opens the verified LinkedIn profile and says so to assistive
- * technology; it never pretends that a private source document is downloadable.
- */
+/** Canonical public résumé asset checked into the static site's public tree. */
 export const resumeLink = {
-  href: publicLinks.linkedin,
-  ariaLabel: "Résumé profile — Yashas Kadambi on LinkedIn (opens in a new tab)",
+  href: "/resume/Yashas-Kadambi-Resume.pdf",
+  ariaLabel: "Download Yashas Kadambi’s résumé (PDF)",
   label: "Résumé",
-  isPdf: false,
-  verificationNote: "[VERIFY BEFORE PUBLICATION: canonical public résumé PDF URL]",
+  isPdf: true,
+  verificationNote: null,
 } as const;

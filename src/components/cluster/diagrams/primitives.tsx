@@ -38,10 +38,12 @@ export interface BoxProps {
 /** A labelled component box that resolves in as its step advances. */
 export function Box({ x, y, w, h, label, sub, step, tone, accent, mono }: Readonly<BoxProps>) {
   const t = useTokens(tone);
-  const opacity = useTransform(step, [0, 0.35], [0.18, 1]);
+  // Keep the full topology legible before any desktop scroll enhancement. The
+  // motion adds emphasis; it never gates comprehension of the mechanism.
+  const opacity = useTransform(step, [0, 0.35], [0.72, 1]);
   return (
     <motion.g style={{ opacity }}>
-      <rect x={x} y={y} width={w} height={h} rx={7} fill={t.canvas} stroke={accent ?? t.line} strokeWidth={1.4} />
+      <rect x={x} y={y} width={w} height={h} rx={7} fill={t.canvas} stroke={accent ?? t.line} strokeWidth={1.4} vectorEffect="non-scaling-stroke" />
       <text
         x={x + w / 2}
         y={sub ? y + h / 2 - 4 : y + h / 2 + 4}
@@ -80,6 +82,7 @@ export function Conn({
       strokeWidth={width}
       strokeLinecap="round"
       strokeDasharray={dashed ? "4 4" : undefined}
+      vectorEffect="non-scaling-stroke"
       style={{ pathLength: step }}
     />
   );
@@ -101,7 +104,7 @@ export function Dot({
   return <motion.circle r={r} fill={color ?? t.blue} style={{ cx, cy, opacity }} />;
 }
 
-/** A small pill used for state callouts (committed, rejected, timings). */
+/** A compact state callout. */
 export function Tag({
   x,
   y,

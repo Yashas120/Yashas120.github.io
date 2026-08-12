@@ -60,7 +60,7 @@ interface FeatSample {
   label: number;
 }
 
-export function CifarSparkDemo() {
+export function CifarSparkDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
   const light = useIsLight();
   const reduced = usePrefersReducedMotion();
   const accentText = light ? "#c2410c" : SPARK;
@@ -721,6 +721,7 @@ export function CifarSparkDemo() {
       subtitle="A guided walkthrough of how a streaming ML system is built: a producer pushes CIFAR-10 over a socket, Spark discretizes it into micro-batch RDDs, executors featurize partitions in parallel, and the driver reduces the gradients into one SGD step. Step through each stage — everything is computed live in your browser."
       repoUrl={REPO}
       accent={SPARK}
+      embedded={embedded}
       {...cardProps("cifar")}
     >
       {/* controls */}
@@ -870,6 +871,10 @@ export function CifarSparkDemo() {
       </p>
     </LiveDemo>
   );
+}
+
+export function CifarSparkLab() {
+  return <CifarSparkDemo embedded />;
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {

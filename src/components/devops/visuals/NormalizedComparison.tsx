@@ -1,11 +1,9 @@
 /**
  * A normalized before/after bar.
  *
- * The route publishes two measured ratios — an approximately 50% deployment-time
- * reduction and a 40% page-load improvement — and neither has a verified absolute
- * duration attached. So the bars are drawn to the ratio, labelled 100 → 50 rather
- * than in minutes or milliseconds, and every instance carries a caption saying so.
- * That caption is not optional: it is a required prop.
+ * The bars communicate a normalized before/after relationship without publishing
+ * held employer measurements or implying an absolute duration. The explanatory
+ * caption is required.
  */
 
 "use client";

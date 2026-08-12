@@ -1,224 +1,133 @@
 "use client";
 
 import { motion, useTransform } from "framer-motion";
-import type { Tone } from "@/lib/clusterTheme";
 import { useTokens } from "../theme";
-import { Box, Caption, Conn, Dot, Tag, useStep, type DiagramProps, type Step } from "./primitives";
+import { Box, Caption, Conn, Dot, Tag, useStep, type DiagramProps } from "./primitives";
 
 const SVG = "h-full w-full";
 
-/* ============ hero: request replication ============ */
-
-function Replica({
-  index,
-  x,
-  y,
-  w,
-  h,
-  cx,
-  cy,
-  write,
-  ack,
-  tone,
-}: Readonly<{ index: number; x: number; y: number; w: number; h: number; cx: number; cy: number; write: Step; ack: Step; tone?: Tone }>) {
+export function EventTopologyDiagram({ p, vertical, tone }: Readonly<DiagramProps>) {
   const t = useTokens(tone);
-  const s = useStep(write, index * 0.14, 0.62 + index * 0.14);
-  const a = useStep(ack, index * 0.14, 0.62 + index * 0.14);
-  const mid = x + w / 2;
-  const recA = useTransform(s, [0.7, 1], [0, 0.55]);
-  const recB = useTransform(a, [0.4, 1], [0, 0.8]);
-  return (
-    <g>
-      <Conn d={`M ${cx} ${cy + 24} L ${cx} ${y - 36} L ${mid} ${y - 36} L ${mid} ${y}`} step={s} color={t.blue} tone={tone} />
-      <Box x={x} y={y} w={w} h={h} label={`replica ${index + 1}`} step={s} mono tone={tone} />
-      {/* written record, then its acknowledgement — kept clear of the label */}
-      <motion.rect x={x + 14} y={y + h / 2 + 16} width={w - 28} height={9} rx={2} fill={t.blue} style={{ opacity: recA }} />
-      <motion.rect x={x + 14} y={y + h / 2 + 34} width={w - 28} height={9} rx={2} fill={t.green} style={{ opacity: recB }} />
-      <Dot from={[mid, y - 8]} to={[cx, cy + 26]} step={a} color={t.green} r={4} tone={tone} />
-    </g>
-  );
-}
-
-export function ReplicationDiagram({ p, vertical, tone }: Readonly<DiagramProps>) {
-  const t = useTokens(tone);
-  const req = useStep(p, 0, 0.2);
-  const coord = useStep(p, 0.14, 0.32);
-  const write = useStep(p, 0.3, 0.58);
-  const ack = useStep(p, 0.56, 0.84);
-  const done = useStep(p, 0.86, 1);
-
-  const cx = vertical ? 190 : 360;
-  const cy = vertical ? 66 : 76;
-  const cw = vertical ? 170 : 160;
-  const y = vertical ? 210 : 214;
-  const h = vertical ? 132 : 140;
-  const w = vertical ? 96 : 122;
-  const xs = vertical ? [16, 142, 268] : [126, 299, 472];
-
-  return (
-    <svg viewBox={vertical ? "0 0 380 430" : "0 0 720 420"} className={SVG} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-      <Caption x={vertical ? 190 : 58} y={vertical ? 20 : 40} text="write request" step={req} anchor={vertical ? "middle" : "start"} tone={tone} />
-      <Dot from={vertical ? [190, 28] : [56, 76]} to={[cx, cy]} step={req} tone={tone} />
-      <Box x={cx - cw / 2} y={cy - 24} w={cw} h={48} label="Coordinator" step={coord} accent={t.blue} tone={tone} />
-      {xs.map((x, i) => (
-        <Replica key={x} index={i} x={x} y={y} w={w} h={h} cx={cx} cy={cy} write={write} ack={ack} tone={tone} />
-      ))}
-      <line x1={cx - 96} y1={y + h + 22} x2={cx + 96} y2={y + h + 22} stroke={t.line} strokeWidth={1} />
-      <Tag x={cx} y={y + h + 46} text="committed" step={done} color={t.green} tone={tone} />
-    </svg>
-  );
-}
-
-/* ============ backend: dependency DAG ============ */
-
-function DepStage({
-  index,
-  label,
-  x,
-  y,
-  w,
-  from,
-  parent,
-  vertical,
-  tone,
-}: Readonly<{ index: number; label: string; x: number; y: number; w: number; from: [number, number]; parent: Step; vertical?: boolean; tone?: Tone }>) {
-  const t = useTokens(tone);
-  const s = useStep(parent, index * 0.28, 0.72 + index * 0.28);
-  const d = vertical
-    ? `M ${from[0]} ${from[1]} L ${from[0]} ${y + 20} L ${x} ${y + 20}`
-    : `M ${from[0]} ${from[1]} L ${from[0] + 26} ${from[1]} L ${from[0] + 26} ${y + 20} L ${x} ${y + 20}`;
-  return (
-    <g>
-      <Conn d={d} step={s} tone={tone} />
-      <Box x={x} y={y} w={w} h={40} label={label} step={s} mono accent={t.green} tone={tone} />
-    </g>
-  );
-}
-
-export function DependencyDagDiagram({ p, vertical, tone }: Readonly<DiagramProps>) {
-  const t = useTokens(tone);
-  const parallel = useStep(p, 0.06, 0.4);
-  const gate = useStep(p, 0.4, 0.62);
-  const dependent = useStep(p, 0.6, 0.86);
-  const result = useStep(p, 0.88, 1);
-
-  const indep = ["network", "iam", "artifacts"];
-  const dep = ["compute", "services"];
-
-  const ix = vertical ? 115 : 70;
-  const iw = 150;
-  const irows = vertical ? [40, 100, 160] : [60, 150, 240];
-  const gx = vertical ? 110 : 280;
-  const gy = vertical ? 232 : 148;
-  const gw = vertical ? 160 : 118;
-  const dx = vertical ? 115 : 520;
-  const drows = vertical ? [318, 378] : [60, 180];
-  const gateFrom: [number, number] = vertical ? [190, 276] : [gx + gw, gy + 22];
-
-  return (
-    <svg viewBox={vertical ? "0 0 380 470" : "0 0 720 420"} className={SVG} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-      <Caption
-        x={vertical ? 190 : ix}
-        y={irows[0] - 16}
-        text="independent — apply in parallel"
-        step={parallel}
-        anchor={vertical ? "middle" : "start"}
-        tone={tone}
-      />
-      {indep.map((label, i) => (
-        <Box key={label} x={ix} y={irows[i]} w={iw} h={40} label={label} step={parallel} mono accent={t.blue} tone={tone} />
-      ))}
-
-      <Conn
-        d={vertical ? `M 190 ${irows[2] + 40} L 190 ${gy}` : `M ${ix + iw} ${irows[1] + 20} L ${gx} ${irows[1] + 20}`}
-        step={gate}
-        color={t.blue}
-        tone={tone}
-      />
-      <Box x={gx} y={gy} w={gw} h={44} label="depends on" step={gate} tone={tone} />
-
-      {dep.map((label, i) => (
-        <DepStage key={label} index={i} label={label} x={dx} y={drows[i]} w={iw} from={gateFrom} parent={dependent} vertical={vertical} tone={tone} />
-      ))}
-
-      <Caption x={vertical ? 190 : 595} y={vertical ? 300 : 340} text="gated — waits for prerequisites" step={dependent} tone={tone} />
-      <Tag x={vertical ? 190 : 360} y={vertical ? 448 : 398} text="deployment time reduced by ~50%" step={result} color={t.green} tone={tone} />
-    </svg>
-  );
-}
-
-/* ============ event-driven fan-out (inverted interlude) ============ */
-
-function RegionLane({
-  index,
-  region,
-  vertical,
-  fan,
-  consume,
-  acks,
-  tone,
-}: Readonly<{ index: number; region: string; vertical?: boolean; fan: Step; consume: Step; acks: Step; tone?: Tone }>) {
-  const t = useTokens(tone);
-  const s = useStep(fan, index * 0.18, 0.66 + index * 0.18);
-  const c = useStep(consume, index * 0.18, 0.66 + index * 0.18);
-  const a = useStep(acks, index * 0.18, 0.66 + index * 0.18);
+  const source = useStep(p, 0, 0.2);
+  const transport = useStep(p, 0.18, 0.42);
+  const consume = useStep(p, 0.4, 0.76);
+  const store = useStep(p, 0.72, 1);
 
   if (vertical) {
-    const x = 16 + index * 122;
-    const mid = x + 52;
     return (
-      <g>
-        <Conn d={`M 190 174 L 190 212 L ${mid} 212 L ${mid} 236`} step={s} color={t.blue} tone={tone} />
-        <Box x={x} y={236} w={104} h={42} label="SQS" sub={region} step={s} tone={tone} mono />
-        <Conn d={`M ${mid} 278 L ${mid} 360`} step={c} tone={tone} />
-        <Box x={x} y={360} w={104} h={40} label="service" step={c} tone={tone} />
-        <Conn d={`M ${mid} 400 L ${mid} 470`} step={a} color={t.green} tone={tone} />
-        <Box x={x} y={470} w={104} h={38} label="db" step={a} tone={tone} accent={t.green} mono />
-      </g>
+      <svg viewBox="0 0 380 560" className={SVG} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <Box x={90} y={36} w={200} h={48} label="source service" step={source} accent={t.blue} tone={tone} />
+        <Conn d="M 190 84 L 190 142" step={transport} color={t.blue} tone={tone} />
+        <Box x={70} y={142} w={240} h={52} label="managed AWS messaging" step={transport} accent={t.blue} tone={tone} />
+        {[82, 298].map((x, index) => (
+          <g key={x}>
+            <Conn d={`M 190 194 L 190 236 L ${x} 236 L ${x} 278`} step={consume} color={t.blue} tone={tone} />
+            <Box x={x - 60} y={278} w={120} h={48} label={`regional service ${index === 0 ? "A" : "B"}`} step={consume} tone={tone} />
+            <Conn d={`M ${x} 326 L ${x} 398`} step={store} color={t.green} tone={tone} />
+            <Box x={x - 60} y={398} w={120} h={44} label="SQL store" step={store} accent={t.green} tone={tone} />
+          </g>
+        ))}
+        <Dot from={[190, 92]} to={[190, 138]} step={transport} tone={tone} />
+        <Tag x={190} y={504} text="illustrative topology · not scale" step={store} color={t.muted} tone={tone} />
+      </svg>
     );
   }
 
-  const y = [80, 190, 300][index];
   return (
-    <g>
-      <Conn d={`M 298 190 L 316 190 L 316 ${y} L 340 ${y}`} step={s} color={t.blue} tone={tone} />
-      <Box x={340} y={y - 21} w={112} h={42} label="SQS" sub={region} step={s} tone={tone} mono />
-      <Conn d={`M 452 ${y} L 480 ${y}`} step={c} tone={tone} />
-      <Box x={480} y={y - 20} w={104} h={40} label="service" step={c} tone={tone} />
-      <Conn d={`M 584 ${y} L 610 ${y}`} step={a} color={t.green} tone={tone} />
-      <Box x={610} y={y - 19} w={74} h={38} label="db" step={a} tone={tone} accent={t.green} mono />
-    </g>
+    <svg viewBox="0 0 760 460" className={SVG} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <Box x={32} y={202} w={142} h={52} label="source service" step={source} accent={t.blue} tone={tone} />
+      <Conn d="M 174 228 L 246 228" step={transport} color={t.blue} tone={tone} />
+      <Box x={246} y={194} w={180} h={68} label="managed messaging" sub="AWS boundary" step={transport} accent={t.blue} tone={tone} />
+      {[122, 334].map((y, index) => (
+        <g key={y}>
+          <Conn d={`M 426 228 L 462 228 L 462 ${y + 26} L 500 ${y + 26}`} step={consume} color={t.blue} tone={tone} />
+          <Box x={500} y={y} w={144} h={52} label={`regional service ${index === 0 ? "A" : "B"}`} step={consume} tone={tone} />
+          <Conn d={`M 644 ${y + 26} L 682 ${y + 26}`} step={store} color={t.green} tone={tone} />
+          <Box x={682} y={y + 4} w={70} h={44} label="SQL" step={store} accent={t.green} tone={tone} mono />
+        </g>
+      ))}
+      <Dot from={[180, 228]} to={[242, 228]} step={transport} tone={tone} />
+      <Caption x={380} y={52} text="one event · consequences across service boundaries" step={consume} tone={tone} />
+      <Tag x={380} y={430} text="illustrative topology · not scale" step={store} color={t.muted} tone={tone} />
+    </svg>
   );
 }
 
-export function EventFanoutDiagram({ p, vertical, tone }: Readonly<DiagramProps>) {
+/** One production topology that moves through order, discovery, cutover and recovery. */
+export function SafeChangeDiagram({ p, vertical, tone }: Readonly<DiagramProps>) {
   const t = useTokens(tone);
-  const write = useStep(p, 0, 0.18);
-  const topic = useStep(p, 0.16, 0.36);
-  const fan = useStep(p, 0.34, 0.62);
-  const consume = useStep(p, 0.6, 0.82);
-  const acks = useStep(p, 0.8, 1);
-  const regions = ["us-east", "eu-west", "ap-south"];
+  const order = useStep(p, 0, 0.23);
+  const discover = useStep(p, 0.22, 0.44);
+  const cutover = useStep(p, 0.43, 0.67);
+  const failure = useStep(p, 0.66, 0.82);
+  const recovered = useStep(p, 0.81, 1);
+  const failureOpacity = useTransform(p, [0.64, 0.7, 0.83, 0.9], [0, 1, 1, 0]);
+  const recoveryOpacity = useTransform(recovered, [0, 0.3, 1], [0, 1, 1]);
+
+  if (vertical) {
+    return (
+      <svg viewBox="0 0 380 620" className={SVG} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <Caption x={190} y={26} text="1 · order" step={order} tone={tone} />
+        <Box x={26} y={48} w={104} h={42} label="network" step={order} accent={t.blue} tone={tone} mono />
+        <Box x={250} y={48} w={104} h={42} label="identity" step={order} accent={t.blue} tone={tone} mono />
+        <Conn d="M 78 90 L 78 126 L 190 126 L 190 156" step={order} tone={tone} />
+        <Conn d="M 302 90 L 302 126 L 190 126" step={order} tone={tone} />
+        <Box x={120} y={156} w={140} h={44} label="service" step={order} accent={t.green} tone={tone} mono />
+
+        <Caption x={190} y={238} text="2 · discover consumers + owners" step={discover} tone={tone} />
+        <Conn d="M 190 200 L 190 264 L 82 264 L 82 294" step={discover} color={t.blue} tone={tone} />
+        <Conn d="M 190 264 L 298 264 L 298 294" step={discover} color={t.blue} tone={tone} />
+        <Box x={22} y={294} w={120} h={46} label="consumer" sub="owner A" step={discover} tone={tone} />
+        <Box x={238} y={294} w={120} h={46} label="consumer" sub="owner B" step={discover} tone={tone} />
+
+        <Caption x={190} y={378} text="3 · staged endpoint transition" step={cutover} tone={tone} />
+        <Box x={24} y={398} w={140} h={46} label="old SQL store" step={cutover} tone={tone} />
+        <Box x={216} y={398} w={140} h={46} label="new SQL store" step={cutover} accent={t.green} tone={tone} />
+        <Conn d="M 164 421 L 216 421" step={cutover} color={t.green} dashed tone={tone} />
+
+        <motion.g style={{ opacity: failureOpacity }}>
+          <Conn d="M 286 444 L 286 496" step={failure} color={t.coral} dashed tone={tone} />
+          <Box x={206} y={496} w={160} h={44} label="hidden dependency" step={failure} accent={t.coral} tone={tone} />
+        </motion.g>
+        <motion.g style={{ opacity: recoveryOpacity }}>
+          <Box x={14} y={496} w={160} h={44} label="health checks" step={recovered} accent={t.green} tone={tone} />
+          <Tag x={190} y={584} text="4 · recovered + verified" step={recovered} color={t.green} tone={tone} />
+        </motion.g>
+      </svg>
+    );
+  }
 
   return (
-    <svg viewBox={vertical ? "0 0 380 560" : "0 0 720 420"} className={SVG} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-      <Box
-        x={vertical ? 110 : 40}
-        y={vertical ? 40 : 168}
-        w={vertical ? 160 : 118}
-        h={44}
-        label="DynamoDB"
-        step={write}
-        tone={tone}
-        accent={t.blue}
-        mono
-      />
-      <Conn d={vertical ? "M 190 84 L 190 130" : "M 158 190 L 190 190"} step={topic} color={t.blue} tone={tone} />
-      <Box x={vertical ? 110 : 190} y={vertical ? 130 : 168} w={vertical ? 160 : 108} h={44} label="SNS" step={topic} tone={tone} accent={t.blue} mono />
-      {regions.map((r, i) => (
-        <RegionLane key={r} index={i} region={r} vertical={vertical} fan={fan} consume={consume} acks={acks} tone={tone} />
-      ))}
-      <Caption x={vertical ? 190 : 360} y={vertical ? 540 : 394} text="one change event, fanned out per region" step={acks} tone={tone} />
+    <svg viewBox="0 0 760 460" className={SVG} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <Caption x={74} y={46} text="1 · order" step={order} anchor="start" tone={tone} />
+      <Box x={44} y={70} w={122} h={44} label="network" step={order} accent={t.blue} tone={tone} mono />
+      <Box x={44} y={144} w={122} h={44} label="identity" step={order} accent={t.blue} tone={tone} mono />
+      <Conn d="M 166 92 L 214 92 L 214 160 L 250 160" step={order} tone={tone} />
+      <Conn d="M 166 166 L 214 166" step={order} tone={tone} />
+      <Box x={250} y={138} w={136} h={48} label="service" step={order} accent={t.green} tone={tone} mono />
+
+      <Caption x={318} y={46} text="2 · discover" step={discover} tone={tone} />
+      <Conn d="M 318 186 L 318 228 L 470 228" step={discover} color={t.blue} tone={tone} />
+      <Box x={438} y={86} w={130} h={46} label="consumer" sub="owner A" step={discover} tone={tone} />
+      <Box x={438} y={206} w={130} h={46} label="consumer" sub="owner B" step={discover} tone={tone} />
+      <Conn d="M 470 228 L 470 132" step={discover} color={t.blue} tone={tone} />
+
+      <Caption x={648} y={46} text="3 · cut over" step={cutover} tone={tone} />
+      <Box x={610} y={88} w={116} h={44} label="old store" step={cutover} tone={tone} />
+      <Box x={610} y={208} w={116} h={44} label="new store" step={cutover} accent={t.green} tone={tone} />
+      <Conn d="M 568 110 L 610 110" step={cutover} tone={tone} />
+      <Conn d="M 568 230 L 610 230" step={cutover} color={t.green} tone={tone} />
+
+      <motion.g style={{ opacity: failureOpacity }}>
+        <Conn d="M 318 252 L 318 318" step={failure} color={t.coral} dashed tone={tone} />
+        <Box x={220} y={318} w={196} h={46} label="hidden dependency" step={failure} accent={t.coral} tone={tone} />
+        <Caption x={318} y={388} text="rollout interrupted" step={failure} tone={tone} />
+      </motion.g>
+      <motion.g style={{ opacity: recoveryOpacity }}>
+        <Box x={454} y={318} w={150} h={46} label="health checks" step={recovered} accent={t.green} tone={tone} />
+        <Conn d="M 416 341 L 454 341" step={recovered} color={t.green} tone={tone} />
+        <Tag x={380} y={430} text="4 · recovered + verified" step={recovered} color={t.green} tone={tone} />
+      </motion.g>
     </svg>
   );
 }

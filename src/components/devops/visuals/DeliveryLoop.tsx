@@ -10,6 +10,7 @@
 
 import { DV } from "../tokens";
 import { DiagramFrame, Edge, GNode, VW } from "./parts";
+import { deliveryLoop } from "@/data/devops/profile";
 
 const CX = VW / 2;
 const CY = 150;
@@ -17,11 +18,11 @@ const R = 100;
 
 /** Stage centres at -90°, -18°, 54°, 126°, 198° — evenly spaced around the ring. */
 const STAGES = [
-  { label: "Define", x: 180, y: 50, accent: DV.cyan },
-  { label: "Provision", x: 275, y: 119, accent: DV.cyan },
-  { label: "Deliver", x: 239, y: 231, accent: DV.amber },
-  { label: "Observe", x: 121, y: 231, accent: DV.green },
-  { label: "Improve", x: 85, y: 119, accent: DV.violet },
+  { label: deliveryLoop.stages[0], x: 180, y: 50, accent: DV.cyan },
+  { label: deliveryLoop.stages[1], x: 275, y: 119, accent: DV.cyan },
+  { label: deliveryLoop.stages[2], x: 239, y: 231, accent: DV.amber },
+  { label: deliveryLoop.stages[3], x: 121, y: 231, accent: DV.green },
+  { label: deliveryLoop.stages[4], x: 85, y: 119, accent: DV.violet },
 ];
 
 export interface DeliveryLoopProps {
@@ -57,10 +58,10 @@ export function DeliveryLoop({ live }: Readonly<DeliveryLoopProps>) {
       ))}
 
       <text x={CX} y={CY - 4} textAnchor="middle" fontSize={13} fill={DV.muted} className="font-mono">
-        delivery loop
+        {deliveryLoop.center[0]}
       </text>
       <text x={CX} y={CY + 14} textAnchor="middle" fontSize={12} fill={DV.muted} className="font-mono">
-        one system
+        {deliveryLoop.center[1]}
       </text>
     </DiagramFrame>
   );

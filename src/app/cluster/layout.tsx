@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
-const title = "Yashas Kadambi — Distributed Systems & Infrastructure";
+const title = "Yashas Kadambi — Production Systems, Infrastructure, and Reliability";
 const description =
-  "Systems engineer with production experience across multi-region AWS infrastructure, asynchronous event flows, dependency-aware deployment, live database migration, service reliability, and systems performance.";
+  "A complete engineering portfolio ordered through a distributed-systems lens: about three years of Cisco production work, systems projects, research, teaching, and technical breadth.";
 const url = "https://yashas120.github.io/cluster";
 
 export const metadata: Metadata = {
@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     url,
     type: "website",
     siteName: "Yashas Kadambi",
+    images: [{ url: "https://yashas120.github.io/icon.svg", alt: "Yashas Kadambi portfolio" }],
   },
   twitter: {
     card: "summary_large_image",

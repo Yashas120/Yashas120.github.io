@@ -49,7 +49,7 @@ const CAPTIONS = [
   "Left: the N×N matrix. Right: the same accesses laid out in linear memory (the malloc'd row blocks end-to-end). Sequential access walks one block and rides the cache line; the transposed order jumps a whole block every step.",
 ];
 
-export function ParallelDemo() {
+export function ParallelDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
   const light = useIsLight();
   const reduced = usePrefersReducedMotion();
   const accentText = light ? "#4f46e5" : ACC;
@@ -426,6 +426,7 @@ export function ParallelDemo() {
       subtitle="Three implementation lessons from the SSP pthreads/cache coursework, each shown as its real C code beside a live animation of the mechanism it hides: how work is split across threads, how a shared update races, and how memory layout decides speed."
       repoUrl={REPO}
       accent={ACC}
+      embedded={embedded}
       {...cardProps("parallel")}
     >
       {/* mode tabs */}
@@ -605,4 +606,8 @@ export function ParallelDemo() {
       </p>
     </LiveDemo>
   );
+}
+
+export function ParallelLab() {
+  return <ParallelDemo embedded />;
 }

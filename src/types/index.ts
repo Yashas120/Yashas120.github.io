@@ -6,6 +6,42 @@ export type Domain =
   | "ta"
   | "research";
 
+export type WorkContext =
+  | "production"
+  | "independent"
+  | "coursework"
+  | "research"
+  | "open-source";
+
+export type Ownership = "primary" | "contributor" | "team" | "evaluator";
+
+export type WorkStatus =
+  | "shipped"
+  | "completed"
+  | "ongoing"
+  | "archived"
+  | "in-development";
+
+export interface Evidence {
+  id?: string;
+  label: string;
+  value?: string;
+  qualifier?: string;
+  sourceUrl?: string;
+}
+
+export interface PortfolioCaseStudy {
+  id: string;
+  context: string;
+  heading: string;
+  title: string;
+  body: string;
+  impactLabel: string;
+  impact: string;
+  evidence?: string[];
+  matrix?: [string, string][];
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -14,13 +50,16 @@ export interface Project {
   detail: string;
   tech: string[];
   domains: Domain[];
-  stars?: number;
-  status: "active" | "completed" | "archived";
-  // OS/kernel theme fields
-  pid: number;
-  cpu: number; // %CPU for ps aux table
-  mem: number; // %MEM for ps aux table
-  state: "R" | "S" | "Z" | "D"; // process state
+  context: WorkContext;
+  ownership: Ownership;
+  status: WorkStatus;
+  contribution: string;
+  outcome: string;
+  evidence: Evidence[];
+  caseStudyUrl?: string;
+  demoUrl?: string;
+  demoId?: DemoId;
+  caseStudy?: PortfolioCaseStudy;
 }
 
 export interface ExperienceItem {
@@ -32,6 +71,12 @@ export interface ExperienceItem {
   location?: string;
   points: string[];
   tags: Domain[];
+  kind: "professional" | "teaching" | "education";
+  scope: string;
+  ownership: Ownership;
+  technologies: string[];
+  related?: { label: string; href: string }[];
+  caseStudies?: PortfolioCaseStudy[];
 }
 
 export interface Publication {
@@ -41,6 +86,12 @@ export interface Publication {
   year: number;
   doi: string;
   points: string[];
+  publishedOnline?: string;
+  issueYear?: number;
+  citation?: string;
+  authors?: string[];
+  contribution?: string;
+  paperUrl?: string;
 }
 
 export interface SkillGroup {
@@ -60,3 +111,4 @@ export interface Metric {
   context: string;
   domains: Domain[];
 }
+import type { DemoId } from "@/data/demos";

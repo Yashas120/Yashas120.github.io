@@ -4,7 +4,7 @@ One resume, six domain-native interfaces. The same underlying content (bio, expe
 
 | Interface | Route | Metaphor |
 |-----------|-------|----------|
-| Distributed Systems | `/cluster` | Consensus cluster — a scroll-driven Raft election, a career log that commits entry by entry, a consistent-hash project ring, and a chaos lab that partitions the cluster (`partition the cluster` easter egg). |
+| Production Systems | `/cluster` | A six-chapter production-systems narrative grounded in managed event integration, dependency-aware change, staged cutover and recovery, and software/hardware state reconciliation. |
 | Operating Systems | `/kernel` | Boot to desktop — POST, `dmesg`, and a login drop you into a windowed OS whose apps are the resume: `htop` (projects), `systemctl` (career), `man yashas`, `/proc` (skills), `sched` (ghOSt), papers, and a shell (`panic` easter egg). |
 | Web Development | `/devtools` | Chrome DevTools — Elements (DOM-tree bio), Network waterfall, a live Console REPL, Sources, and a Lighthouse audit. |
 | Optical Systems | `/data-plane` | Data plane — line-card bringup, drivers probing the bus, a HAL stack, and live optical PM counters. |
@@ -73,9 +73,9 @@ Note that `--recurse-submodules` fails for anyone without access to the private 
 CI does not fetch it: `actions/checkout` leaves submodules off by default, so the Pages
 build never touches `source-documents/`.
 
-Employer-scale figures that are not cleared for public disclosure stay behind the
-`disclosureReview` flag in `src/lib/clusterContent.ts` and render as public-safe wording
-until approved.
+The `/cluster` content module contains publication-safe wording only. Employer-scale
+figures and private review notes are excluded from source and client bundles rather
+than stored behind rendering flags.
 
 ## Deploy
 

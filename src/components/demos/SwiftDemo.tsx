@@ -97,7 +97,7 @@ function useSampleImage(src: string): { img: HTMLImageElement | null; gray: Floa
   return state;
 }
 
-export function SwiftDemo() {
+export function SwiftDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
   const p = palette(useIsLight());
   const reduced = usePrefersReducedMotion();
   const [sample, setSample] = useState<SampleKind>("panda");
@@ -151,6 +151,7 @@ export function SwiftDemo() {
       subtitle="A walkthrough of the SWIFT architecture: SwinV2+ transformers fused with Fast Fourier Convolutions to upscale images with ~34% fewer parameters. Step through each layer to see what it does."
       repoUrl={REPO}
       accent={SWIFT}
+      embedded={embedded}
       {...cardProps("swift")}
     >
       {/* controls */}
@@ -259,6 +260,10 @@ export function SwiftDemo() {
       </p>
     </LiveDemo>
   );
+}
+
+export function SwiftLab() {
+  return <SwiftDemo embedded />;
 }
 
 // ------------------------------- pipeline -------------------------------

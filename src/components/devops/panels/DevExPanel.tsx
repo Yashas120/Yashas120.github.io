@@ -1,9 +1,8 @@
 /**
  * DevEx: the SDK delivery path, the effort it removed, and the local feedback loop.
  *
- * The comparison is stated as effort per SDK — approximately four hours of routine
- * manual work, then zero — which is what was verified. No cycle time, release
- * frequency or error-rate claim is attached to it.
+ * The comparison shows repeated manual work becoming automated while version
+ * selection remains an intentional human decision.
  */
 
 "use client";
@@ -29,7 +28,7 @@ export function DevExPanel({ live }: Readonly<{ live?: boolean }>) {
             manual generation/publication
           </dt>
           <dd className="m-0 font-mono text-[14px]" style={{ color: DV.text }}>
-            ~4 hours per SDK
+            repeated manual work
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-3 py-1.5">
@@ -37,7 +36,7 @@ export function DevExPanel({ live }: Readonly<{ live?: boolean }>) {
             routine manual effort after automation
           </dt>
           <dd className="m-0 font-mono text-[14px]" style={{ color: DV.green }}>
-            0
+            automated
           </dd>
         </div>
       </dl>

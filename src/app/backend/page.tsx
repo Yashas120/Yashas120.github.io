@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BackendStory } from "@/components/backend/BackendStory";
+import { backendMeta } from "@/data/backend";
 
 /**
  * /backend — a standalone endpoint for backend and platform roles.
@@ -9,18 +10,16 @@ import { BackendStory } from "@/components/backend/BackendStory";
  * `src/data/backend.ts`; the scroll story is a client component.
  */
 export const metadata: Metadata = {
-  title: "Yashas Kadambi — Backend & Platform Engineer",
-  description:
-    "Backend and platform engineering portfolio of Yashas Kadambi: cloud infrastructure, event-driven systems, delivery automation, and production reliability.",
+  title: backendMeta.title,
+  description: backendMeta.description,
   alternates: {
     canonical: "/backend",
   },
   openGraph: {
-    title: "Yashas Kadambi — Backend & Platform Engineer",
-    description:
-      "Production engineering across cloud infrastructure, event-driven systems, automation, and reliability.",
+    title: backendMeta.title,
+    description: backendMeta.description,
     type: "website",
-    url: "/backend",
+    url: backendMeta.url,
   },
 };
 

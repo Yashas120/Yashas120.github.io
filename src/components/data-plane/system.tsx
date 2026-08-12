@@ -192,7 +192,7 @@ function Rail({
 }
 
 /** The traffic path: always present. Only continuity and colour change. */
-function Traffic({ geo, phase, health }: Readonly<{ geo: Geo; phase: MotionValue<number>; health: MotionValue<number> }>) {
+function Traffic({ geo, phase, health, glowId }: Readonly<{ geo: Geo; phase: MotionValue<number>; health: MotionValue<number>; glowId: string }>) {
   const { x1, x2, y, amp } = geo.traffic;
   const span = x2 - x1;
   const periods = geo.compact ? 6 : 11;
@@ -217,7 +217,7 @@ function Traffic({ geo, phase, health }: Readonly<{ geo: Geo; phase: MotionValue
       >
         {label}
       </motion.text>
-      <motion.path d={d} fill="none" strokeWidth={5} strokeOpacity={0.13} filter="url(#dpGlow)" style={{ stroke }} />
+      <motion.path d={d} fill="none" strokeWidth={5} strokeOpacity={0.13} filter={`url(#${glowId})`} style={{ stroke }} />
       <motion.path
         d={d}
         fill="none"
@@ -236,7 +236,9 @@ function Traffic({ geo, phase, health }: Readonly<{ geo: Geo; phase: MotionValue
  * from it so the persistent system responds to the story without any chapter
  * having to reach in and mutate it.
  */
-export function LineCardBase({ geo, phase }: Readonly<{ geo: Geo; phase: MotionValue<number> }>) {
+export function LineCardBase({ geo, phase, idPrefix }: Readonly<{ geo: Geo; phase: MotionValue<number>; idPrefix: string }>) {
+  const glowId = `${idPrefix}-glow`;
+  const pcbId = `${idPrefix}-pcb`;
   const build = useTransform(phase, [0, 0.3], [0.25, 1], { clamp: true });
 
   // ch01: the platform-specific region is what changed on this platform
@@ -278,15 +280,15 @@ export function LineCardBase({ geo, phase }: Readonly<{ geo: Geo; phase: MotionV
   return (
     <g>
       <defs>
-        <filter id="dpGlow" x="-20%" y="-140%" width="140%" height="380%">
+        <filter id={glowId} x="-20%" y="-140%" width="140%" height="380%">
           <feGaussianBlur stdDeviation="4" />
         </filter>
-        <pattern id="dpPcb" width="24" height="24" patternUnits="userSpaceOnUse">
+        <pattern id={pcbId} width="24" height="24" patternUnits="userSpaceOnUse">
           <path d="M 24 0 L 0 0 0 24" fill="none" stroke={GRID} strokeOpacity={0.3} strokeWidth={0.6} />
         </pattern>
       </defs>
 
-      <motion.rect x={0} y={0} width={geo.box.w} height={geo.box.h} fill="url(#dpPcb)" style={{ opacity: build }} />
+      <motion.rect x={0} y={0} width={geo.box.w} height={geo.box.h} fill={`url(#${pcbId})`} style={{ opacity: build }} />
 
       <motion.g style={{ opacity: build }}>
         <Rail
@@ -362,7 +364,7 @@ export function LineCardBase({ geo, phase }: Readonly<{ geo: Geo; phase: MotionV
         <Layer r={geo.trunk} geo={geo} label="TRUNK" stroke={GRID} />
       </motion.g>
 
-      <Traffic geo={geo} phase={phase} health={health} />
+      <Traffic geo={geo} phase={phase} health={health} glowId={glowId} />
 
       {/* panel surface: chapters draw their mechanism inside this region */}
       <motion.rect

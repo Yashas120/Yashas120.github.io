@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Minus, Square, X } from "lucide-react";
 import { hexToRgba } from "@/lib/utils";
 import { PHOSPHOR, type AppDef, type WinState } from "./types";
@@ -50,6 +50,7 @@ export function Window({
   children,
 }: Readonly<WindowProps>) {
   const Icon = app.icon;
+  const reducedMotion = useReducedMotion();
   const filled = mobile || state.maximized;
 
   // Maximizing on desktop stops short of the floating dock; on mobile the dock is
@@ -80,7 +81,7 @@ export function Window({
       initial={{ opacity: 0, scale: 0.97, y: 8 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97, y: 8 }}
-      transition={{ duration: 0.16, ease: "easeOut" }}
+      transition={{ duration: reducedMotion ? 0 : 0.16, ease: "easeOut" }}
       onPointerDown={onFocus}
       className={`absolute flex flex-col overflow-hidden border ${
         filled ? "" : "rounded-xl win-shadow"
@@ -122,7 +123,7 @@ export function Window({
                 aria-label={`Minimize ${app.short}`}
                 onClick={onMinimize}
                 onPointerDown={(e) => e.stopPropagation()}
-                className="rounded p-1 text-zinc-500 transition-colors hover:bg-line/10 hover:text-zinc-200"
+                className="flex h-11 w-11 items-center justify-center rounded text-zinc-500 transition-colors hover:bg-line/10 hover:text-zinc-200 sm:h-8 sm:w-8"
               >
                 <Minus className="h-3 w-3" />
               </button>
@@ -130,7 +131,7 @@ export function Window({
                 aria-label={state.maximized ? `Restore ${app.short}` : `Maximize ${app.short}`}
                 onClick={onToggleMax}
                 onPointerDown={(e) => e.stopPropagation()}
-                className="rounded p-1 text-zinc-500 transition-colors hover:bg-line/10 hover:text-zinc-200"
+                className="flex h-11 w-11 items-center justify-center rounded text-zinc-500 transition-colors hover:bg-line/10 hover:text-zinc-200 sm:h-8 sm:w-8"
               >
                 <Square className="h-2.5 w-2.5" />
               </button>
@@ -140,7 +141,7 @@ export function Window({
             aria-label={`Close ${app.short}`}
             onClick={onClose}
             onPointerDown={(e) => e.stopPropagation()}
-            className="rounded p-1 text-zinc-500 transition-colors hover:bg-red-500/20 hover:text-red-400"
+            className="flex h-11 w-11 items-center justify-center rounded text-zinc-500 transition-colors hover:bg-red-500/20 hover:text-red-400 sm:h-8 sm:w-8"
           >
             <X className="h-3 w-3" />
           </button>

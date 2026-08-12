@@ -1,166 +1,198 @@
-/**
- * Content for /fde — "THE DEPLOYMENT DOSSIER".
- *
- * All copy for the sticky scroll film lives here so the scene components carry
- * geometry only. Every claim is scoped to what Yashas built or directly drove:
- * he has not held the title Forward Deployed Engineer, the Webex work is
- * labelled a proof of concept, and approximate figures stay approximate.
- *
- * Note on employer figures: the Cisco estate numbers in scene 04 are rendered
- * directly here (owner-authorised for this page) rather than routed through
- * src/lib/disclosure.ts, which still withholds them on the other endpoints.
- */
+/** FDE-specific ordering and framing. Facts live in profileEvidence.ts. */
+
+import { contact } from "@/data/profileEvidence";
+
+export type DossierVisual =
+  | "cover"
+  | "workflow"
+  | "tool"
+  | "production"
+  | "rollout"
+  | "diagnosis"
+  | "constraints"
+  | "leverage"
+  | "rag"
+  | "optical"
+  | "release";
 
 export interface DossierScene {
-  /** Scene number shown in the progress rail, e.g. "01". */
   id: string;
-  /** Short mono label for the rail and the sheet header. */
   slug: string;
-  eyebrow?: string;
+  eyebrow: string;
   headline: string;
-  body?: string;
-  /** Short supporting lines, rendered as annotations rather than cards. */
+  body: string;
   notes?: string[];
-  /** Single emphasised outcome, if the scene has one. */
   outcome?: string;
-  /**
-   * Which surface of the active theme the scene sits on. "deep" is a small step
-   * inside the same theme (used by the production scenes), never a switch to the
-   * other theme — see isDeepScene() in components/fde/dossier/kit.tsx.
-   */
   panel: "base" | "deep";
+  visual: DossierVisual;
+  evidenceIds: string[];
 }
 
 export const fdeChrome = {
-  name: "Yashas Kadambi",
+  name: contact.name,
   descriptor: "Forward Deployed Engineering",
-  links: {
-    // No FDE-specific PDF is published in this repository, so the résumé slot
-    // points at the LinkedIn profile rather than a URL that would 404.
-    resume: { label: "Resume", href: "https://www.linkedin.com/in/yashas120", external: true },
-    github: { label: "GitHub", href: "https://github.com/Yashas120", external: true },
-    email: { label: "Email", href: "mailto:ykadambi@ucsd.edu", external: false },
-  },
-  email: "ykadambi@ucsd.edu",
-  github: "https://github.com/Yashas120",
-  linkedin: "https://www.linkedin.com/in/yashas120",
+  email: contact.email,
+  github: contact.github,
+  linkedin: contact.linkedin,
+  demos: contact.demos,
+  resumeUrl: contact.resumeUrl,
 } as const;
 
 export const fdeMetaDossier = {
-  title: "Yashas Kadambi — Deployment Dossier",
+  title: "Yashas Kadambi — Forward Deployed Engineering",
   description:
-    "A field document: ambiguous operational problems turned into systems people use, across backend systems, deployment automation, developer tooling, and enterprise prototypes.",
+    "A complete role-lens portfolio for a production software engineer spanning discovery, implementation, deployment, debugging, optical systems, research, projects, and teaching.",
   ogTitle: "Yashas Kadambi — Forward Deployed Engineering",
   ogDescription:
-    "Understand the workflow, build something the domain can use, read production before changing it, deploy safely, hand it off.",
+    "A complete engineering record ordered through discovery, implementation, safe deployment, operational debugging, and durable handoff.",
   url: "https://yashas120.github.io/fde/",
-};
+} as const;
 
-export const scenes: DossierScene[] = [
+export const scenes = [
   {
     id: "01",
-    slug: "translate ambiguity",
-    eyebrow: "FORWARD DEPLOYED ENGINEERING",
+    slug: "role lens",
+    eyebrow: "FORWARD DEPLOYED ENGINEERING · COMPLETE PROFILE",
     headline: "I turn ambiguous operational problems into systems people can actually use.",
     body:
-      "Production engineer with ~3 years across backend systems, deployment automation, developer tooling, and enterprise prototypes. M.S. Computer Science at UC San Diego.",
-    notes: ["Understand → model → build → deploy → hand\u00A0off"],
+      "I’m Yashas Kadambi, a software engineer with roughly three years of production experience across backend systems, cloud infrastructure, deployment tooling, optical platform software, and operational debugging. I’m preparing to begin an MS in Computer Science at UC San Diego in September 2026.",
+    notes: [
+      "Complete engineering record, ordered through a forward-deployed lens: discover, build, deploy, debug, and leave durable leverage.",
+      "Schneider: discovered, built, deployed, and handed off a workflow tool used after the internship.",
+    ],
     panel: "base",
+    visual: "cover",
+    evidenceIds: ["ED-01", "PE-01", "PE-08", "PE-21", "CP-01", "LK-01", "LK-02", "LK-03", "LK-05"],
   },
   {
     id: "02",
-    slug: "understand the workflow",
-    headline: "The first system to debug is the problem itself.",
+    slug: "discover the workflow",
+    eyebrow: "FIELD NOTE 01 · DISCOVERY",
+    headline: "Start with the workflow, not the feature request.",
     body:
-      "At Schneider Electric, I was the only software engineer embedded in a mechanical engineering team. I interviewed domain experts, mapped their calculations, and translated informal processes into a maintainable application.",
+      "At Schneider Electric, I was the sole software engineer inside a mechanical switchgear team. I interviewed domain experts and mapped how a component, its required tests, and its expected failure modes related before writing the application.",
+    notes: ["Users: switchgear engineers · Constraint: knowledge lived across people and spreadsheets · Ownership: requirements through handoff"],
     panel: "base",
+    visual: "workflow",
+    evidenceIds: ["PE-21", "CP-01"],
   },
   {
     id: "03",
-    slug: "build for the domain",
-    headline: "From twenty workflows to one deployed tool.",
+    slug: "build and hand off",
+    eyebrow: "FIELD NOTE 02 · SHIPPED TOOL",
+    headline: "Ship the tool and the handoff.",
     body:
-      "I built a Python/Tkinter Windows application with an Excel-backed structured knowledge store and SSO, then handled deployment, documentation, and knowledge transfer.",
-    outcome: "~2 days → ~2 hours",
-    notes: [">90% faster · ~20 workflows · ~35 users · delivered in ~2 months"],
+      "I built and deployed a Python/Tkinter Windows application with an Excel-backed knowledge store and generated Excel test plan. I owned requirements, architecture, implementation, functional verification, security review, local deployment, documentation, and knowledge transfer.",
+    outcome: "roughly 2 days → roughly 2 hours",
+    notes: ["More than 90% less engineering effort · continued in use after the internship"],
     panel: "base",
+    visual: "tool",
+    evidenceIds: ["PE-21", "CP-06", "CP-09", "CP-10"],
   },
   {
     id: "04",
     slug: "read production",
-    headline: "Production systems reveal their real architecture through traffic.",
+    eyebrow: "PRODUCTION X-RAY · DISCOVERY",
+    headline: "Production traffic is the real dependency graph.",
     body:
-      "At Cisco, I mapped production consumers across approximately 50 services, 500,000 calls per day, 30 integrations, 12 teams, and 96 endpoints to support no-impact change planning.",
-    notes: [
-      "I also traced a production authentication defect across four repositories and decompiled two JARs to identify the least-risk fix.",
-    ],
+      "During an authentication and API-endpoint migration at Cisco, documentation did not identify every active consumer. I used production traffic evidence to find integrations across services and teams, map ownership, and support staged validation and deployment-controlled changes. The cutover completed without customer impact.",
+    notes: ["Observe actual calls · identify consumers and owners · sequence environments · stop on staging evidence · protect downstream users"],
     panel: "deep",
+    visual: "production",
+    evidenceIds: ["PE-08", "PE-12", "CP-01", "CP-02", "CP-04"],
   },
   {
     id: "05",
-    slug: "deploy safely",
-    headline: "A deployment is finished when the system is healthy—not when the command returns.",
+    slug: "sequence deployment",
+    eyebrow: "DEPLOYMENT PLAN · ORDER MATTERS",
+    headline: "Turn the architecture into an executable plan.",
     body:
-      "I exposed hidden service, load-balancer, and deployment dependencies, then staged rollouts with health checks while keeping old pods available until replacements were stable.",
-    notes: [
-      "Reusable Terraform modules and cross-region dependencies reduced deployment time by approximately 50%.",
-    ],
+      "I built and maintained reusable Terraform components across AWS infrastructure and separated work that could run concurrently from stages that had to wait for healthy prerequisites. Safe speed came from modeling dependencies, not from making everything concurrent.",
+    notes: ["Also: an asynchronous DynamoDB → SNS → regional SQS → services → SQL path, and a database cutover using transaction-log continuity."],
     panel: "deep",
+    visual: "rollout",
+    evidenceIds: ["PE-09", "PE-10", "CP-03", "CP-04"],
   },
   {
     id: "06",
-    slug: "repetition into leverage",
-    headline: "The next deployment should be easier than the last.",
-    panel: "base",
+    slug: "isolate the failure",
+    eyebrow: "INCIDENT TRACE · FIND THE RESPONSIBLE LAYER",
+    headline: "Trace the symptom until the responsibility is clear.",
+    body:
+      "I have followed production failures across user behavior, APIs, authentication rules, application code, dependencies, load-balancer behavior, deployment order, database queries, and old pods retained during rollout. The goal is the least-risk correction at the layer that owns the failure.",
+    notes: ["Separate cases: an access defect traced through compiled dependencies; a rollout failure exposing a hidden global URL and load-balancer dependency."],
+    panel: "deep",
+    visual: "diagnosis",
+    evidenceIds: ["PE-11", "PE-13", "CP-02", "CP-04"],
   },
   {
     id: "07",
-    slug: "AI under constraints",
-    headline: "Enterprise AI is also a deployment problem.",
+    slug: "fit the environment",
+    eyebrow: "CONSTRAINT SHEET · THE ENVIRONMENT IS PART OF THE PRODUCT",
+    headline: "A correct artifact still has to run where the work happens.",
     body:
-      "I built a RAG proof of concept across 10 Webex groups and thousands of messages, with scheduled ingestion, vector retrieval, group-membership authorization, and approved GPT-4 access.",
-    notes: ["Proof of concept"],
+      "I have adapted delivery paths for air-gapped legacy environments, Apple Silicon developer machines, and secure-boot-aware hardware recovery. The implementation changed with the constraint: bundle offline dependencies, reproduce a compatible runtime, or respect the platform’s trust boundary.",
+    notes: ["Offline logging migration · compatible local database runtime · Colima container setup · secure-boot-aware recovery"],
     panel: "base",
+    visual: "constraints",
+    evidenceIds: ["PE-05", "PE-14", "PE-20", "CP-04", "CP-06"],
   },
-];
+  {
+    id: "08",
+    slug: "leave leverage",
+    eyebrow: "LEVERAGE RAIL · THE NEXT TEAM SHOULD NOT START OVER",
+    headline: "A fix becomes valuable when the next team can reuse it.",
+    body:
+      "Across roles, I turned repeated work into shared infrastructure: SDK generation and publication, hardware-independent C validation, repository onboarding and setup, a local emulator, human-approved operations automation, and guides, runbooks, architecture notes, and knowledge transfer.",
+    notes: ["Ownership and source remain explicit for every artifact."],
+    panel: "base",
+    visual: "leverage",
+    evidenceIds: ["PE-06", "PE-16", "PE-18", "PE-20", "CP-06", "CP-09", "AW-05"],
+  },
+  {
+    id: "09",
+    slug: "bound the prototype",
+    eyebrow: "APPLIED AI · PROOF OF CONCEPT",
+    headline: "Prototype where a human can still verify the answer.",
+    body:
+      "I built a Webex RAG proof of concept that ingested approved conversations, retrieved topic-relevant context, respected membership authorization, generated a draft answer with an approved model, and captured feedback for evaluation.",
+    notes: ["Engineering analytics: I built the Python backend; others built the Angular frontend.", "Multilingual voice assistant: collaborative CPU-only prototype for government subsidy and relief information."],
+    panel: "base",
+    visual: "rag",
+    evidenceIds: ["PE-15", "AW-06", "PR-12", "CP-08"],
+  },
+  {
+    id: "10",
+    slug: "below services",
+    eyebrow: "BEYOND THE PRIMARY LENS · OPTICAL PLATFORM SOFTWARE",
+    headline: "The same systems discipline continues below the service boundary.",
+    body:
+      "As a Cisco Optical Software Development Engineer II, I built optical line-card software at the hardware/software boundary: pre-hardware bring-up, clock-and-data-recovery integration, warm-reload continuity, QPSK and high-speed Ethernet modes, resource reconciliation, secure-boot recovery, performance-monitoring tools, and C validation infrastructure.",
+    notes: [
+      "Not presented as forward-deployed work. The transfer is systems discipline: isolate boundary failures, model state, validate without full hardware, and make recovery safe.",
+      "Validation: co-authored the CMocka framework and personally built its third-iteration stubbing architecture. Hardware-independent feedback moved from tens of minutes to seconds.",
+    ],
+    panel: "base",
+    visual: "optical",
+    evidenceIds: ["PE-01", "PE-02", "PE-03", "PE-04", "PE-05", "PE-06", "PE-07", "CP-05"],
+  },
+  {
+    id: "11",
+    slug: "release the record",
+    eyebrow: "HANDOFF · COMPLETE RECORD",
+    headline: "One operating pattern. A complete engineering record.",
+    body:
+      "Continue to related public implementation labs ↓ Forward-deployed work leads the story because it is the role lens. The dossier continues below with every verified role, the complete project index, two publications, teaching across 656 learners, education, recognition, engineering scope, and direct evidence links.",
+    notes: ["Continue into the verified record."],
+    panel: "base",
+    visual: "release",
+    evidenceIds: ["PE-01", "PE-08", "PE-17", "PE-21", "PE-22", "RS-01", "RS-02", "ED-01", "ED-02"],
+  },
+] satisfies readonly DossierScene[];
 
-/** Scene 06, revealed one at a time against the same automation rail. */
 export const leverageItems = [
-  {
-    id: "sdk",
-    label: "SDK CI",
-    line: "SDK CI: approximately four hours of manual work per SDK → automated pipeline supporting roughly 200 API operations",
-  },
-  {
-    id: "onboarding",
-    label: "repo onboarding",
-    line: "Repository onboarding automated across approximately 200 repositories and 13 GitHub accounts for a 20-person team",
-  },
-  {
-    id: "cmocka",
-    label: "CMocka",
-    line: "CMocka infrastructure across 122 production sources and ~430 stubs: approximately 30 minutes → 10 seconds",
-  },
-  {
-    id: "silicon",
-    label: "Apple Silicon",
-    line: "Apple Silicon DataStax setup: a three-month blocker replaced with an approximately 30-minute scripted path for ~20 developers",
-  },
-  {
-    id: "log4j",
-    label: "air-gapped",
-    line: "Air-gapped Log4j modernization across ~50 VMs with no downtime",
-  },
-];
-
-export const handoff = {
-  slug: "handoff",
-  headline: "Listen closely. Build concretely. Leave the system stronger.",
-  body:
-    "I am exploring Forward Deployed Engineer roles where technical depth, ambiguity, deployment, and user outcomes meet.",
-  name: "Yashas Kadambi",
-  education: "M.S. Computer Science · UC San Diego",
-  email: "ykadambi@ucsd.edu",
-  stamps: ["UNDERSTOOD", "SHIPPED", "VERIFIED", "HANDED OFF"],
-  cta: "Start a conversation",
-};
+  { id: "sdk", label: "CI PIPELINE", line: "API specification change → generated and published Python and Java SDKs · individually built; production deployment owned elsewhere" },
+  { id: "cmocka", label: "TEST HARNESS", line: "Hardware-coupled validation → feedback in seconds · framework co-authored; third-iteration stubbing architecture personally built" },
+  { id: "setup", label: "SETUP PATH", line: "Repeated environment blockers → reusable repository, Apple Silicon, and local-emulator setup paths" },
+  { id: "handoff", label: "RUNBOOK + KT", line: "Tacit operating knowledge → versioned guides, architecture notes, onboarding, and knowledge transfer" },
+] as const;

@@ -84,9 +84,9 @@ export const hero = {
     "Software engineer with roughly three years of production experience at Cisco. Incoming UC San Diego M.S. Computer Science student.",
   evidence: [
     { value: "2 days → 2 hours", note: "switchgear test scoping, after the tool shipped" },
-    { value: "~50% faster deployments", note: "independent work separated from prerequisite-bound work" },
-    { value: "4 hours per SDK → automated", note: "client SDKs regenerate on contract change" },
-    { value: "35-user deployed workflow", note: "still in use after the internship ended" },
+    { value: "safe parallel stages", note: "independent work separated from prerequisite-bound work" },
+    { value: "API change → published SDKs", note: "client SDKs regenerate on contract change" },
+    { value: "deployed workflow", note: "still in use after the internship ended" },
   ],
   primaryAction: { label: "See how I deliver", href: "#workflow-first" },
 };
@@ -156,9 +156,9 @@ export const flagship: FDECaseStudy = {
   deployment:
     "Deployed to the team's own machines, demonstrated to the engineers who would use it, then documented and handed over so it could outlive the internship.",
   adoption:
-    "Approximately 35 engineers used the deployed application, and the team continued using it after the internship.",
+    "The engineering team used the deployed application and continued using it after the internship.",
   outcome:
-    "The workflow reduced actual engineering effort from approximately two days to approximately two hours—more than 90%—across about 20 feature workflows.",
+    "The workflow reduced actual engineering effort from approximately two days to approximately two hours—more than 90%.",
   reusableLeverage: [
     "A part-to-test model the team maintains instead of rebuilding in meetings",
     "Setup and usage documentation plus a knowledge-transfer session",
@@ -212,16 +212,11 @@ export const discovery: FDECaseStudy = {
   disclosure: "public-safe",
 };
 
-/**
- * Held: the same Cisco traffic and integration figures this repository already
- * withholds on the other endpoints. Flip `approved` only once they are cleared.
- */
+/** Public source stores only the safe fallback; private review values live elsewhere. */
 export const discoveryScale: DisclosureReview = {
   approved: false,
   note: "Cisco traffic/integration figures — hold until cleared for public disclosure.",
-  exact: [
-    "The analysis identified approximately 30 integrations across 12 teams in a service estate handling about 500,000 API calls per day. I then supported staged validation and deployment-controlled feature flags across 96 staging and production endpoint deployments, completing the production cutover without customer impact.",
-  ],
+  exact: [],
   fallback:
     "The analysis identified active integrations across multiple services and teams. I then supported staged validation and deployment-controlled feature flags so the production cutover could complete without customer impact.",
 };
@@ -229,14 +224,7 @@ export const discoveryScale: DisclosureReview = {
 export const discoveryFacts: DisclosedFacts = {
   approved: false,
   note: "Cisco estate/traffic counts — hold until cleared for public disclosure.",
-  exact: [
-    { label: "services", value: "~50" },
-    { label: "API calls / day", value: "~500,000" },
-    { label: "integrations found", value: "~30" },
-    { label: "owning teams", value: "12" },
-    { label: "endpoint deployments", value: "96" },
-    { label: "customer impact", value: "none" },
-  ],
+  exact: [],
 };
 
 export const discoverySignals = [
@@ -274,7 +262,7 @@ export const sequencing: FDECaseStudy = {
   deployment: "Independent stages run concurrently; dependent stages stay gated behind a healthy prerequisite.",
   adoption: "Used across the shared deployment path rather than as a one-off script.",
   outcome:
-    "Reduced overall deployment time by approximately 50%. Parallel database bring-up across three regions saved approximately four hours in applicable deployments.",
+    "Shortened the deployment path by running independent work concurrently while retaining prerequisite and health gates.",
   reusableLeverage: [
     "Reusable Terraform components other teams could adopt instead of rebuilding equivalent deployment logic",
   ],
@@ -283,18 +271,11 @@ export const sequencing: FDECaseStudy = {
   disclosure: "public-safe",
 };
 
-/** Held: the Cisco estate counts this repository already withholds elsewhere. */
+/** Public source intentionally contains no held employer counts. */
 export const sequencingFacts: DisclosedFacts = {
   approved: false,
   note: "Cisco estate figures — hold until cleared for public disclosure.",
-  exact: [
-    { label: "backend services", value: "~50" },
-    { label: "Lambda functions", value: "~35" },
-    { label: "databases", value: "4" },
-    { label: "AWS accounts", value: "3" },
-    { label: "regions", value: "3" },
-    { label: "engineers supported", value: "~40" },
-  ],
+  exact: [],
 };
 
 /** Public-safe replacement shown while the counts above are held. */
@@ -379,15 +360,15 @@ export const constrainedCases: ConstrainedCase[] = [
     id: "air-gapped",
     title: "Air-gapped modernization",
     environment: "no internet, no ordinary build path, no downtime window",
-    copy: "Worked on modernizing approximately 50 air-gapped VM environments from end-of-life Log4j 1 to a patched Log4j 2 release. Three legacy environments required deeper dependency remediation and decompilation because source and ordinary internet-based build paths were unavailable. The rollout completed without downtime.",
+    copy: "Worked on modernizing air-gapped legacy environments from end-of-life logging software to a patched release. Difficult environments required deeper dependency remediation because source and ordinary internet-based build paths were unavailable. The rollout completed without downtime.",
     weight: "primary",
     ownership: "collaborative",
   },
   {
     id: "apple-silicon",
     title: "Apple Silicon compatibility",
-    environment: "a three-month blocker on the machines the team actually had",
-    copy: "Unblocked approximately 20 developers after a three-month DataStax Enterprise compatibility issue on Apple Silicon by establishing Java 8 x86/Rosetta and legacy Java 7 execution paths, then packaging the environment into an approximately 30-minute setup script.",
+    environment: "a legacy compatibility blocker on the machines the team actually had",
+    copy: "Unblocked developers facing a legacy database compatibility issue on Apple Silicon by establishing compatible Java execution paths and packaging the environment into a reusable setup script.",
     weight: "supporting",
     ownership: "individual",
   },
@@ -395,7 +376,7 @@ export const constrainedCases: ConstrainedCase[] = [
     id: "colima",
     title: "Enterprise container workflow",
     environment: "corporate certificates, authentication, and a licensing constraint",
-    copy: "Engineered a manager-approved Colima development environment for approximately 20 engineers, integrating corporate certificates, authentication, container storage, and Apple Silicon compatibility while avoiding roughly $1,500 in annual Docker Desktop licensing.",
+    copy: "Engineered a manager-approved Colima development environment integrating corporate certificates, authentication, container storage, and Apple Silicon compatibility.",
     weight: "supporting",
     ownership: "individual",
   },
@@ -423,7 +404,7 @@ export const prototypes: PrototypeCase[] = [
     id: "rag-assistant",
     title: "Group-aware engineering RAG",
     label: "Proof of concept · demonstrated internally",
-    copy: "Built and demonstrated a retrieval-augmented assistant over thousands of engineering messages from approximately 10 topic-specific Webex groups. The proof of concept used vector retrieval, scheduled corpus updates, and an approved GPT-4 service to answer engineering questions while respecting source-group membership.",
+    copy: "Built and demonstrated a retrieval-augmented assistant over approved engineering conversations. The proof of concept used vector retrieval, scheduled corpus updates, an approved model, and source-group membership checks.",
     demonstrated: [
       "User problem discovery: knowledge existed but was difficult to retrieve.",
       "Continuous ingestion through scheduled updates.",
@@ -440,12 +421,11 @@ export const prototypes: PrototypeCase[] = [
     title: "Engineering analytics",
     label: "Python backend · Angular frontend built by others",
     copy: "Built the Python backend for a leadership-recognized engineering analytics platform combining Jira, SonarQube, and defect-tracking data. The system supported persisted analytics and optional live refresh so managers could examine defect ownership, code-quality trends, component and team comparisons, and MTTR.",
-    // Organizational scale is an employer figure; held on the same terms as the
-    // other Cisco counts. The exact wording is kept for the review, not rendered.
+    // Organizational scale is not stored in this public repository.
     extra: {
       approved: false,
       note: "Cisco organizational scale — hold until cleared for public disclosure.",
-      exact: ["The data covered an organization of approximately 2,000 people."],
+      exact: [],
       fallback: "The data covered a large engineering organization.",
     },
     ownership: "collaborative",
@@ -476,7 +456,7 @@ export const ragDemo = {
       chunks: ["group/ci-cd", "group/platform"],
       lines: [
         "A scheduled update re-ingests the topic groups, so an answer reflects the discussion as of the last run rather than a one-time snapshot.",
-        "Thousands of engineering messages across roughly 10 topic-specific groups sit behind it.",
+        "Approved topic-specific engineering conversations sit behind it.",
       ],
     },
     {
@@ -523,7 +503,7 @@ export const leverage: LeverageItem[] = [
   {
     id: "sdk-pipeline",
     title: "SDK delivery pipeline",
-    copy: "Built the complete GitHub Actions pipeline that regenerated and published Python and Java client SDKs whenever downstream Swagger/OpenAPI contracts changed, replacing approximately four hours of manual work per SDK across roughly 200 API operations.",
+    copy: "Built the complete GitHub Actions pipeline that regenerated and published Python and Java client SDKs whenever downstream Swagger/OpenAPI contracts changed, replacing repeated manual release work.",
     note: "The pipeline remained active more than three years after the internship.",
     link: { label: "Public Java SDK artifact", href: "https://github.com/CiscoDevNet/px-cloud-java-sdk" },
     ownership: "individual",
@@ -531,19 +511,19 @@ export const leverage: LeverageItem[] = [
   {
     id: "repo-onboarding",
     title: "Repository onboarding automation",
-    copy: "Automated onboarding across approximately 200 repositories in 13 accounts, replacing repository-by-repository cloning with a one-trigger workflow used by a 20-person team.",
+    copy: "Automated multi-repository onboarding, replacing repository-by-repository cloning with a reusable triggered workflow.",
     ownership: "individual",
   },
   {
     id: "documentation",
     title: "Documentation",
-    copy: "Authored or maintained approximately 30 setup guides, database guides, runbooks, SOPs, and architecture documents, then conducted knowledge-transfer sessions so difficult setup and operational knowledge could be reused.",
+    copy: "Authored and maintained setup guides, database guides, runbooks, SOPs, and architecture documents, then conducted knowledge-transfer sessions so difficult setup and operational knowledge could be reused.",
     ownership: "individual",
   },
   {
     id: "mentorship",
     title: "Mentorship and adoption",
-    copy: "Mentored an intern and a non-CS apprentice through hands-on delivery and onboarded four engineers across cloud-migration and legacy-platform teams using reusable setup and architecture guidance.",
+    copy: "Mentored an intern and a non-CS apprentice through hands-on delivery and helped onboard engineers using reusable setup and architecture guidance.",
     ownership: "individual",
   },
   {
@@ -555,7 +535,7 @@ export const leverage: LeverageItem[] = [
   {
     id: "white-box-testing",
     title: "White-box testing framework",
-    copy: "Co-authored a CMocka-based white-box framework that compiled 122 production source files against approximately 430 stubbed SDK boundaries and reduced a hardware-independent build cycle from approximately 30 minutes to approximately 10 seconds. The framework became mandatory for newly added code.",
+    copy: "Co-authored a CMocka-based white-box framework and personally built its third-iteration stubbing architecture, reducing hardware-independent feedback from tens of minutes to seconds.",
     ownership: "collaborative",
   },
 ];
@@ -567,34 +547,34 @@ export const leverageDiffs = [
     title: "keeping client SDKs current",
     before: [
       "a downstream contract changes, so hand-edit the Python SDK",
-      "hand-edit the Java SDK across roughly 200 API operations",
-      "about four hours per SDK, every time, easy to get wrong",
+      "hand-edit the Java SDK across a broad API surface",
+      "repeat generation and publication every time, easy to get wrong",
     ],
     after: [
       "GitHub Actions regenerates and publishes both SDKs on contract change",
       "still running more than three years after the internship that built it",
     ],
-    delta: "4h per SDK → automated",
+    delta: "manual release work → automated",
   },
   {
     id: "onboarding",
     title: "getting a new engineer set up",
-    before: ["clone roughly 200 repositories one at a time", "repeat the whole thing for every new joiner"],
-    after: ["one triggered workflow across 13 accounts", "used by a 20-person team"],
-    delta: "~200 repos · one trigger",
+    before: ["clone many repositories one at a time", "repeat the whole thing for every new joiner"],
+    after: ["one triggered multi-repository workflow", "a reusable onboarding path"],
+    delta: "many repositories · one trigger",
   },
   {
     id: "environment",
     title: "handing over a hard environment",
-    before: ["walk each engineer through the setup in person", "a three-month blocker stays a three-month blocker"],
-    after: ["a packaged setup script that reproduces the working environment", "roughly 30 minutes, unattended"],
-    delta: "~20 developers unblocked",
+    before: ["walk each engineer through the setup in person", "a compatibility blocker stays unresolved"],
+    after: ["a packaged setup script that reproduces the working environment", "repeatable and unattended"],
+    delta: "developers unblocked",
   },
   {
     id: "knowledge",
     title: "operational knowledge",
     before: ["the person who built it explains it again", "it leaves when they do"],
-    after: ["~30 setup guides, runbooks, SOPs and architecture documents", "knowledge-transfer sessions so it survives handover"],
+    after: ["setup guides, runbooks, SOPs and architecture documents", "knowledge-transfer sessions so it survives handover"],
     delta: "reusable after handover",
   },
 ];

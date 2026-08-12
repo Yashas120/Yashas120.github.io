@@ -14,26 +14,29 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { chapterForPanel, panelLabel, type PanelId } from "@/data/devops/chapters";
+import { chapterForPanel, chapters, panelLabel, type ChapterId, type PanelId } from "@/data/devops/chapters";
 import { InspectorTabs } from "./InspectorTabs";
 import { Panel } from "./panels/registry";
 import { useInspectorState } from "./useInspectorState";
 import { CHROME_H, CONTEXT_H, DV, HEADER_H } from "./tokens";
 
-function ContextBar({ panel, pinned }: Readonly<{ panel: PanelId; pinned: boolean }>) {
+function ContextBar({ panel, chapter, pinned }: Readonly<{ panel: PanelId; chapter: ChapterId; pinned: boolean }>) {
+  const path = pinned
+    ? chapterForPanel(panel).path
+    : chapters.find((item) => item.id === chapter)?.path ?? chapterForPanel(panel).path;
   return (
     <div
       className="flex items-center justify-between gap-2 border-b px-3 font-mono text-[12px]"
       style={{ height: CONTEXT_H, borderColor: DV.border, color: DV.muted, background: DV.inspector }}
     >
-      <span className="truncate">{chapterForPanel(panel).path}</span>
+      <span className="truncate">{path}</span>
       <span style={{ color: pinned ? DV.amber : DV.muted }}>{pinned ? "selected" : "following scroll"}</span>
     </div>
   );
 }
 
 export function InspectorDock() {
-  const { panel, pinned, select } = useInspectorState();
+  const { panel, chapter, pinned, select } = useInspectorState();
   const [idle, setIdle] = useState(false);
 
   useEffect(() => {
@@ -58,12 +61,12 @@ export function InspectorDock() {
         }}
       >
         <InspectorTabs active={panel} onSelect={select} idPrefix="dock" />
-        <ContextBar panel={panel} pinned={pinned} />
+        <ContextBar panel={panel} chapter={chapter} pinned={pinned} />
         <div className="min-h-0 flex-1 overflow-y-auto">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={panel}
-              id={`dock-panel-${panel}`}
+              id="dock-panel"
               role="tabpanel"
               aria-labelledby={`dock-tab-${panel}`}
               tabIndex={-1}
@@ -72,7 +75,7 @@ export function InspectorDock() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
             >
-              <Panel id={panel} live />
+              <Panel id={panel} live chapter={chapter} />
             </motion.div>
           </AnimatePresence>
         </div>
