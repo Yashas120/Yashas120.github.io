@@ -777,6 +777,18 @@
   margin-bottom: 3rem;
 }
 
+.projectLabs .sectionEyebrow {
+  color: #ff8a5f;
+}
+
+.projectLabs .sectionHeading {
+  color: #f8f6f1;
+}
+
+.projectLabs .sectionIntro {
+  color: #b8bdc8;
+}
+
 .projectMechanism {
   margin: clamp(2.5rem, 6vw, 5rem) 0 1rem;
   padding: 1rem;

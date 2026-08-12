@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { AlertCircle } from "lucide-react";
+import { DEMOS } from "@/data/demos";
 import { BootSequence } from "../BootSequence";
 import { BootShell } from "../BootShell";
 import { apps } from "../apps/registry";
@@ -14,7 +15,8 @@ type LabMode = "desktop" | "boot" | "shell";
 export function KernelLab() {
   const [mode, setMode] = useState<LabMode>("desktop");
   const validIds = useMemo(() => apps.map((app) => app.id), []);
-  const route = useLabRouteState(validIds);
+  const validDemoIds = useMemo(() => DEMOS.map((demo) => demo.id), []);
+  const route = useLabRouteState(validIds, validDemoIds);
 
   const finishBoot = (appId?: string) => {
     setMode("desktop");
@@ -28,7 +30,9 @@ export function KernelLab() {
         initialOpen={["man"]}
         active={mode === "desktop"}
         routeAppId={route.appId}
+        routeDemoId={route.demoId}
         onAppOpen={route.openApp}
+        onDemoOpen={route.openDemo}
         onRoutedAppClose={route.closeApp}
         onReplayBoot={() => setMode("boot")}
         returnHref="/kernel"

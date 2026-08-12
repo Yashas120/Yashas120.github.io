@@ -15,7 +15,7 @@ test("renders the complete public record with one production-first H1", async ({
   await expect(page.locator("h1")).toHaveCount(1);
   await expect(page.locator("h1")).toHaveText("I make coordinated systems safer to change.");
   await expect(page.locator("#experience article")).toHaveCount(4);
-  await expect(page.locator("#systems-evidence article")).toHaveCount(4);
+  await expect(page.locator("#systems-evidence > div > article")).toHaveCount(4);
   await expect(page.locator("#research article")).toHaveCount(2);
   await expect(page.locator("#teaching li")).toHaveCount(3);
   await expect(page.locator("#education article")).toHaveCount(2);
@@ -96,17 +96,20 @@ test("reduced motion uses ordinary flow and retains the complete story", async (
   expect(firstHeight).toBeLessThan(1600);
 });
 
-test("hydration keeps key anchors stable", async ({ page }) => {
+test("hydration keeps the sticky track and story anchors stable", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/cluster/", { waitUntil: "domcontentloaded" });
-  const before = await page.evaluate(() =>
-    Object.fromEntries(["regional-consequences", "complete-profile", "contact"].map((id) => [id, document.querySelector<HTMLElement>(`#${id}`)?.offsetTop ?? 0])),
-  );
+  const before = await page.evaluate(() => ({
+    trackHeight: document.querySelector<HTMLElement>("[data-total-span] > div")?.offsetHeight ?? 0,
+    filmBottom: document.querySelector<HTMLElement>("[data-total-span]")?.getBoundingClientRect().bottom ?? 0,
+  }));
   await page.waitForTimeout(750);
-  const after = await page.evaluate(() =>
-    Object.fromEntries(["regional-consequences", "complete-profile", "contact"].map((id) => [id, document.querySelector<HTMLElement>(`#${id}`)?.offsetTop ?? 0])),
-  );
-  for (const id of Object.keys(before)) expect(Math.abs(after[id] - before[id])).toBeLessThanOrEqual(1);
+  const after = await page.evaluate(() => ({
+    trackHeight: document.querySelector<HTMLElement>("[data-total-span] > div")?.offsetHeight ?? 0,
+    filmBottom: document.querySelector<HTMLElement>("[data-total-span]")?.getBoundingClientRect().bottom ?? 0,
+  }));
+  expect(Math.abs(after.trackHeight - before.trackHeight)).toBeLessThanOrEqual(1);
+  expect(Math.abs(after.filmBottom - before.filmBottom)).toBeLessThanOrEqual(1);
 });
 
 test("no-JavaScript rendering retains story, profile, and contact", async ({ browser }) => {
