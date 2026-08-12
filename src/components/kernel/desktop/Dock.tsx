@@ -23,7 +23,7 @@ export function Dock({
         className="no-scrollbar z-[50] flex flex-shrink-0 items-center gap-1 overflow-x-auto border-t px-2 py-1.5 backdrop-blur"
         style={{ borderColor: "rgb(var(--line) / 0.1)", background: "rgb(var(--ink-900) / 0.92)" }}
       >
-        {apps.map((a) => {
+        {apps.filter((a) => !a.hiddenLauncher).map((a) => {
           const Icon = a.icon;
           const active = activeId === a.id;
           return (
@@ -61,7 +61,7 @@ export function Dock({
         className="pointer-events-auto flex items-start gap-1 rounded-2xl border px-2 py-2 backdrop-blur win-shadow"
         style={{ borderColor: "rgb(var(--line) / 0.12)", background: "rgb(var(--ink-800) / 0.8)" }}
       >
-        {apps.map((a) => {
+        {apps.filter((a) => !a.hiddenLauncher).map((a) => {
           const Icon = a.icon;
           const isOpen = openIds.includes(a.id);
           const active = activeId === a.id;

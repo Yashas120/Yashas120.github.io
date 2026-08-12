@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { profile } from "@/data/profile";
+import { demoEvidence, type DemoId } from "@/data/demos";
 import { hexToRgba } from "@/lib/utils";
 import { DesktopProvider } from "./DesktopContext";
 import { DesktopTour } from "./DesktopTour";
@@ -53,7 +54,9 @@ export function Desktop({
   initialOpen,
   active = true,
   routeAppId,
+  routeDemoId,
   onAppOpen,
+  onDemoOpen,
   onRoutedAppClose,
   onReplayBoot,
   returnHref,
@@ -62,7 +65,9 @@ export function Desktop({
   initialOpen: string[];
   active?: boolean;
   routeAppId?: string;
+  routeDemoId?: DemoId;
   onAppOpen?: (id: string) => void;
+  onDemoOpen?: (id: DemoId) => void;
   onRoutedAppClose?: () => void;
   onReplayBoot: () => void;
   returnHref: string;
@@ -75,6 +80,7 @@ export function Desktop({
   );
   const [panic, setPanic] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [demoId, setDemoId] = useState<DemoId | null>(routeDemoId ?? null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
   const openersRef = useRef(new Map<string, HTMLElement>());
@@ -119,11 +125,19 @@ export function Desktop({
     [onAppOpen, openWindow]
   );
 
+  const openDemo = useCallback((nextDemoId: DemoId) => {
+    if (document.activeElement instanceof HTMLElement) openersRef.current.set("demo-lab", document.activeElement);
+    setDemoId(nextDemoId);
+    openWindow("demo-lab");
+    onDemoOpen?.(nextDemoId);
+  }, [onDemoOpen, openWindow]);
+
   const close = useCallback((id: string) => {
     setWins((ws) => ws.filter((w) => w.id !== id));
     if (routeAppId === id) onRoutedAppClose?.();
     const opener = openersRef.current.get(id);
     openersRef.current.delete(id);
+    if (id === "demo-lab") setDemoId(null);
     window.requestAnimationFrame(() => opener?.focus());
   }, [onRoutedAppClose, routeAppId]);
 
@@ -170,6 +184,10 @@ export function Desktop({
   }, [active, openWindow, routeAppId]);
 
   useEffect(() => {
+    if (routeDemoId) setDemoId(routeDemoId);
+  }, [routeDemoId]);
+
+  useEffect(() => {
     if (!shellRef.current) return;
     shellRef.current.inert = !active || tourOpen || panic;
   }, [active, panic, tourOpen]);
@@ -197,8 +215,8 @@ export function Desktop({
     setPanic(true);
   }, []);
   const api = useMemo(
-    () => ({ open, close, isOpen: (id: string) => wins.some((w) => w.id === id), panic: triggerPanic }),
-    [open, close, triggerPanic, wins]
+    () => ({ open, close, isOpen: (id: string) => wins.some((w) => w.id === id), panic: triggerPanic, openDemo, demoId }),
+    [open, close, triggerPanic, wins, openDemo, demoId]
   );
 
   return (
@@ -249,8 +267,11 @@ export function Desktop({
 
           <AnimatePresence>
             {visible.map((w, i) => {
-              const app = byId.get(w.id);
-              if (!app) return null;
+              const registeredApp = byId.get(w.id);
+              if (!registeredApp) return null;
+              const app = registeredApp.id === "demo-lab" && demoId
+                ? { ...registeredApp, title: `demo-lab — ${demoEvidence(demoId).projectTitle}` }
+                : registeredApp;
               // On mobile only the topmost window is rendered — one app at a time.
               if (mobile && w.id !== topId) return null;
               return (

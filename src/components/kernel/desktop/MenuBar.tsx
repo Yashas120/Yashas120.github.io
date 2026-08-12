@@ -88,7 +88,7 @@ export function MenuBar({
                 Applications
               </p>
               <ul className="p-1">
-                {apps.map((a) => {
+                {apps.filter((a) => !a.hiddenLauncher).map((a) => {
                   const Icon = a.icon;
                   return (
                     <li key={a.id}>

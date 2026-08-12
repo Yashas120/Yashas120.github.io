@@ -5,6 +5,7 @@ import {
   BookOpen,
   Cpu,
   FileText,
+  FlaskConical,
   FolderTree,
   Mail as MailIcon,
   Server,
@@ -20,9 +21,22 @@ import { Procfs } from "./Procfs";
 import { Sched } from "./Sched";
 import { Systemd } from "./Systemd";
 import { Terminal } from "./Terminal";
+import { DemoLab } from "./DemoLab";
 
 /** Dock order, left to right. Positions cascade so nothing opens perfectly stacked. */
 export const apps: AppDef[] = [
+  {
+    id: "demo-lab",
+    title: "demo-lab — select a project",
+    short: "demo-lab",
+    friendly: "Live project lab",
+    blurb: "Singleton browser process for the selected project demo",
+    icon: FlaskConical,
+    hiddenLauncher: true,
+    size: { w: 960, h: 680 },
+    pos: { x: 150, y: 28 },
+    render: () => <DemoLab />,
+  },
   {
     id: "terminal",
     title: "yashas@kernel: ~",
