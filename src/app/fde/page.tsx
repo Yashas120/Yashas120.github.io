@@ -154,11 +154,13 @@ export default function FdePage() {
           "learn   = adoption",
           "codify  = playbook",
         ]}
+        // Public-safe only: this column is rendered content, so it carries no
+        // figure that is still under disclosure review.
         right={[
           "2 days → 2 hours",
           "~35 users",
-          "~30 integrations",
-          "12 teams",
+          "undocumented consumers",
+          "found in the traffic",
           "~50% faster deploys",
           "4 codebases traced",
           "~50 air-gapped envs",
