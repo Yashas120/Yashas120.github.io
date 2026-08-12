@@ -1,6 +1,7 @@
 /node_modules
 /.next/
-/.next-dev/
+# alternate dev/build dirs used via NEXT_DIST_DIR (.next-dev, .next-fde, ...)
+/.next-*/
 /dev-build/
 /out/
 /build

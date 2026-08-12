@@ -11,7 +11,8 @@ export function ThemeSwitcher() {
   const [open, setOpen] = useState(false);
   const [cursor, setCursor] = useState(0);
   const router = useRouter();
-  const pathname = usePathname();
+  // Normalised so the route checks hold with or without a trailing slash.
+  const pathname = usePathname()?.replace(/(.)\/+$/, "$1");
   // The switcher is the only cross-interface navigation, so it lives ONLY on the
   // private index (/hidden). Individually shared role pages stay standalone.
   const enabled = pathname === "/hidden";

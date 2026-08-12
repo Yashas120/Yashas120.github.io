@@ -6,12 +6,17 @@ import { useTheme } from "@/lib/useTheme";
 
 export function ThemeToggle() {
   const { light, toggle } = useTheme();
-  const pathname = usePathname();
+  // Normalised so the checks below hold whether or not the export adds a
+  // trailing slash to the route.
+  const pathname = usePathname()?.replace(/(.)\/+$/, "$1");
 
   // The kernel desktop carries its own tray toggle in the menu bar; a floating
-  // pill would sit on top of the mobile dock. /cluster is a fixed editorial
-  // canvas with its own palette, so the toggle has nothing to switch there.
-  if (pathname === "/kernel" || pathname === "/cluster") return null;
+  // pill would sit on top of the mobile dock. /cluster, /backend and /data-plane
+  // are fixed editorial canvases with their own palettes, so the toggle has
+  // nothing to switch there. /fde is not in this list: it ships a complete ivory
+  // theme and a complete midnight theme and this toggle is how you pick one.
+  const FIXED_PALETTE = ["/kernel", "/cluster", "/backend", "/data-plane"];
+  if (pathname && FIXED_PALETTE.includes(pathname)) return null;
 
   return (
     <button

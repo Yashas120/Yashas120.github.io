@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
-import { fdeMeta } from "@/data/fde";
+import { fdeMetaDossier } from "@/data/fdeDossier";
 
 export const metadata: Metadata = {
-  title: fdeMeta.title,
-  description: fdeMeta.description,
-  alternates: { canonical: fdeMeta.url },
+  title: fdeMetaDossier.title,
+  description: fdeMetaDossier.description,
+  alternates: { canonical: fdeMetaDossier.url },
   openGraph: {
-    title: fdeMeta.ogTitle,
-    description: fdeMeta.ogDescription,
-    url: fdeMeta.url,
+    title: fdeMetaDossier.ogTitle,
+    description: fdeMetaDossier.ogDescription,
+    url: fdeMetaDossier.url,
     type: "website",
     siteName: "Yashas Kadambi",
   },
   twitter: {
     card: "summary_large_image",
-    title: fdeMeta.ogTitle,
-    description: fdeMeta.ogDescription,
+    title: fdeMetaDossier.ogTitle,
+    description: fdeMetaDossier.ogDescription,
   },
 };
 

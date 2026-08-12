@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    // ES2020 is required by the /demos Bitcoin demo, which uses BigInt literals
+    // (e.g. 0xffffffffn) for its from-scratch secp256k1 implementation.
+    "target": "ES2020",
     "lib": [
       "dom",
       "dom.iterable",
@@ -33,7 +36,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next-dev/types/**/*.ts",
-    "dev-build/types/**/*.ts"
+    "dev-build/types/**/*.ts",
+    ".next-fde/types/**/*.ts",
+    ".next-demos/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

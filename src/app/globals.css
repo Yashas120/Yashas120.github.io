@@ -228,10 +228,183 @@ html.light .crt::after {
   transform: translateY(0);
 }
 
+/* ============ /devtools — DevOps & platform endpoint ============
+   Scoped palette. Every pair below was chosen so body copy, technical labels
+   and status colours keep WCAG AA contrast against the surface they sit on in
+   both themes, which the shared zinc ramp could not guarantee for the amber,
+   cyan, green and violet accents this route relies on. */
+.devops {
+  --dv-canvas: 7 10 14;
+  --dv-browser: 11 15 20;
+  --dv-inspector: 10 13 18;
+  --dv-raised: 17 24 33;
+  --dv-border: 37 49 64;
+  --dv-text: 232 238 245;
+  --dv-muted: 155 170 189;
+  --dv-amber: 255 180 84;
+  --dv-cyan: 103 221 242;
+  --dv-green: 140 233 154;
+  --dv-red: 255 123 114;
+  --dv-violet: 195 166 255;
+
+  background: rgb(var(--dv-canvas));
+  color: rgb(var(--dv-text));
+}
+
+html.light .devops {
+  --dv-canvas: 244 246 248;
+  --dv-browser: 255 255 255;
+  --dv-inspector: 248 250 252;
+  --dv-raised: 255 255 255;
+  --dv-border: 203 213 225;
+  --dv-text: 23 32 51;
+  --dv-muted: 82 97 118;
+  --dv-amber: 154 82 0;
+  --dv-cyan: 0 108 122;
+  --dv-green: 23 107 44;
+  --dv-red: 163 33 25;
+  --dv-violet: 104 66 166;
+}
+
+.dv-card {
+  border: 1px solid rgb(var(--dv-border));
+  border-radius: 8px;
+  background: rgb(var(--dv-raised));
+}
+
+/* Small monospace label: a category, a technology, a classification. */
+.dv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: 1px solid rgb(var(--dv-border));
+  border-radius: 6px;
+  padding: 0.125rem 0.5rem;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgb(var(--dv-muted));
+}
+
+/* One focus treatment for the whole route: 2px, offset, always visible. */
+.devops :focus-visible {
+  outline: 2px solid rgb(var(--dv-amber));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* ============ /fde deployment dossier ============
+   Two separate, complete themes. The page picks one from the site's light/dark
+   toggle and stays on it for the whole read — it never transitions between them
+   while scrolling. `--fde-bg-deep` / `--fde-paper-deep` are a small step inside
+   whichever theme is active (used by the production scenes), not a flip to the
+   other theme.
+
+   The repository default is dark (:root), with html.light overriding, so the
+   midnight values live on .fde-root and the ivory values override them. */
+
+.fde-root {
+  /* header height, referenced by the stage's safe top padding */
+  --fde-header: 64px;
+
+  /* midnight */
+  --fde-bg: #0f1216;
+  --fde-bg-deep: #141a21;
+  --fde-paper: #151a20;
+  --fde-paper-deep: #1a222b;
+  --fde-ink: #f3f0e8;
+  --fde-rule: rgba(243, 240, 232, 0.16);
+  /* accents lifted just enough to hold contrast on a dark field */
+  --fde-cobalt: #5c7dff;
+  --fde-orange: #ff6e56;
+  --fde-green: #35c08c;
+}
+
+html.light .fde-root {
+  /* mineral ivory */
+  --fde-bg: #f3f0e8;
+  --fde-bg-deep: #e7e2d6;
+  --fde-paper: #faf8f2;
+  --fde-paper-deep: #f1ede3;
+  --fde-ink: #151719;
+  --fde-rule: rgba(21, 23, 25, 0.14);
+  --fde-cobalt: #315cff;
+  --fde-orange: #ff593d;
+  --fde-green: #28a878;
+}
+
+@media (min-width: 768px) {
+  .fde-root {
+    --fde-header: 56px;
+  }
+}
+
+.fde-root ::selection {
+  background: color-mix(in srgb, var(--fde-cobalt) 24%, transparent);
+}
+
+.fde-grain {
+  opacity: 0.32;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23g)' opacity='0.16'/></svg>");
+  background-size: 140px 140px;
+}
+
+html.light .fde-grain {
+  opacity: 0.5;
+}
+
+.fde-rules {
+  opacity: 0.08;
+  background-image:
+    linear-gradient(90deg, currentColor 1px, transparent 1px),
+    linear-gradient(90deg, currentColor 1px, transparent 1px),
+    linear-gradient(currentColor 1px, transparent 1px);
+  background-position: 2.2vw 0, 43% 0, 0 calc(100% - 12vh);
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* One focus treatment for the route. */
+.fde-root :focus-visible {
+  outline-color: var(--fde-cobalt);
+}
+
+/* ============ /backend — backend & platform endpoint ============
+   A fixed near-black operations surface that does not follow the site-wide light
+   theme, so the state colours (blue active, green converged, amber review, red
+   failure) keep their meaning and their measured contrast. */
+
+.bk-root {
+  /* header height, referenced by the sticky stage's safe top padding */
+  --bk-header: 56px;
+  background-color: #070b10;
+  color: #e6edf3;
+}
+
+@media (min-width: 1024px) {
+  .bk-root {
+    --bk-header: 64px;
+  }
+}
+
+.bk-root ::selection {
+  background: rgba(96, 165, 250, 0.26);
+}
+
+/* One visible focus treatment for the whole route. */
+.bk-root :focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
