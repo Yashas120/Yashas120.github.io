@@ -12,6 +12,8 @@ next-env.d.ts
 .vercel
 *.tsbuildinfo
 
-# Personal reference documents (resume, CV, etc.) — excluded except the public TA CV
-/reference/*
-!/reference/Yashas Kadambi UCSD TA CV.pdf
+# NOTE: source-documents/ is a submodule pointing at the private repo
+# Yashas120/personal-site-reference (CV, resume, credential evaluation,
+# teaching artifacts). It must NOT be listed here — git cannot track a
+# submodule at an ignored path. The submodule boundary is what keeps those
+# documents out of this repository; only a URL and a commit SHA are stored.

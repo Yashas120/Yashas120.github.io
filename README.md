@@ -43,6 +43,40 @@ All content is data-driven — no CMS. Edit the TypeScript files in `src/data/`:
 
 Themes are registered in `src/lib/themes.ts`; each theme's components live under `src/components/<theme>/`.
 
+## Source documents
+
+The CV, resume, LinkedIn export, credential evaluation and teaching artifacts that this
+content was written from live in a separate **private** repository, wired in at
+`source-documents/` as a submodule:
+
+[`Yashas120/personal-site-reference`](https://github.com/Yashas120/personal-site-reference) *(access required)*
+
+They are kept out of this repository because several contain PII. This repo stores only
+the submodule's URL and commit SHA — never the documents themselves.
+
+**Without access**, clone normally; everything except `source-documents/` checks out and the
+site builds and deploys as usual:
+
+```bash
+git clone git@github.com:Yashas120/Yashas120.github.io.git
+```
+
+**With access**, pull the documents too:
+
+```bash
+git clone --recurse-submodules git@github.com:Yashas120/Yashas120.github.io.git
+# or, in an existing clone:
+git submodule update --init
+```
+
+Note that `--recurse-submodules` fails for anyone without access to the private repo, and
+CI does not fetch it: `actions/checkout` leaves submodules off by default, so the Pages
+build never touches `source-documents/`.
+
+Employer-scale figures that are not cleared for public disclosure stay behind the
+`disclosureReview` flag in `src/lib/clusterContent.ts` and render as public-safe wording
+until approved.
+
 ## Deploy
 
 Static export is enabled, so push `./out` to any static host (Vercel, Netlify, GitHub Pages, S3+CloudFront).
