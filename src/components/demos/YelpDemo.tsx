@@ -130,6 +130,28 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onScreen]);
 
+  // A tab can replace the observed canvas before IntersectionObserver reports
+  // again (most noticeably on narrow screens). Draw the map once immediately
+  // for every relevant state change, and redraw when its container is resized.
+  useEffect(() => {
+    if (mode !== 2) return;
+    let frame = 0;
+    const redraw = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(drawMap);
+    };
+    redraw();
+
+    const cv = canvas.current;
+    const observer = cv && typeof ResizeObserver !== "undefined" ? new ResizeObserver(redraw) : null;
+    if (cv) observer?.observe(cv);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, view, mapColor, light]);
+
   // fit the view to all restaurants the first time the map is shown
   function fitView() {
     const cv = canvas.current;
