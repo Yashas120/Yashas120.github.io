@@ -19,13 +19,14 @@ interface LiveDemoProps {
   embedded?: boolean;
   contentRef?: RefObject<HTMLDivElement>;
   contentLabel?: string;
+  showEvidenceDetails?: boolean;
 }
 
 // Shared shell for a project demo card.
 export function LiveDemo({
   title, subtitle, repoUrl, accent, children,
   id, kind = "interactive", tech, role, result,
-  embedded = false, contentRef, contentLabel,
+  embedded = false, contentRef, contentLabel, showEvidenceDetails = true,
 }: LiveDemoProps) {
   const interactive = kind === "interactive";
   const evidence = id ? demoEvidence(id) : undefined;
@@ -64,7 +65,7 @@ export function LiveDemo({
               {result && <span><span className="text-zinc-400">result</span> · {result}</span>}
             </div>
           )}
-          {evidence && (
+          {showEvidenceDetails && evidence && (
             <dl className="mt-3 grid gap-2 text-[12px] leading-relaxed text-zinc-400 sm:grid-cols-2">
               <div><dt className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">My contribution</dt><dd>{evidence.contribution}</dd></div>
               <div><dt className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">Browser fidelity</dt><dd>{evidence.simplification}</dd></div>
@@ -86,13 +87,13 @@ export function LiveDemo({
           </a>
         )}
       </div>
-      {evidence?.warning && (
+      {showEvidenceDetails && evidence?.warning && (
         <p role="note" className="border-b px-5 py-3 text-[12px] font-medium leading-relaxed" style={{ borderColor: hexToRgba(accent, 0.2), background: hexToRgba(accent, 0.08), color: accent }}>
           {evidence.warning}
         </p>
       )}
       <div className="p-5">{content}</div>
-      {evidence && (
+      {showEvidenceDetails && evidence && (
         <div className="flex flex-wrap gap-x-4 gap-y-1 border-t px-5 py-3 font-mono text-[11px]" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>
           {evidence.projectSourceHref && <a className="min-h-11 py-3 text-zinc-400 hover:text-zinc-100" href={evidence.projectSourceHref} target="_blank" rel="noreferrer noopener">Original project source</a>}
           {evidence.upstreamHref && <a className="min-h-11 py-3 text-zinc-400 hover:text-zinc-100" href={evidence.upstreamHref} target="_blank" rel="noreferrer noopener">Upstream source</a>}
