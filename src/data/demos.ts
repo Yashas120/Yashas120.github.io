@@ -66,10 +66,10 @@ export const PROJECT_DEMO_EVIDENCE: readonly ProjectDemoRecord[] = [
     projectTitle: "Performance Analysis of the ghOSt Scheduler",
     ownership: "coursework",
     status: "completed",
-    fidelity: "in-memory-simulation",
+    fidelity: "interactive-explainer",
     contribution: "Rebuilt and configured Linux for ghOSt, prepared kernel-only and user-space scheduling configurations, ran controlled RocksDB experiments, and analyzed scheduler performance.",
-    browserRuns: "A ghOSt explainer and deterministic TypeScript simulation of the scheduling decision path across CFS, FIFO, an example ghOSt user-space policy, and a Shinjuku-style teaching model.",
-    simplification: "Linux, ghOSt, RocksDB, and the original benchmarks do not run in the browser. The lab explains policy placement and dispatch flow without synthesizing latency, throughput, or a winner.",
+    browserRuns: "An architecture and methodology explainer covering the kernel/user-space control loop, implementation sequence, scheduler matrix, and RocksDB testing procedure.",
+    simplification: "Linux, ghOSt, RocksDB, and the original benchmarks do not run in the browser. This page documents the implementation and test design without simulating output or publishing unverified measurements.",
     upstreamHref: "https://github.com/google/ghost-userspace",
     browserImplementationHref: browserSource("GhostDemo.tsx"),
   },
@@ -228,7 +228,7 @@ export interface DemoMeta {
 }
 
 export const DEMOS: DemoMeta[] = [
-  { id: "ghost", title: "ghOSt + RocksDB scheduling", blurb: "See why ghOSt moves policy into user space and trace the kernel/user-space dispatch boundary.", accent: "#a3e635", kind: "interactive", tech: ["Linux kernel rebuild", "ghOSt", "RocksDB", "CFS", "FIFO"] },
+  { id: "ghost", title: "ghOSt + RocksDB scheduling", blurb: "Inspect the ghOSt architecture, kernel build, scheduler configurations, and controlled RocksDB test matrix.", accent: "#a3e635", kind: "explainer", tech: ["Linux kernel rebuild", "ghOSt", "RocksDB", "CFS", "FIFO"] },
   { id: "bitcoin", title: "Bitcoin, end to end", blurb: "Generate educational keys, sign a transaction, and mine a block with real browser computation.", accent: "#f7931a", kind: "interactive", tech: ["Java", "TypeScript port", "SHA-256", "ECDSA", "Proof-of-work"] },
   { id: "chocollvm", title: "ChocoLLVM compiler", blurb: "Compile the supported ChocoPy subset through a browser pipeline to LLVM IR.", accent: "#8b5cf6", kind: "interactive", tech: ["Lexer", "Parser", "AST", "LLVM IR", "Codegen"] },
   { id: "swift", title: "SWIFT super-resolution", blurb: "Inspect the co-authored SwinV2 and Fourier-convolution architecture.", accent: "#22d3ee", kind: "explainer", tech: ["PyTorch", "SwinV2", "Fourier Conv", "Super-resolution"] },

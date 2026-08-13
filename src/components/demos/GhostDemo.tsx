@@ -1,273 +1,67 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Pause, Play, RotateCcw, SkipForward } from "lucide-react";
 import { cardProps } from "@/data/demos";
 import { LiveDemo } from "./LiveDemo";
-import { usePrefersReducedMotion } from "./bitcoin/parts";
 
 const ACCENT = "#a3e635";
-const TASK_COLORS = ["#38bdf8", "#f59e0b", "#f472b6", "#a78bfa", "#34d399"] as const;
-
-type PolicyId = "cfs" | "fifo" | "ghost" | "shinjuku";
-type LoadId = "bursty" | "sustained";
-type TaskKind = "latency" | "background";
-
-type SimTask = {
-  id: string;
-  label: string;
-  kind: TaskKind;
-  arrival: number;
-  service: number;
-  remaining: number;
-  vruntime: number;
-  color: string;
-};
-
-type TraceStep = {
-  tick: number;
-  selectedId: string | null;
-  selectedLabel: string;
-  tasks: SimTask[];
-  decision: string;
-  path: string[];
-};
-
-const POLICIES: readonly {
-  id: PolicyId;
-  label: string;
-  location: "kernel" | "user space";
-  rule: string;
-}[] = [
-  {
-    id: "cfs",
-    label: "Linux CFS",
-    location: "kernel",
-    rule: "Teaching model: choose the runnable task with the smallest virtual runtime.",
-  },
-  {
-    id: "fifo",
-    label: "Linux FIFO",
-    location: "kernel",
-    rule: "Teaching model: keep the oldest runnable task until it completes.",
-  },
-  {
-    id: "ghost",
-    label: "ghOSt policy",
-    location: "user space",
-    rule: "Example user-space rule: serve latency work while reserving periodic turns for background work.",
-  },
-  {
-    id: "shinjuku",
-    label: "Shinjuku-style",
-    location: "user space",
-    rule: "Teaching model: favor the shortest latency-sensitive request, then the shortest remaining task.",
-  },
-] as const;
-
-function taskFixture(load: LoadId): SimTask[] {
-  const arrivals = load === "bursty" ? [0, 0, 1, 1, 4] : [0, 2, 4, 6, 8];
-  const source = [
-    ["get-01", "GET 01", "latency", 2, 1],
-    ["compact", "compaction", "background", 6, 0],
-    ["get-02", "GET 02", "latency", 1, 3],
-    ["flush", "memtable flush", "background", 4, 2],
-    ["get-03", "GET 03", "latency", 2, 4],
-  ] as const;
-
-  return source.map(([id, label, kind, service, vruntime], index) => ({
-    id,
-    label,
-    kind,
-    arrival: arrivals[index],
-    service,
-    remaining: service,
-    vruntime,
-    color: TASK_COLORS[index],
-  }));
-}
-
-function cloneTasks(tasks: SimTask[]): SimTask[] {
-  return tasks.map((task) => ({ ...task }));
-}
-
-function selectTask(policy: PolicyId, ready: SimTask[], runningId: string | null, tick: number): SimTask {
-  const byArrival = (a: SimTask, b: SimTask) => a.arrival - b.arrival || a.id.localeCompare(b.id);
-  if (policy === "fifo") {
-    return ready.find((task) => task.id === runningId) ?? [...ready].sort(byArrival)[0];
-  }
-  if (policy === "cfs") {
-    return [...ready].sort((a, b) => a.vruntime - b.vruntime || byArrival(a, b))[0];
-  }
-  if (policy === "shinjuku") {
-    return [...ready].sort((a, b) => {
-      const classOrder = Number(a.kind === "background") - Number(b.kind === "background");
-      return classOrder || a.remaining - b.remaining || byArrival(a, b);
-    })[0];
-  }
-
-  const background = ready.filter((task) => task.kind === "background").sort(byArrival);
-  const latency = ready.filter((task) => task.kind === "latency").sort(byArrival);
-  if (tick > 0 && tick % 4 === 0 && background.length > 0) return background[0];
-  return latency[0] ?? background[0] ?? [...ready].sort(byArrival)[0];
-}
-
-function buildTrace(initial: SimTask[], policy: PolicyId): TraceStep[] {
-  const tasks = cloneTasks(initial);
-  const trace: TraceStep[] = [];
-  let runningId: string | null = null;
-  const maxTicks = tasks.reduce((sum, task) => sum + task.service, 0) + Math.max(...tasks.map((task) => task.arrival)) + 1;
-
-  for (let tick = 0; tick < maxTicks && tasks.some((task) => task.remaining > 0); tick += 1) {
-    const ready = tasks.filter((task) => task.arrival <= tick && task.remaining > 0);
-    if (ready.length === 0) {
-      trace.push({
-        tick,
-        selectedId: null,
-        selectedLabel: "idle",
-        tasks: cloneTasks(tasks),
-        decision: "No runnable task has arrived, so the CPU remains idle.",
-        path: ["arrival check", "idle"],
-      });
-      runningId = null;
-      continue;
-    }
-
-    const selected = selectTask(policy, ready, runningId, tick);
-    const before = selected.remaining;
-    selected.remaining -= 1;
-    selected.vruntime += 1;
-    runningId = policy === "fifo" && selected.remaining > 0 ? selected.id : null;
-    const location = policy === "cfs" || policy === "fifo" ? "kernel" : "user-space agent";
-    const decision = `${location} selected ${selected.label}; modeled service decreases ${before} → ${selected.remaining}.`;
-    const path = policy === "cfs" || policy === "fifo"
-      ? ["runnable queue", "kernel policy", `dispatch ${selected.label}`]
-      : ["kernel status", "ghOSt message", "user-space policy", "commit", `dispatch ${selected.label}`];
-
-    trace.push({
-      tick,
-      selectedId: selected.id,
-      selectedLabel: selected.label,
-      tasks: cloneTasks(tasks),
-      decision,
-      path,
-    });
-  }
-  return trace;
-}
 
 function rgba(hex: string, alpha: number): string {
   const value = hex.replace("#", "");
   return `rgba(${parseInt(value.slice(0, 2), 16)}, ${parseInt(value.slice(2, 4), 16)}, ${parseInt(value.slice(4, 6), 16)}, ${alpha})`;
 }
 
-function useIsLight(): boolean {
-  const [light, setLight] = useState(false);
-  useEffect(() => {
-    const root = document.documentElement;
-    const update = () => setLight(root.classList.contains("light"));
-    update();
-    const observer = new MutationObserver(update);
-    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
-  }, []);
-  return light;
-}
+const IMPLEMENTATION_STEPS = [
+  {
+    number: "01",
+    title: "Build the scheduling substrate",
+    body: "Rebuilt and configured Linux with ghOSt support, then prepared the matching user-space components needed to communicate with the ghOSt scheduling class.",
+  },
+  {
+    number: "02",
+    title: "Prepare both sides of the comparison",
+    body: "Kept Linux CFS and FIFO as kernel-policy baselines, then configured ghOSt policies—including the Shinjuku-style path—where scheduling decisions are delegated to a user-space agent.",
+  },
+  {
+    number: "03",
+    title: "Drive every policy with RocksDB",
+    body: "Used the same RocksDB workload definition while varying load pattern, client concurrency, and available memory so the scheduler path was a controlled experimental factor.",
+  },
+  {
+    number: "04",
+    title: "Profile and compare like for like",
+    body: "Collected latency and throughput for each configuration, then compared tradeoffs across equivalent matrix cells instead of treating one isolated run as a result.",
+  },
+] as const;
 
-function ConfigurationSelect({
-  label,
-  value,
-  onChange,
-  options,
-}: Readonly<{
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: readonly { value: string; label: string }[];
-}>) {
-  return (
-    <label className="flex min-w-[128px] flex-1 flex-col gap-1 font-mono text-[10px] uppercase tracking-wide text-zinc-500">
-      {label}
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="rounded-md border bg-ink-900 px-2.5 text-xs normal-case tracking-normal text-zinc-200"
-        style={{ borderColor: "rgb(var(--line) / 0.14)" }}
-      >
-        {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-      </select>
-    </label>
-  );
-}
+const TEST_MATRIX = [
+  ["Scheduler path", "Linux CFS · Linux FIFO · ghOSt policies · Shinjuku-style", "Kernel policy versus delegated user-space policy"],
+  ["Load pattern", "Bursty · sustained", "Response to changing and continuous demand"],
+  ["Concurrency", "16 · 32 threads", "Behavior as runnable work increases"],
+  ["Memory", "16 GB · 32 GB", "Sensitivity to resource pressure"],
+  ["Workload", "RocksDB", "One consistent storage workload across the matrix"],
+] as const;
 
 export function GhostDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
-  const reducedMotion = usePrefersReducedMotion();
-  const light = useIsLight();
-  const accent = light ? "#3f6212" : ACCENT;
-  const action = light ? "#84cc16" : ACCENT;
-  const [policyId, setPolicyId] = useState<PolicyId>("ghost");
-  const [load, setLoad] = useState<LoadId>("bursty");
-  const [threads, setThreads] = useState("16");
-  const [memory, setMemory] = useState("16 GB");
-  const [step, setStep] = useState(0);
-  const [playing, setPlaying] = useState(false);
-
-  const initialTasks = useMemo(() => taskFixture(load), [load]);
-  const trace = useMemo(() => buildTrace(initialTasks, policyId), [initialTasks, policyId]);
-  const policy = POLICIES.find((item) => item.id === policyId) ?? POLICIES[0];
-  const current = step > 0 ? trace[Math.min(step - 1, trace.length - 1)] : null;
-  const visibleTasks = current?.tasks ?? initialTasks;
-
-  useEffect(() => {
-    setStep(0);
-    setPlaying(false);
-  }, [load, policyId]);
-
-  useEffect(() => {
-    if (!playing) return;
-    if (reducedMotion) {
-      setStep(trace.length);
-      setPlaying(false);
-      return;
-    }
-    if (step >= trace.length) {
-      setPlaying(false);
-      return;
-    }
-    const timer = window.setTimeout(() => setStep((value) => Math.min(value + 1, trace.length)), 650);
-    return () => window.clearTimeout(timer);
-  }, [playing, reducedMotion, step, trace.length]);
-
-  const reset = () => {
-    setPlaying(false);
-    setStep(0);
-  };
-  const play = () => {
-    if (step >= trace.length) setStep(0);
-    setPlaying((value) => !value);
-  };
-  const advance = () => {
-    setPlaying(false);
-    setStep((value) => Math.min(value + 1, trace.length));
-  };
+  const accent = ACCENT;
 
   return (
     <LiveDemo
-      title="ghOSt kernel rebuild and RocksDB scheduler analysis"
-      subtitle="Rebuilt Linux with ghOSt, then compared kernel-only and user-space scheduling configurations under controlled RocksDB runs."
-      accent={accent}
-      embedded={embedded}
       {...cardProps("ghost")}
+      title="ghOSt kernel rebuild and RocksDB scheduler analysis"
+      subtitle="How the ghOSt-enabled Linux environment was built, how the scheduler boundary works, and how the RocksDB comparison was structured."
+      accent={accent}
+      kind="explainer"
+      embedded={embedded}
     >
       <section className="mb-4 grid gap-3 lg:grid-cols-[1.05fr_0.95fr]" aria-labelledby="ghost-explainer-title">
         <div className="rounded-lg border p-4" style={{ borderColor: rgba(accent, 0.28), background: rgba(accent, 0.045) }}>
           <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: accent }}>The niche, in plain English</p>
-          <h3 id="ghost-explainer-title" className="mt-2 text-base font-semibold text-zinc-100">What is ghOSt?</h3>
+          <h3 id="ghost-explainer-title" className="mt-2 text-base font-semibold text-zinc-100">What ghOSt changes</h3>
           <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">
-            A normal Linux scheduler keeps both the low-level CPU mechanism and the policy for choosing the next runnable thread in the kernel. ghOSt keeps the kernel mechanisms, but lets a user-space agent make scheduling-policy decisions and commit them back to the kernel for dispatch.
+            A conventional Linux scheduler keeps the mechanism that switches threads and the policy that chooses the next thread inside the kernel. ghOSt separates those responsibilities: Linux retains the safe, low-level mechanism, while a user-space agent can implement the scheduling policy.
           </p>
           <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">
-            That separation is useful for specialized data-center workloads: a policy can target latency, throughput, or another workload-specific objective and can be developed or upgraded without putting all of its complexity into the kernel or rebooting the host for every policy change.
+            That makes specialized policies easier to develop and replace. The agent can optimize for a workload such as a latency-sensitive storage service without moving context switching, state validation, or hardware control out of the kernel.
           </p>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[10px]">
             <a className="min-h-11 py-3 text-zinc-400 hover:text-zinc-100" href="https://github.com/google/ghost-userspace" target="_blank" rel="noreferrer noopener">Upstream ghOSt source</a>
@@ -276,161 +70,194 @@ export function GhostDemo({ embedded = false }: Readonly<{ embedded?: boolean }>
         </div>
 
         <div className="rounded-lg border p-4" style={{ borderColor: "rgb(var(--line) / 0.12)" }}>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">What the project did</p>
-          <ol className="mt-3 space-y-3">
-            <ProjectStep number="01" title="Rebuild the kernel" body="Built and configured the ghOSt-enabled Linux kernel and its user-space components." accent={accent} />
-            <ProjectStep number="02" title="Create both comparison paths" body="Prepared kernel-only baselines and ghOSt configurations where policy decisions move into a user-space agent." accent={accent} />
-            <ProjectStep number="03" title="Run and analyze RocksDB" body="Executed controlled RocksDB runs across the recorded load, thread, and memory configurations, then analyzed latency and throughput behavior." accent={accent} />
-          </ol>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">Project scope</p>
+          <dl className="mt-3 space-y-3 text-[12px] leading-relaxed">
+            <ScopeFact label="Built" value="A ghOSt-enabled Linux kernel environment and its user-space scheduling path" accent={accent} />
+            <ScopeFact label="Compared" value="Kernel CFS/FIFO baselines against policies delegated through ghOSt" accent={accent} />
+            <ScopeFact label="Exercised with" value="Controlled RocksDB runs across load, concurrency, and memory settings" accent={accent} />
+            <ScopeFact label="Evaluated by" value="Latency and throughput tradeoffs; no unsupported benchmark winner is published" accent={accent} />
+          </dl>
         </div>
       </section>
 
-      <p className="mb-4 rounded-lg border px-3 py-2 text-[12px] leading-relaxed text-zinc-400" style={{ borderColor: rgba(accent, 0.28), background: rgba(accent, 0.06) }}>
-        This deterministic teaching model does not run Linux, ghOSt, RocksDB, or the original experiments. It explains policy placement and dispatch flow without inventing latency, throughput, or a winning scheduler.
-      </p>
+      <ArchitectureDiagram accent={accent} />
 
-      <div className="flex flex-wrap gap-1 pb-1" role="group" aria-label="Scheduling policy">
-        {POLICIES.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setPolicyId(item.id)}
-            aria-pressed={policyId === item.id}
-            className="whitespace-nowrap rounded-md border px-3 font-mono text-[11px]"
-            style={{
-              borderColor: policyId === item.id ? rgba(accent, 0.55) : "rgb(var(--line) / 0.12)",
-              background: policyId === item.id ? rgba(accent, 0.12) : "transparent",
-              color: policyId === item.id ? accent : "rgb(var(--zinc-400))",
-            }}
-          >
-            <span className="block">{item.label}</span>
-            <span className="mt-0.5 block text-[9px] uppercase tracking-wide">{item.location === "kernel" ? "kernel baseline" : "via user space"}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-2">
-        <ConfigurationSelect label="load" value={load} onChange={(value) => setLoad(value as LoadId)} options={[{ value: "bursty", label: "Bursty" }, { value: "sustained", label: "Sustained" }]} />
-        <ConfigurationSelect label="threads" value={threads} onChange={setThreads} options={[{ value: "16", label: "16 threads" }, { value: "32", label: "32 threads" }]} />
-        <ConfigurationSelect label="memory" value={memory} onChange={setMemory} options={[{ value: "16 GB", label: "16 GB" }, { value: "32 GB", label: "32 GB" }]} />
-      </div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-[0.95fr_1.25fr]">
-        <section className="rounded-lg border p-3" style={{ borderColor: "rgb(var(--line) / 0.12)" }} aria-labelledby="ghost-boundary-title">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">policy boundary</p>
-              <h3 id="ghost-boundary-title" className="mt-1 text-sm font-semibold text-zinc-200">{policy.label} · {policy.location}</h3>
-            </div>
-            <span className="rounded-full px-2 py-1 font-mono text-[9px] uppercase" style={{ background: rgba(accent, 0.1), color: accent }}>{policy.location}</span>
-          </div>
-          <p className="mt-2 min-h-[42px] text-xs leading-relaxed text-zinc-400">{policy.rule}</p>
-
-          <div className="mt-4 space-y-2 font-mono text-[11px]">
-            <BoundaryNode label="Runnable work" active={!!current} />
-            <ArrowDown />
-            <BoundaryNode label="Linux kernel mechanisms" active={!!current} />
-            {(policyId === "ghost" || policyId === "shinjuku") && (
-              <>
-                <div className="flex items-center gap-2 py-1 text-[10px] text-zinc-400"><span className="h-px flex-1" style={{ background: rgba(accent, 0.35) }} />status / decision messages<span className="h-px flex-1" style={{ background: rgba(accent, 0.35) }} /></div>
-                <BoundaryNode label="User-space scheduling agent" active={!!current} accent />
-                <ArrowDown />
-                <BoundaryNode label="Commit dispatch decision" active={!!current} />
-              </>
-            )}
-            <ArrowDown />
-            <BoundaryNode label={current ? `CPU → ${current.selectedLabel}` : "CPU → awaiting first step"} active={!!current} accent />
-          </div>
-        </section>
-
-        <section className="rounded-lg border p-3" style={{ borderColor: "rgb(var(--line) / 0.12)" }} aria-labelledby="ghost-trace-title">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">deterministic dispatch trace</p>
-              <h3 id="ghost-trace-title" className="mt-1 text-sm font-semibold text-zinc-200">Tick {step} / {trace.length}</h3>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button type="button" onClick={play} className="inline-flex items-center gap-1.5 rounded-md px-3 font-mono text-[11px] font-semibold" style={{ background: action, color: "#111827" }}>
-                {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}{playing ? "pause" : step >= trace.length ? "replay" : "run"}
-              </button>
-              <button type="button" onClick={advance} disabled={step >= trace.length} className="inline-flex items-center gap-1 rounded-md border px-2.5 font-mono text-[11px] text-zinc-300 disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "rgb(var(--line) / 0.14)" }}>
-                <SkipForward className="h-3.5 w-3.5" /> step
-              </button>
-              <button type="button" onClick={reset} aria-label="Reset dispatch trace" className="inline-flex items-center rounded-md border px-2 text-zinc-400" style={{ borderColor: "rgb(var(--line) / 0.14)" }}>
-                <RotateCcw className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {visibleTasks.map((task) => {
-              const arrived = task.arrival <= (current?.tick ?? 0);
-              const selected = current?.selectedId === task.id;
-              const completed = task.remaining === 0;
-              return (
-                <div key={task.id} className="rounded-md border p-2" style={{ borderColor: selected ? task.color : "rgb(var(--line) / 0.1)", background: selected ? rgba(task.color, 0.09) : "transparent" }}>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate font-mono text-[11px] font-semibold text-zinc-300">{task.label}</span>
-                    <span className="font-mono text-[9px] uppercase text-zinc-400">{completed ? "done" : arrived ? task.kind : `arrives t${task.arrival}`}</span>
-                  </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full" style={{ background: "rgb(var(--line) / 0.08)" }}>
-                    <span className="block h-full rounded-full" style={{ width: `${((task.service - task.remaining) / task.service) * 100}%`, background: task.color }} />
-                  </div>
-                  <p className="mt-1 font-mono text-[9px] text-zinc-400">modeled service remaining {task.remaining}/{task.service}</p>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-3 rounded-md px-3 py-2" style={{ background: "rgb(var(--line) / 0.05)" }}>
-            <p className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">decision log</p>
-            <p className="mt-1 text-xs leading-relaxed text-zinc-300" aria-live="polite">{current?.decision ?? "Choose a policy, then run or step through the trace."}</p>
-            {current && (
-              <div className="mt-2 flex flex-wrap items-center gap-1 font-mono text-[9px] text-zinc-400">
-                {current.path.map((node, index) => (
-                  <span key={`${node}-${index}`} className="contents"><span>{node}</span>{index < current.path.length - 1 && <ArrowRight className="h-3 w-3" aria-hidden="true" />}</span>
-                ))}
+      <section className="mb-4 rounded-lg border p-4" style={{ borderColor: "rgb(var(--line) / 0.12)" }} aria-labelledby="ghost-implementation-title">
+        <div className="max-w-2xl">
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: accent }}>Implementation</p>
+          <h3 id="ghost-implementation-title" className="mt-1 text-base font-semibold text-zinc-100">How the experiment was built</h3>
+          <p className="mt-1 text-[12px] leading-relaxed text-zinc-500">The work was systems integration and evaluation: build the modified kernel path, configure comparable policies, then place RocksDB behind a repeatable experiment harness.</p>
+        </div>
+        <ol className="mt-4 grid gap-3 sm:grid-cols-2">
+          {IMPLEMENTATION_STEPS.map((step) => (
+            <li key={step.number} className="grid grid-cols-[32px_1fr] gap-2 rounded-md border p-3" style={{ borderColor: "rgb(var(--line) / 0.1)" }}>
+              <span className="font-mono text-[10px]" style={{ color: accent }}>{step.number}</span>
+              <div>
+                <p className="text-[13px] font-semibold text-zinc-200">{step.title}</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">{step.body}</p>
               </div>
-            )}
-          </div>
-        </section>
-      </div>
+            </li>
+          ))}
+        </ol>
+      </section>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <MatrixFact label="Experiment selection" value={`RocksDB · ${load} load`} />
-        <MatrixFact label="Machine configuration" value={`${threads} threads · ${memory}`} />
-        <MatrixFact label="Interpretation boundary" value="No synthetic latency or throughput" />
-      </div>
+      <section className="mb-4 rounded-lg border p-4" style={{ borderColor: "rgb(var(--line) / 0.12)" }} aria-labelledby="ghost-testing-title">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: accent }}>Testing methodology</p>
+            <h3 id="ghost-testing-title" className="mt-1 text-base font-semibold text-zinc-100">A controlled scheduler × workload matrix</h3>
+          </div>
+          <p className="max-w-md text-[11px] leading-relaxed text-zinc-500">Each scheduler was tested under matching RocksDB conditions; only then were latency and throughput compared.</p>
+        </div>
+
+        <div className="mt-4 overflow-x-auto rounded-lg border" style={{ borderColor: "rgb(var(--line) / 0.1)" }}>
+          <table className="w-full min-w-[620px] border-collapse text-left text-[11px]">
+            <thead style={{ background: rgba(accent, 0.07) }}>
+              <tr className="font-mono text-[9px] uppercase tracking-[0.12em] text-zinc-400">
+                <th className="px-3 py-2.5 font-medium">Factor</th>
+                <th className="px-3 py-2.5 font-medium">Values tested</th>
+                <th className="px-3 py-2.5 font-medium">What it isolates</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TEST_MATRIX.map(([factor, values, purpose]) => (
+                <tr key={factor} className="border-t" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>
+                  <th scope="row" className="whitespace-nowrap px-3 py-2.5 font-semibold text-zinc-300">{factor}</th>
+                  <td className="px-3 py-2.5 text-zinc-400">{values}</td>
+                  <td className="px-3 py-2.5 text-zinc-500">{purpose}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <TestLoop accent={accent} />
+      </section>
+
+      <section className="grid gap-3 sm:grid-cols-2" aria-labelledby="ghost-interpretation-title">
+        <div className="rounded-lg border p-4" style={{ borderColor: rgba(accent, 0.25), background: rgba(accent, 0.045) }}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: accent }}>What the comparison answers</p>
+          <h3 id="ghost-interpretation-title" className="mt-1 text-sm font-semibold text-zinc-200">Does policy placement change RocksDB behavior?</h3>
+          <p className="mt-2 text-[12px] leading-relaxed text-zinc-500">The analysis looks for workload-dependent latency/throughput tradeoffs when moving from general-purpose or fixed kernel policies to a configurable user-space scheduler.</p>
+        </div>
+        <div className="rounded-lg border p-4" style={{ borderColor: "rgb(var(--line) / 0.12)" }}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">Evidence boundary</p>
+          <h3 className="mt-1 text-sm font-semibold text-zinc-200">Method documented; numbers withheld</h3>
+          <p className="mt-2 text-[12px] leading-relaxed text-zinc-500">This page explains the implementation and test design. It does not simulate scheduler output, rerun Linux or RocksDB in the browser, or publish unverified measurements.</p>
+        </div>
+      </section>
     </LiveDemo>
   );
 }
 
-function ProjectStep({ number, title, body, accent }: Readonly<{ number: string; title: string; body: string; accent: string }>) {
+function ArchitectureDiagram({ accent }: Readonly<{ accent: string }>) {
   return (
-    <li className="grid grid-cols-[28px_1fr] gap-2">
-      <span className="font-mono text-[10px]" style={{ color: accent }}>{number}</span>
-      <div><p className="text-[13px] font-semibold text-zinc-200">{title}</p><p className="mt-0.5 text-[12px] leading-relaxed text-zinc-500">{body}</p></div>
-    </li>
+    <section className="mb-4 rounded-lg border p-4" style={{ borderColor: "rgb(var(--line) / 0.12)" }} aria-labelledby="ghost-architecture-title">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: accent }}>Architecture</p>
+          <h3 id="ghost-architecture-title" className="mt-1 text-base font-semibold text-zinc-100">The scheduling control loop</h3>
+        </div>
+        <p className="max-w-md text-[11px] leading-relaxed text-zinc-500">Events move up to the policy; decisions move down to kernel mechanism.</p>
+      </div>
+
+      <figure className="mt-4" aria-labelledby="ghost-architecture-caption">
+        <div className="overflow-hidden rounded-lg border" style={{ borderColor: rgba(accent, 0.24), background: rgba(accent, 0.025) }}>
+          <div className="border-b p-3" style={{ borderColor: "rgb(var(--line) / 0.1)" }}>
+            <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">User space</p>
+            <div className="grid items-stretch gap-2 md:grid-cols-[1fr_auto_1fr]">
+              <ArchitectureNode eyebrow="application" title="RocksDB threads" body="Foreground requests plus flush and compaction work become runnable tasks." />
+              <ArchitectureArrow label="workload hints" />
+              <ArchitectureNode eyebrow="scheduling policy" title="ghOSt agent" body="Orders runnable work and chooses a task-to-CPU placement." accent={accent} />
+            </div>
+          </div>
+
+          <div className="grid gap-2 border-b px-3 py-3 md:grid-cols-2" style={{ borderColor: "rgb(var(--line) / 0.1)", background: rgba(accent, 0.055) }}>
+            <ArchitectureChannel arrow="↑" title="Kernel → agent" body="Task events and shared CPU/task state flow through the ghOSt interface." accent={accent} />
+            <ArchitectureChannel arrow="↓" title="Agent → kernel" body="A scheduling transaction requests a specific task-to-CPU action." accent={accent} />
+          </div>
+
+          <div className="p-3">
+            <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">ghOSt-enabled Linux kernel</p>
+            <div className="grid items-stretch gap-2 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+              <ArchitectureNode eyebrow="state + events" title="ghOSt scheduling class" body="Tracks enrolled threads and reports lifecycle changes." />
+              <ArchitectureArrow label="transaction" />
+              <ArchitectureNode eyebrow="kernel mechanism" title="Validate + commit" body="Checks current state and atomically applies valid actions." accent={accent} />
+              <ArchitectureArrow label="dispatch" />
+              <ArchitectureNode eyebrow="execution" title="CPU cores" body="Linux performs the context switch and runs the selected RocksDB thread." />
+            </div>
+          </div>
+
+          <div className="border-t px-3 py-2.5" style={{ borderColor: rgba(accent, 0.2), background: rgba(accent, 0.075) }}>
+            <p className="text-[11px] leading-relaxed text-zinc-400"><span className="font-mono text-[9px] uppercase tracking-wide" style={{ color: accent }}>Enclave</span><span aria-hidden="true"> · </span>Groups the CPUs, agents, and ghOSt-scheduled threads controlled by one policy. Disjoint enclaves can isolate different policies or tenants.</p>
+          </div>
+        </div>
+        <figcaption id="ghost-architecture-caption" className="mt-3 grid gap-2 text-[11px] leading-relaxed text-zinc-500 sm:grid-cols-3">
+          <p><span className="font-semibold text-zinc-300">1. Observe.</span> Linux reports runnable-state changes.</p>
+          <p><span className="font-semibold text-zinc-300">2. Decide.</span> The user-space agent applies its policy.</p>
+          <p><span className="font-semibold text-zinc-300">3. Actuate.</span> Linux validates and dispatches the task.</p>
+        </figcaption>
+      </figure>
+    </section>
   );
 }
 
-function BoundaryNode({ label, active, accent = false }: Readonly<{ label: string; active: boolean; accent?: boolean }>) {
+function TestLoop({ accent }: Readonly<{ accent: string }>) {
+  const steps = ["Boot configured environment", "Select scheduler path", "Run matching RocksDB case", "Collect latency + throughput", "Repeat and compare"];
   return (
-    <div className="rounded-md border px-3 py-2 text-zinc-300" style={{ borderColor: active ? rgba(ACCENT, accent ? 0.55 : 0.3) : "rgb(var(--line) / 0.1)", background: active && accent ? rgba(ACCENT, 0.09) : "transparent" }}>
-      {label}
+    <div className="mt-4 rounded-lg border p-3" style={{ borderColor: rgba(accent, 0.2), background: rgba(accent, 0.035) }}>
+      <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-zinc-500">Per-configuration test loop</p>
+      <ol className="mt-2 grid gap-2 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr_auto_1fr]">
+        {steps.map((step, index) => (
+          <li key={step} className="contents">
+            <div className="rounded-md border px-2.5 py-2 text-[10px] leading-relaxed text-zinc-400" style={{ borderColor: "rgb(var(--line) / 0.1)" }}>
+              <span className="mr-1 font-mono" style={{ color: accent }}>{index + 1}.</span>{step}
+            </div>
+            {index < steps.length - 1 && <span className="self-center text-center text-zinc-600" aria-hidden="true">→</span>}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
 
-function ArrowDown() {
-  return <div className="pl-4 text-zinc-600" aria-hidden="true">↓</div>;
+function ScopeFact({ label, value, accent }: Readonly<{ label: string; value: string; accent: string }>) {
+  return (
+    <div className="grid grid-cols-[92px_1fr] gap-2">
+      <dt className="font-mono text-[9px] uppercase tracking-wide" style={{ color: accent }}>{label}</dt>
+      <dd className="text-zinc-400">{value}</dd>
+    </div>
+  );
 }
 
-function MatrixFact({ label, value }: Readonly<{ label: string; value: string }>) {
+function ArchitectureNode({ eyebrow, title, body, accent }: Readonly<{ eyebrow: string; title: string; body: string; accent?: string }>) {
   return (
-    <div className="rounded-lg border p-3" style={{ borderColor: "rgb(var(--line) / 0.1)" }}>
-      <p className="font-mono text-[9px] uppercase tracking-wide text-zinc-400">{label}</p>
-      <p className="mt-1 text-xs leading-relaxed text-zinc-300">{value}</p>
+    <div className="min-w-0 rounded-md border p-3" style={{ borderColor: accent ? rgba(accent, 0.46) : "rgb(var(--line) / 0.12)", background: accent ? rgba(accent, 0.08) : "rgb(var(--line) / 0.025)" }}>
+      <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-zinc-500">{eyebrow}</p>
+      <p className="mt-1 text-[13px] font-semibold text-zinc-200">{title}</p>
+      <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">{body}</p>
+    </div>
+  );
+}
+
+function ArchitectureArrow({ label }: Readonly<{ label: string }>) {
+  return (
+    <div className="flex min-h-8 items-center justify-center gap-1.5 px-1 font-mono text-[9px] text-zinc-500 md:flex-col md:gap-0" aria-label={`${label}, right`}>
+      <span className="md:hidden">{label}</span>
+      <span className="text-base text-zinc-600" aria-hidden="true">→</span>
+      <span className="hidden max-w-20 text-center leading-tight md:block">{label}</span>
+    </div>
+  );
+}
+
+function ArchitectureChannel({ arrow, title, body, accent }: Readonly<{ arrow: "↑" | "↓"; title: string; body: string; accent: string }>) {
+  return (
+    <div className="grid grid-cols-[28px_1fr] gap-2 rounded-md border px-3 py-2.5" style={{ borderColor: rgba(accent, 0.22), background: "rgb(var(--ink-950) / 0.22)" }}>
+      <span className="font-mono text-lg" style={{ color: accent }} aria-hidden="true">{arrow}</span>
+      <div>
+        <p className="text-[12px] font-semibold text-zinc-300">{title}</p>
+        <p className="mt-0.5 text-[10px] leading-relaxed text-zinc-500">{body}</p>
+      </div>
     </div>
   );
 }
