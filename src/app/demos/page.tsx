@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Zap, BookOpen } from "lucide-react";
 import { DEMOS } from "@/data/demos";
+import { GhostDemo } from "@/components/demos/GhostDemo";
 import { BitcoinDemo } from "@/components/demos/BitcoinDemo";
 import { ChocoLLVMDemo } from "@/components/demos/ChocoLLVMDemo";
 import { CifarSparkDemo } from "@/components/demos/CifarSparkDemo";
@@ -13,7 +14,7 @@ import { SwiftDemo } from "@/components/demos/SwiftDemo";
 import { YelpDemo } from "@/components/demos/YelpDemo";
 
 const DEMOS_DESC =
-  "Nine GitHub projects brought to life in the browser — no server, no install. A from-scratch Bitcoin wallet, a ChocoPy→LLVM IR compiler, SWIFT super-resolution, Structure-from-Motion 3D reconstruction, a Spark-style CIFAR-10 streaming classifier, a parallel-computing playground, an RDBMS cloud-provisioning tracer, a Yelp closure predictor with a live map, and a MERN request tracer.";
+  "Ten projects with browser-native ports, simulations, live computation, and clearly labeled explainers. Every demo separates original work, contribution, and browser fidelity.";
 
 export const metadata: Metadata = {
   title: "Live demos",
@@ -76,7 +77,11 @@ export default function DemosPage() {
           ))}
         </nav>
 
-        <BitcoinDemo />
+        <GhostDemo />
+
+        <div className="mt-10">
+          <BitcoinDemo />
+        </div>
 
         <div className="mt-10">
           <ChocoLLVMDemo />

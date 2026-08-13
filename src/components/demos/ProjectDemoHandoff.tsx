@@ -8,8 +8,9 @@ import { DEFAULT_DEMO_THEME, type ProjectDemoTheme } from "./ProjectEvidenceHead
 type DemoLoader = () => Promise<ComponentType>;
 
 // Keep these factories explicit: every lab remains a distinct webpack chunk and
-// no role route statically imports the nine implementations.
+// no role route statically imports the ten implementations.
 export const demoLoaders: Record<DemoId, DemoLoader> = {
+  ghost: () => import("./GhostDemo").then((module) => module.GhostLab),
   bitcoin: () => import("./BitcoinDemo").then((module) => module.BitcoinLab),
   chocollvm: () => import("./ChocoLLVMDemo").then((module) => module.ChocoLLVMLab),
   swift: () => import("./SwiftDemo").then((module) => module.SwiftLab),

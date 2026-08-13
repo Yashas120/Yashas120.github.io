@@ -9,39 +9,41 @@ const allProjects: Project[] = [
   {
     id: "ghost-scheduler",
     title: "Performance Analysis of the ghOSt Scheduler",
-    blurb: "A controlled Linux environment for studying kernel and user-space scheduling approaches.",
+    blurb: "A ghOSt-enabled Linux build for comparing kernel-only and user-space scheduling on RocksDB.",
     detail:
-      "Built and instrumented a ghOSt-compatible Linux experimental environment to compare user-space scheduling policies with Linux CFS and FIFO baselines across controlled workload and machine configurations.",
+      "Rebuilt and configured Linux with ghOSt, then ran controlled RocksDB experiments comparing kernel-only scheduling baselines with policies delegated to user-space agents.",
     tech: ["Linux", "ghOSt", "C/C++", "RocksDB", "Scheduling"],
     domains: ["os", "distributed"],
     context: "coursework",
     ownership: "evaluator",
     status: "completed",
     contribution:
-      "Designed repeatable workload runs and analyzed scheduler behavior across workload type, load pattern, concurrency, and memory configuration.",
+      "Built the ghOSt-enabled kernel environment, prepared repeatable RocksDB runs, and analyzed scheduler behavior across load pattern, concurrency, and memory configuration.",
     outcome:
       "Produced a structured experimental comparison without claiming an unsupported winner or publishing unverified latency and throughput values.",
     evidence: [
       { label: "Scheduler baselines", value: "Linux CFS and FIFO" },
       { label: "User-space scheduling", value: "ghOSt policies, including a Shinjuku-style configuration" },
-      { label: "Workloads", value: "RocksDB and backend-server workloads" },
+      { label: "Workload", value: "RocksDB" },
       { label: "Configurations", value: "Bursty/sustained · 16/32 threads · 16/32 GB" },
     ],
     caseStudyUrl: "/kernel#ghost-scheduling",
+    demoUrl: "/demos#ghost",
+    demoId: "ghost",
     caseStudy: {
       id: "ghost-scheduling",
       context: "COURSEWORK / EXPERIMENTAL · LINUX SCHEDULING",
       heading: "Scheduling experiments in Linux",
       title: "Comparing kernel baselines and user-space scheduling policies",
       body:
-        "Built and instrumented a ghOSt-compatible Linux experimental environment to compare user-space scheduling policies with Linux CFS and FIFO baselines. Designed repeatable workload runs and analyzed how scheduler behavior changed across workload type, load pattern, concurrency and memory configuration.",
+        "Rebuilt and configured Linux with ghOSt, prepared kernel-only and user-space scheduling configurations, and ran repeatable RocksDB experiments. Analyzed how scheduler behavior changed across load pattern, concurrency, and memory configuration.",
       impactLabel: "In plain English",
       impact:
-        "ghOSt allows scheduling policy to run in user space while the kernel retains the mechanisms needed to dispatch and control tasks.",
+        "ghOSt separates mechanism from policy: Linux still performs low-level task dispatch, while a user-space agent can decide which runnable task should execute next.",
       matrix: [
         ["Scheduler baselines", "Linux CFS and FIFO"],
         ["User-space scheduling", "ghOSt policies, including the verified Shinjuku-style configuration"],
-        ["Workloads", "RocksDB and backend-server workloads"],
+        ["Workload", "RocksDB"],
         ["Load patterns", "Bursty and sustained"],
         ["Concurrency", "16 and 32 threads"],
         ["Memory", "16 GB and 32 GB"],

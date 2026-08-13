@@ -48,7 +48,7 @@ export function LiveDemo({
       <div className="flex items-start justify-between gap-4 border-b px-5 py-4" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-lg font-semibold text-zinc-100">{title}</h2>
+            <h2 className="text-lg font-semibold leading-tight text-zinc-100">{title}</h2>
             <span
               className="inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px]"
               style={{ background: hexToRgba(accent, 0.12), color: accent }}
@@ -59,15 +59,15 @@ export function LiveDemo({
           </div>
           <p className="mt-1 text-sm text-zinc-400">{subtitle}</p>
           {(role || result) && (
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-zinc-500">
-              {role && <span><span className="text-zinc-600">role</span> · {role}</span>}
-              {result && <span><span className="text-zinc-600">result</span> · {result}</span>}
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-zinc-400">
+              {role && <span><span className="text-zinc-400">role</span> · {role}</span>}
+              {result && <span><span className="text-zinc-400">result</span> · {result}</span>}
             </div>
           )}
           {evidence && (
             <dl className="mt-3 grid gap-2 text-[12px] leading-relaxed text-zinc-400 sm:grid-cols-2">
-              <div><dt className="font-mono text-[10px] uppercase tracking-wide text-zinc-600">My contribution</dt><dd>{evidence.contribution}</dd></div>
-              <div><dt className="font-mono text-[10px] uppercase tracking-wide text-zinc-600">Browser fidelity</dt><dd>{evidence.simplification}</dd></div>
+              <div><dt className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">My contribution</dt><dd>{evidence.contribution}</dd></div>
+              <div><dt className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">Browser fidelity</dt><dd>{evidence.simplification}</dd></div>
             </dl>
           )}
           {tech && tech.length > 0 && (
