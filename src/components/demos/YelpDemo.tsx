@@ -39,10 +39,24 @@ const yLat = (y: number, z: number) => {
 };
 interface View { lat: number; lng: number; z: number; }
 
-// Basemap tile fetching: how many times to retry a failing tile, and how long to
-// wait between attempts.
-const TILE_RETRIES = 3;
-const TILE_BACKOFF_MS = 1500;
+type MapPoint = { lat: number; lng: number };
+
+// A small, local vector basemap keeps the project map reliable on static hosts
+// and in browsers that block third-party map tiles. Coordinates describe only
+// the illustrative demo extent; they are not a geographic data product.
+const COASTLINE: readonly MapPoint[] = [
+  { lat: 34.397, lng: -119.755 },
+  { lat: 34.399, lng: -119.736 },
+  { lat: 34.403, lng: -119.716 },
+  { lat: 34.405, lng: -119.696 },
+  { lat: 34.409, lng: -119.675 },
+] as const;
+
+const ARTERIALS: readonly (readonly MapPoint[])[] = [
+  [{ lat: 34.406, lng: -119.755 }, { lat: 34.412, lng: -119.731 }, { lat: 34.418, lng: -119.708 }, { lat: 34.425, lng: -119.676 }],
+  [{ lat: 34.444, lng: -119.742 }, { lat: 34.433, lng: -119.727 }, { lat: 34.420, lng: -119.704 }, { lat: 34.408, lng: -119.686 }],
+  [{ lat: 34.398, lng: -119.724 }, { lat: 34.414, lng: -119.713 }, { lat: 34.432, lng: -119.700 }, { lat: 34.444, lng: -119.691 }],
+] as const;
 
 const MODES = [
   { key: "risk", title: "Closure risk" },
@@ -99,15 +113,6 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
   const st = useRef({ mode, row, xKey, yKey, light, mapColor, view, hoverIdx: -1 });
   st.current = { mode, row, xKey, yKey, light, mapColor, view, hoverIdx: hover?.idx ?? -1 };
   const canvas = useRef<HTMLCanvasElement>(null);
-  const tiles = useRef<Map<string, HTMLImageElement>>(new Map());
-  // A tile that fails to load must not stay in `tiles` as a permanently-broken
-  // Image, otherwise one transient network blip blanks the basemap for the rest
-  // of the session. Track failures so we can retry with backoff instead.
-  const tileFail = useRef<Map<string, { n: number; at: number }>>(new Map());
-  // Mirrored in a ref so the rAF draw loop can detect a change without calling
-  // setState on every frame.
-  const [tilesDown, setTilesDown] = useState(false);
-  const tilesDownRef = useRef(false);
   const drag = useRef<{ sx: number; sy: number; cx: number; cy: number } | null>(null);
   const fitted = useRef(false);
 
@@ -257,7 +262,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
   function draw() {
     const key = MODES[st.current.mode].key;
     if (key === "map") {
-      drawMapReal();
+      drawMap();
       return;
     }
     const ctx = fit();
@@ -352,9 +357,78 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     label(ctx, FW - 130, padT + 34, "◎ you", ACC, 10, "600");
   }
 
-  // Real slippy-tile basemap (OpenStreetMap data via CARTO) with the restaurants
-  // overlaid at their true lat/lng via Web Mercator projection.
-  function drawMapReal() {
+  function drawVectorBasemap(
+    ctx: CanvasRenderingContext2D,
+    w: number,
+    h: number,
+    tlX: number,
+    tlY: number,
+    z: number,
+    lt: boolean,
+  ) {
+    const point = ({ lat, lng }: MapPoint) => ({ x: projX(lng, z) - tlX, y: projY(lat, z) - tlY });
+    const road = (points: readonly MapPoint[], color: string, width: number) => {
+      ctx.beginPath();
+      points.forEach((item, index) => {
+        const p = point(item);
+        if (index === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.stroke();
+    };
+
+    ctx.fillStyle = lt ? "#edf0ea" : "#111820";
+    ctx.fillRect(0, 0, w, h);
+
+    NEIGHBORHOODS.forEach((nb, index) => {
+      const p = point(nb);
+      const radius = Math.max(26, Math.min(105, Math.abs(projX(nb.lng + nb.spread, z) - projX(nb.lng, z)) * 2.4));
+      ctx.fillStyle = lt
+        ? index % 2 === 0 ? "rgba(244,63,94,0.055)" : "rgba(14,165,233,0.05)"
+        : index % 2 === 0 ? "rgba(244,63,94,0.07)" : "rgba(56,189,248,0.06)";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    const spacing = Math.max(30, Math.min(120, 52 * Math.pow(2, z - 14)));
+    const ox = ((-tlX % spacing) + spacing) % spacing;
+    const oy = ((-tlY % spacing) + spacing) % spacing;
+    ctx.strokeStyle = lt ? "rgba(63,63,70,0.13)" : "rgba(226,232,240,0.11)";
+    ctx.lineWidth = 1;
+    for (let x = ox - spacing; x < w + spacing; x += spacing) {
+      ctx.beginPath(); ctx.moveTo(x - 16, 0); ctx.lineTo(x + 16, h); ctx.stroke();
+    }
+    for (let y = oy - spacing; y < h + spacing; y += spacing) {
+      ctx.beginPath(); ctx.moveTo(0, y + 10); ctx.lineTo(w, y - 10); ctx.stroke();
+    }
+
+    const coast = COASTLINE.map(point);
+    ctx.beginPath();
+    coast.forEach((p, index) => index === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.lineTo(coast[coast.length - 1].x + w, h + 80);
+    ctx.lineTo(coast[0].x - w, h + 80);
+    ctx.closePath();
+    ctx.fillStyle = lt ? "#cfe8ee" : "#0b2935";
+    ctx.fill();
+    road(COASTLINE, lt ? "rgba(8,145,178,0.55)" : "rgba(56,189,248,0.5)", 2);
+
+    ARTERIALS.forEach((path) => {
+      road(path, lt ? "rgba(255,255,255,0.9)" : "rgba(8,9,12,0.8)", 7);
+      road(path, lt ? "rgba(113,113,122,0.48)" : "rgba(161,161,170,0.42)", 2);
+    });
+
+    ctx.textAlign = "right";
+    label(ctx, w - 8, h - 8, "built-in vector basemap", lt ? "rgba(24,24,27,0.62)" : "rgba(255,255,255,0.58)", 8, "500");
+    ctx.textAlign = "left";
+  }
+
+  // Local vector basemap with restaurants projected through Web Mercator.
+  function drawMap() {
     const cv = canvas.current;
     if (!cv) return;
     const lt = st.current.light;
@@ -371,56 +445,10 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = lt ? "#e6e6ea" : "#0c0c0e";
-    ctx.fillRect(0, 0, w, h);
-
     const { lat, lng, z } = st.current.view;
-    const n = Math.pow(2, z);
     const tlX = projX(lng, z) - w / 2;
     const tlY = projY(lat, z) - h / 2;
-    const theme = lt ? "light_all" : "dark_all";
-    const retina = dpr > 1 ? "@2x" : "";
-
-    const x0 = Math.floor(tlX / TILE), x1 = Math.floor((tlX + w) / TILE);
-    const y0 = Math.floor(tlY / TILE), y1 = Math.floor((tlY + h) / TILE);
-    let wanted = 0, painted = 0;
-    const now = performance.now();
-    for (let tx = x0; tx <= x1; tx++) {
-      for (let ty = y0; ty <= y1; ty++) {
-        if (ty < 0 || ty >= n) continue;
-        wanted++;
-        const wx = ((tx % n) + n) % n;
-        const key = `${theme}/${z}/${wx}/${ty}/${retina}`;
-        let img = tiles.current.get(key);
-        if (!img) {
-          // Retry a previously-failed tile, but only after a backoff and only a
-          // few times, so a real outage doesn't turn into a request storm.
-          const f = tileFail.current.get(key);
-          if (!f || (f.n <= TILE_RETRIES && now - f.at > TILE_BACKOFF_MS)) {
-            const fresh = new Image();
-            fresh.crossOrigin = "anonymous";
-            fresh.onerror = () => {
-              tiles.current.delete(key);
-              const prev = tileFail.current.get(key);
-              tileFail.current.set(key, { n: (prev?.n ?? 0) + 1, at: performance.now() });
-            };
-            fresh.src = `https://basemaps.cartocdn.com/${theme}/${z}/${wx}/${ty}${retina}.png`;
-            tiles.current.set(key, fresh);
-            img = fresh;
-          }
-        }
-        if (img && img.complete && img.naturalWidth > 0) {
-          ctx.drawImage(img, Math.round(tx * TILE - tlX), Math.round(ty * TILE - tlY), TILE, TILE);
-          painted++;
-        }
-      }
-    }
-    // Surface a persistent basemap outage instead of showing an empty pane.
-    const down = wanted > 0 && painted === 0 && tileFail.current.size > 0;
-    if (down !== tilesDownRef.current) {
-      tilesDownRef.current = down;
-      setTilesDown(down);
-    }
+    drawVectorBasemap(ctx, w, h, tlX, tlY, z, lt);
 
     // neighborhood labels at their real centroids
     ctx.textAlign = "center";
@@ -462,11 +490,6 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
         ctx.stroke();
       }
     });
-
-    // attribution
-    ctx.textAlign = "right";
-    label(ctx, w - 6, h - 7, "© OpenStreetMap  © CARTO", lt ? "rgba(24,24,27,0.6)" : "rgba(255,255,255,0.5)", 8, "500");
-    ctx.textAlign = "left";
   }
 
   const contrib = contributions(model, row).sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
@@ -546,7 +569,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="font-mono text-[11px] text-zinc-400">
-              {CITY_NAME} · {sample.rows.length} real restaurants · GPS on OpenStreetMap
+              {CITY_NAME} · {sample.rows.length} restaurants · built-in vector map
             </div>
             <div className="flex gap-1">
               {(["status", "risk"] as const).map((c) => (
@@ -608,18 +631,6 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
                 </div>
               </div>
             )}
-            {tilesDown && (
-              <div
-                className="pointer-events-none absolute inset-x-0 top-2 mx-auto w-fit rounded-md border px-2.5 py-1 font-mono text-[10px]"
-                style={{
-                  background: light ? "rgba(255,255,255,0.94)" : "rgba(9,9,11,0.92)",
-                  borderColor: "rgb(var(--line) / 0.2)",
-                  color: light ? "#18181b" : "#fafafa",
-                }}
-              >
-                basemap tiles unavailable — markers still show real GPS positions
-              </div>
-            )}
           </div>
           <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-5">
             {hoodStats.map((h) => (
@@ -632,8 +643,8 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
             ))}
           </div>
           <p className="font-mono text-[10px] leading-relaxed text-zinc-600">
-            A curated subset of real Santa Barbara restaurants, each placed at its approximate real latitude/longitude
-            and overlaid on live OpenStreetMap tiles (Web Mercator projection) — drag to pan, use the +/− buttons to
+            A curated subset of Santa Barbara restaurants, each placed at its approximate latitude/longitude
+            on a built-in illustrative vector basemap (Web Mercator projection) — drag to pan, use the +/− buttons to
             zoom, and hover a marker for details. Marker size scales with review count; toggle to &quot;predicted
             risk&quot; to recolor each point by the live model&apos;s closure probability.
           </p>
