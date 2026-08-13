@@ -255,7 +255,7 @@ export function ChocoLLVMDemo({ embedded = false }: Readonly<{ embedded?: boolea
   return (
     <LiveDemo
       title="ChocoLLVM — ChocoPy → LLVM IR"
-      subtitle="A compiler frontend, from scratch: type ChocoPy on the left and press run to watch it lower — the lexer sweeps the source, the parser builds the tree, and codegen emits real LLVM IR."
+      subtitle="A TypeScript browser compiler pipeline for the supported ChocoPy subset: type source on the left and press run to watch lexing, parsing, validation, and LLVM IR generation."
       repoUrl={REPO}
       accent={CHOCO}
       embedded={embedded}
@@ -336,7 +336,7 @@ export function ChocoLLVMDemo({ embedded = false }: Readonly<{ embedded?: boolea
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* editor / live source sweep */}
-        <div className="flex flex-col">
+        <div className="min-w-0 flex flex-col">
           <div className="mb-1.5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-zinc-500">
             <span style={sweeping ? { color: p.accent } : undefined}>
               {sweeping
@@ -362,6 +362,7 @@ export function ChocoLLVMDemo({ embedded = false }: Readonly<{ embedded?: boolea
           ) : (
             <textarea
               ref={textareaRef}
+              aria-label="ChocoPy source code"
               value={source}
               onChange={(e) => setSource(e.target.value)}
               spellCheck={false}
@@ -391,7 +392,7 @@ export function ChocoLLVMDemo({ embedded = false }: Readonly<{ embedded?: boolea
         </div>
 
         {/* output */}
-        <div className="flex flex-col">
+        <div className="min-w-0 flex flex-col">
           <div className="mb-1.5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-zinc-500">
             <span style={{ color: p.accent }}>
               {shownPhase === "lex" ? "lexer" : shownPhase === "parse" ? "parser" : "codegen"}

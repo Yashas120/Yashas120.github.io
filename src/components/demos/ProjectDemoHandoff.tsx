@@ -25,6 +25,75 @@ export const demoLoaders: Record<DemoId, DemoLoader> = {
 type LoadState = "idle" | "loading" | "ready" | "error";
 type HeadingLevel = 2 | 3 | 4;
 
+/**
+ * The single shared loader for embedded project labs. Both /demos handoffs and
+ * role-specific portfolio stages mount the exact same lab component through
+ * this boundary; no route owns a second implementation of demo behaviour.
+ */
+export function SharedProjectLab({
+  demoId,
+  load,
+  className = "",
+}: Readonly<{
+  demoId: DemoId;
+  load: boolean;
+  className?: string;
+}>) {
+  const [attempt, setAttempt] = useState(0);
+  const [state, setState] = useState<LoadState>("idle");
+  const [Lab, setLab] = useState<ComponentType | null>(null);
+
+  useEffect(() => {
+    if (!load || Lab) return;
+    let current = true;
+    setState("loading");
+    demoLoaders[demoId]()
+      .then((component) => {
+        if (!current) return;
+        setLab(() => component);
+        setState("ready");
+      })
+      .catch(() => {
+        if (current) setState("error");
+      });
+    return () => {
+      current = false;
+    };
+  }, [Lab, attempt, demoId, load]);
+
+  const retry = () => {
+    setLab(null);
+    setState("idle");
+    setAttempt((value) => value + 1);
+  };
+
+  return (
+    <div className={className} data-shared-project-lab={demoId}>
+      {!load && <div className="min-h-[240px]" aria-hidden="true" />}
+      {load && state === "loading" && (
+        <div className="flex min-h-[240px] items-center justify-center gap-2 font-mono text-[12px] text-zinc-400" role="status" aria-live="polite">
+          <LoaderCircle className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Loading interactive lab…
+        </div>
+      )}
+      {load && state === "error" && (
+        <div className="flex min-h-[240px] flex-col items-start justify-center" role="alert">
+          <AlertTriangle className="h-5 w-5 text-amber-300" aria-hidden="true" />
+          <p className="mt-2 text-sm">The lab bundle could not be loaded.</p>
+          <button type="button" onClick={retry} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md border border-zinc-700 px-4 text-sm"><RotateCcw className="h-4 w-4" aria-hidden="true" /> Retry</button>
+        </div>
+      )}
+      {load && state === "ready" && Lab && (
+        <>
+          <span className="sr-only" role="status" aria-live="polite">{demoEvidence(demoId).projectTitle} lab ready.</span>
+          <LabErrorBoundary key={attempt} onRetry={retry}>
+            <Lab />
+          </LabErrorBoundary>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function ProjectDemoHandoff({
   demoId,
   theme = DEFAULT_DEMO_THEME,
@@ -32,6 +101,7 @@ export function ProjectDemoHandoff({
   autoOpen = false,
   headingLevel = 3,
   onOpen,
+  standaloneHref,
 }: Readonly<{
   demoId: DemoId;
   theme?: ProjectDemoTheme;
@@ -39,14 +109,12 @@ export function ProjectDemoHandoff({
   autoOpen?: boolean;
   headingLevel?: HeadingLevel;
   onOpen?: (demoId: DemoId) => void;
+  standaloneHref?: string | null;
 }>) {
   const project = demoEvidence(demoId);
   const rootRef = useRef<HTMLDivElement>(null);
   const [nearViewport, setNearViewport] = useState(false);
-  const [opened, setOpened] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const [state, setState] = useState<LoadState>("idle");
-  const [Lab, setLab] = useState<ComponentType | null>(null);
+  const [opened, setOpened] = useState(autoOpen);
   const Heading = `h${headingLevel}` as "h2" | "h3" | "h4";
 
   useEffect(() => {
@@ -68,37 +136,15 @@ export function ProjectDemoHandoff({
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (autoOpen && nearViewport) setOpened(true);
-  }, [autoOpen, nearViewport]);
-
-  const shouldLoad = opened || (autoOpen && nearViewport);
-  useEffect(() => {
-    if (!shouldLoad || Lab) return;
-    let current = true;
-    setState("loading");
-    demoLoaders[demoId]()
-      .then((component) => {
-        if (!current) return;
-        setLab(() => component);
-        setState("ready");
-      })
-      .catch(() => {
-        if (current) setState("error");
-      });
-    return () => {
-      current = false;
-    };
-  }, [Lab, attempt, demoId, shouldLoad]);
+  // Auto-open controls presentation, while proximity controls the expensive
+  // dynamic import. This keeps every default preview visibly expanded in the
+  // server-rendered document without pulling every lab into the initial load.
+  const shouldLoad = opened && (!autoOpen || nearViewport);
+  const resolvedStandaloneHref = standaloneHref === undefined ? `/demos/#${demoId}` : standaloneHref;
 
   const open = () => {
     setOpened(true);
     onOpen?.(demoId);
-  };
-  const retry = () => {
-    setLab(null);
-    setState("idle");
-    setAttempt((value) => value + 1);
   };
 
   return (
@@ -113,7 +159,7 @@ export function ProjectDemoHandoff({
         </div>
       </div>
 
-      {!opened && !(autoOpen && nearViewport) ? (
+      {!opened ? (
         <div className={`flex flex-col items-start justify-center px-4 sm:px-6 ${variant === "preview" ? "min-h-[180px]" : "min-h-[240px]"}`}>
           <FlaskConical className="h-6 w-6" style={{ color: theme.accent }} aria-hidden="true" />
           <p className="mt-3 max-w-[68ch] text-[14px] leading-relaxed" style={{ color: theme.muted }}>
@@ -125,29 +171,14 @@ export function ProjectDemoHandoff({
         </div>
       ) : (
         <div className="min-h-[260px] p-3 sm:p-5" data-demo-lab-root>
-          {state === "loading" && (
-            <div className="flex min-h-[240px] items-center justify-center gap-2 font-mono text-[12px]" style={{ color: theme.muted }} role="status" aria-live="polite">
-              <LoaderCircle className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Loading interactive lab…
-            </div>
-          )}
-          {state === "error" && (
-            <div className="flex min-h-[240px] flex-col items-start justify-center" role="alert">
-              <AlertTriangle className="h-5 w-5" style={{ color: theme.accent }} aria-hidden="true" />
-              <p className="mt-2 text-sm">The lab bundle could not be loaded.</p>
-              <button type="button" onClick={retry} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md border px-4 text-sm" style={{ borderColor: theme.border }}><RotateCcw className="h-4 w-4" aria-hidden="true" /> Retry</button>
-            </div>
-          )}
-          {state === "ready" && Lab && (
-            <LabErrorBoundary key={attempt} onRetry={retry}>
-              <Lab />
-            </LabErrorBoundary>
-          )}
+          <SharedProjectLab demoId={demoId} load={shouldLoad} />
         </div>
       )}
 
       <noscript>
         <p className="px-4 py-4 text-sm sm:px-6" style={{ color: theme.muted }}>
-          JavaScript is required for the embedded lab. <a className="underline" href={`/demos/#${demoId}`}>Open the standalone demo page.</a>
+          JavaScript is required for the embedded lab.
+          {resolvedStandaloneHref ? <> <a className="underline" href={resolvedStandaloneHref}>Open the standalone demo page.</a></> : null}
         </p>
       </noscript>
     </div>

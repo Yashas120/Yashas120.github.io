@@ -532,40 +532,232 @@
   border-bottom: 1px solid var(--cluster-base-line);
 }
 
-.ledger {
-  margin-top: 2.75rem;
-  border-top: 2px solid var(--cluster-base-ink);
+.indexLegend {
+  display: grid;
+  gap: 0;
+  margin-top: 2rem;
+  border-block: 1px solid var(--cluster-base-line);
 }
 
-.ledgerRow {
-  display: grid;
-  gap: 1rem;
-  padding-block: 1.5rem;
+.indexLegend > div {
+  padding: 1rem 0;
   border-bottom: 1px solid var(--cluster-base-line);
 }
 
-.ledgerCell {
+.indexLegend > div:last-child {
+  border-bottom: 0;
+}
+
+.indexLegend dt,
+.indexGroupNumber,
+.indexFieldLabel,
+.indexMetadata dt,
+.indexContribution span {
+  color: var(--cluster-base-blue);
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 0.66rem;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.indexLegend dd {
+  margin-top: 0.3rem;
+  color: var(--cluster-base-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.indexGroups {
+  margin-top: 1rem;
+}
+
+.indexGroup {
+  padding-top: clamp(4rem, 7vw, 6.5rem);
+}
+
+.indexGroupSubordinate {
+  margin-top: 1rem;
+  padding-top: 3.5rem;
+  border-top: 1px dashed var(--cluster-base-line);
+}
+
+.indexGroupHeader {
+  max-width: 68rem;
+}
+
+.indexGroupNumber {
+  margin-bottom: 0.75rem;
+}
+
+.indexGroupHeader h3 {
+  max-width: 24ch;
+  color: var(--cluster-base-ink);
+  font-size: clamp(1.65rem, 3.2vw, 2.65rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.indexGroupHeader > p:last-child {
+  max-width: 68ch;
+  margin-top: 0.8rem;
+  color: var(--cluster-base-muted);
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.indexRows {
+  margin-top: 2rem;
+  border-top: 2px solid var(--cluster-base-ink);
+}
+
+.indexGroup[data-evidence-group-section="professional-systems"] .indexRows {
+  border-top-color: var(--cluster-base-blue);
+  border-top-width: 3px;
+}
+
+.indexGroup[data-evidence-group-section="professional-systems"] .indexGroupNumber,
+.indexGroup[data-evidence-group-section="professional-systems"] .indexTitle {
+  color: var(--cluster-base-blue);
+}
+
+.indexRow {
+  display: grid;
+  gap: 1.5rem;
+  padding-block: 2rem;
+  border-bottom: 1px solid var(--cluster-base-line);
+}
+
+.indexRow[data-index-compact="true"] {
+  gap: 1rem;
+  padding-block: 1.25rem;
+}
+
+.indexRow[data-index-compact="true"] .indexDescription,
+.indexRow[data-index-compact="true"] .indexContribution,
+.indexRow[data-index-compact="true"] .indexDomain,
+.indexRow[data-index-compact="true"] .indexEvidenceType {
+  font-size: 0.78rem;
+}
+
+.indexIdentity,
+.indexNarrative,
+.indexProof {
   min-width: 0;
 }
 
-.ledgerValue {
-  margin-top: 0.28rem;
+.indexTitle {
+  color: var(--cluster-base-ink);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.indexMetadata {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.15rem;
+}
+
+.indexMetadata > div {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 0.8fr) minmax(0, 1.2fr);
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.indexMetadata dt {
+  color: var(--cluster-base-muted);
+  font-size: 0.59rem;
+  overflow-wrap: anywhere;
+}
+
+.indexMetadata dd {
+  color: var(--cluster-base-ink);
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 0.67rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.indexDescription {
+  max-width: 68ch;
+  color: var(--cluster-base-ink);
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.indexContribution {
+  max-width: 68ch;
+  margin-top: 1.15rem;
   color: var(--cluster-base-muted);
   font-size: 0.86rem;
+  line-height: 1.62;
+}
+
+.indexContribution span {
+  display: block;
+  margin-bottom: 0.28rem;
+}
+
+.indexBoundary {
+  max-width: 68ch;
+  margin-top: 1.05rem;
+  padding-left: 0.85rem;
+  border-left: 2px solid var(--cluster-base-green);
+  color: var(--cluster-base-muted);
+  font-size: 0.82rem;
+  line-height: 1.62;
+}
+
+.indexDetailedLink,
+.indexEvidenceLink {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--cluster-base-blue);
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 0.24rem;
+}
+
+.indexDetailedLink {
+  margin-top: 0.65rem;
+}
+
+.indexFieldLabel:not(:first-child) {
+  margin-top: 1.15rem;
+}
+
+.indexDomain,
+.indexEvidenceType,
+.indexEvidenceNote {
+  margin-top: 0.35rem;
+  color: var(--cluster-base-muted);
+  font-size: 0.8rem;
   line-height: 1.58;
   overflow-wrap: anywhere;
 }
 
-.subordinate {
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px dashed var(--cluster-base-line);
+.indexEvidenceType {
+  color: var(--cluster-base-ink);
 }
 
-.subheading {
-  color: var(--cluster-base-ink);
-  font-size: 1.05rem;
-  font-weight: 650;
+.indexEvidenceLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.8rem;
+  margin-top: 0.35rem;
+}
+
+.indexDetailedLink:hover,
+.indexEvidenceLink:hover {
+  filter: brightness(0.82);
 }
 
 .simpleList {
@@ -621,8 +813,23 @@
     gap: 2.5rem;
   }
 
-  .ledgerRow {
-    grid-template-columns: minmax(11rem, 1.3fr) minmax(10rem, 1fr) minmax(8rem, 0.8fr);
+  .indexLegend {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .indexLegend > div {
+    padding: 1rem;
+    border-right: 1px solid var(--cluster-base-line);
+    border-bottom: 0;
+  }
+
+  .indexLegend > div:first-child {
+    padding-left: 0;
+  }
+
+  .indexLegend > div:last-child {
+    padding-right: 0;
+    border-right: 0;
   }
 
   .scopeGrid {
@@ -636,6 +843,34 @@
   .scopeBand:nth-child(even) {
     padding-left: 2rem;
     border-left: 1px solid var(--cluster-base-line);
+  }
+}
+
+@media (min-width: 1040px) {
+  .indexRow {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1.5rem;
+    padding-block: 2.35rem;
+  }
+
+  .indexIdentity {
+    grid-column: 1 / span 3;
+  }
+
+  .indexNarrative {
+    grid-column: 4 / span 6;
+  }
+
+  .indexProof {
+    grid-column: 10 / span 3;
+  }
+
+  .indexMetadata > div {
+    display: block;
+  }
+
+  .indexMetadata dd {
+    margin-top: 0.12rem;
   }
 }
 
@@ -904,7 +1139,7 @@
   .profileSection,
   .role,
   .editorialRow,
-  .ledgerRow {
+  .indexRow {
     break-inside: avoid;
   }
 

@@ -4,8 +4,8 @@ import { useTokens } from "../theme";
 import { Box, Caption, Conn, Tag, useStep, type DiagramProps } from "./primitives";
 
 const stops = [
-  { title: "Spark Streaming", boundary: "team · fork" },
-  { title: "RDBMS allocation", boundary: "team · fork" },
+  { title: "Spark Streaming", boundary: "team · contributed" },
+  { title: "RDBMS allocation", boundary: "team · contributed" },
   { title: "Bitcoin Java", boundary: "no consensus" },
   { title: "SSP", boundary: "illustrative models" },
 ];

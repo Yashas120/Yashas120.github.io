@@ -37,6 +37,45 @@ function IndexRow({ p, i }: Readonly<{ p: SceneVisualProps["p"]; i: number }>) {
   );
 }
 
+const COMPACT_CHAIN = [
+  ["APPROVED SOURCES", COBALT],
+  ["MEMBERSHIP + RETRIEVAL", COBALT],
+  ["DRAFT ANSWER", "currentColor"],
+  ["HUMAN GATE", ORANGE],
+  ["FEEDBACK / EVALUATION", GREEN],
+] as const;
+
+function CompactRag({ p }: Readonly<{ p: SceneVisualProps["p"] }>) {
+  const trace = useRange(p, 0.04, 0.8, 0, 1);
+  const support = useRange(p, 0.7, 0.94, 0, 1);
+  return (
+    <g>
+      <Ann x={118} y={34} size={12} color={ORANGE}>PROOF OF CONCEPT · HUMAN CONTROLLED</Ann>
+      <motion.line x1={146} y1={56} x2={146} y2={316} stroke={COBALT} strokeWidth={2} style={{ pathLength: trace }} />
+      {COMPACT_CHAIN.map(([label, color], index) => <CompactRagStep key={label} p={p} index={index} label={label} color={color} />)}
+      <motion.g style={{ opacity: support }}>
+        <line x1={118} y1={346} x2={562} y2={346} stroke="currentColor" strokeWidth={0.8} opacity={0.3} />
+        <Ann x={118} y={372} size={10} color={COBALT}>PROTOTYPE · ENGINEERING ANALYTICS</Ann>
+        <Ann x={118} y={390} size={9.5} opacity={0.64}>PYTHON BACKEND · ANGULAR FRONTEND BY OTHERS</Ann>
+        <Ann x={118} y={422} size={10} color={COBALT}>PROTOTYPE · MULTILINGUAL VOICE RETRIEVAL</Ann>
+        <Ann x={118} y={440} size={9.5} opacity={0.64}>COLLABORATIVE · CPU-ONLY · POLICY INFORMATION</Ann>
+      </motion.g>
+    </g>
+  );
+}
+
+function CompactRagStep({ p, index, label, color }: Readonly<{ p: SceneVisualProps["p"]; index: number; label: string; color: string }>) {
+  const opacity = useRange(p, 0.04 + index * 0.14, 0.22 + index * 0.14, 0, 1);
+  const y = 52 + index * 60;
+  return (
+    <motion.g style={{ opacity }}>
+      <circle cx={146} cy={y + 17} r={7} fill="var(--fde-paper)" stroke={color} strokeWidth={2} />
+      <rect x={184} y={y} width={344} height={36} fill="none" stroke={color} strokeWidth={index === 3 ? 1.5 : 1} strokeDasharray={index === 3 ? "5 4" : undefined} />
+      <Ann x={202} y={y + 24} size={13} color={color}>{label}</Ann>
+    </motion.g>
+  );
+}
+
 export function Scene07Rag({ p, compact }: Readonly<SceneVisualProps>) {
   const nDocs = compact ? 4 : 7;
   const store = useRange(p, 0.14, 0.34, 0, 1);
@@ -49,6 +88,10 @@ export function Scene07Rag({ p, compact }: Readonly<SceneVisualProps>) {
   const stop = useRange(p, 0.72, 0.82, 0, 1);
   const active = useRange(p, 0.78, 0.94, 0, 1);
   const modelStroke = useTransform(active, (v) => (v > 0.5 ? GREEN : "currentColor"));
+  const indexOpacity = useTransform(indexFill, [0, 1], [0, 0.08]);
+  const modelOpacity = useTransform(active, [0, 1], [0.4, 1]);
+
+  if (compact) return <CompactRag p={p} />;
 
   return (
     <g>
@@ -71,7 +114,7 @@ export function Scene07Rag({ p, compact }: Readonly<SceneVisualProps>) {
           width={STORE.w}
           height={STORE.h}
           fill={COBALT}
-          style={{ opacity: useTransform(indexFill, [0, 1], [0, 0.08]) }}
+          style={{ opacity: indexOpacity }}
         />
         <Ann x={STORE.x} y={STORE.y + STORE.h + 18} size={8} color={COBALT}>
           vector retrieval
@@ -126,7 +169,7 @@ export function Scene07Rag({ p, compact }: Readonly<SceneVisualProps>) {
         height={MODEL.h}
         fill="none"
         strokeWidth={1.2}
-        style={{ stroke: modelStroke, opacity: useTransform(active, [0, 1], [0.4, 1]) }}
+        style={{ stroke: modelStroke, opacity: modelOpacity }}
       />
       <motion.g style={{ opacity: active }}>
         <Ann x={MODEL.x + 10} y={MODEL.y + 30} size={9} color={GREEN}>
@@ -136,6 +179,12 @@ export function Scene07Rag({ p, compact }: Readonly<SceneVisualProps>) {
       <Ann x={MODEL.x} y={MODEL.y + MODEL.h + 20} size={8} color={ORANGE}>
         HUMAN GATE · PROOF OF CONCEPT
       </Ann>
+      <motion.g style={{ opacity: active }}>
+        <path d={`M ${MODEL.x + MODEL.w} 202 V 382 H ${STORE.x + 52} V ${STORE.y + STORE.h}`} fill="none" stroke={GREEN} strokeWidth={0.9} strokeDasharray="4 4" />
+        <Ann x={MODEL.x + MODEL.w} y={374} size={8} anchor="end" color={GREEN}>feedback / evaluation</Ann>
+        <Ann x={44} y={410} size={8} color={COBALT}>PROTOTYPE · ENGINEERING ANALYTICS · PYTHON BACKEND</Ann>
+        <Ann x={44} y={430} size={8} color={COBALT}>PROTOTYPE · MULTILINGUAL VOICE RETRIEVAL · COLLABORATIVE</Ann>
+      </motion.g>
     </g>
   );
 }

@@ -179,6 +179,7 @@ export function LedgerSection({
           <span className="font-mono text-[11px] text-zinc-500">difficulty</span>
           <input
             type="range"
+            aria-label="Proof-of-work difficulty"
             min={8}
             max={22}
             value={difficulty}

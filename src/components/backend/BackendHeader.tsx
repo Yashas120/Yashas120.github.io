@@ -9,10 +9,11 @@ interface BackendHeaderProps {
 }
 
 const primaryIds = new Set(["overview", "experience", "systems", "projects", "research-teaching", "work-index", "contact"]);
+const primaryOrder = ["overview", "experience", "systems", "projects", "research-teaching", "work-index", "contact"];
 
 export function BackendHeader({ activeId }: Readonly<BackendHeaderProps>) {
   const [open, setOpen] = useState(false);
-  const links = sceneRanges.filter((scene) => primaryIds.has(scene.id));
+  const links = sceneRanges.filter((scene) => primaryIds.has(scene.id)).sort((a, b) => primaryOrder.indexOf(a.id) - primaryOrder.indexOf(b.id));
 
   return (
     <header className="bk-header">

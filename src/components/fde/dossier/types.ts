@@ -6,4 +6,6 @@ export interface SceneVisualProps {
   p: MotionValue<number>;
   /** Simplified geometry for narrow viewports. */
   compact: boolean;
+  /** Static normal-flow rendering for reduced-motion visitors. */
+  reduced?: boolean;
 }

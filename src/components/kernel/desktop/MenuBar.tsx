@@ -16,13 +16,15 @@ export function MenuBar({
   onHelp,
   onReplayBoot,
   returnHref,
+  onReturn,
 }: Readonly<{
   apps: AppDef[];
   activeTitle?: string;
   onLaunch: (id: string) => void;
   onHelp: () => void;
   onReplayBoot: () => void;
-  returnHref: string;
+  returnHref?: string;
+  onReturn?: () => void;
 }>) {
   const [now, setNow] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -129,14 +131,26 @@ export function MenuBar({
             </motion.div>
           )}
         </AnimatePresence>
-        <Link
-          href={returnHref}
-          className="flex min-h-11 items-center gap-1.5 rounded px-2 font-mono text-[10px] text-zinc-300 transition-colors hover:bg-line/10 hover:text-zinc-50 sm:min-h-9 sm:text-[11px]"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Return to Portfolio Overview</span>
-          <span className="sm:hidden">Overview</span>
-        </Link>
+        {onReturn ? (
+          <button
+            type="button"
+            onClick={onReturn}
+            className="flex min-h-11 items-center gap-1.5 rounded px-2 font-mono text-[10px] text-zinc-300 transition-colors hover:bg-line/10 hover:text-zinc-50 sm:min-h-9 sm:text-[11px]"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Return to scroll story</span>
+            <span className="sm:hidden">Story</span>
+          </button>
+        ) : (
+          <Link
+            href={returnHref ?? "/kernel"}
+            className="flex min-h-11 items-center gap-1.5 rounded px-2 font-mono text-[10px] text-zinc-300 transition-colors hover:bg-line/10 hover:text-zinc-50 sm:min-h-9 sm:text-[11px]"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Return to Portfolio Overview</span>
+            <span className="sm:hidden">Overview</span>
+          </Link>
+        )}
       </div>
 
       {activeTitle && (

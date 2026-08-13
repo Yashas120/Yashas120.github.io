@@ -12,6 +12,7 @@
     "validate:backend": "node scripts/validate-backend.mjs",
     "validate:devtools": "node scripts/validate-devtools.mjs",
     "validate:cluster": "node scripts/validate-cluster.mjs",
+    "test:backend": "playwright test tests/backend.spec.ts",
     "test:fde": "playwright test tests/fde.spec.ts",
     "test:cluster": "playwright test tests/cluster.spec.ts"
   },

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { KernelPortfolioOverview } from "@/components/kernel/overview/KernelPortfolioOverview";
+import { KernelStory } from "@/components/kernel/story/KernelStory";
 
 const description =
   "Yashas Kadambi is a systems software engineer with production experience across Linux, optical line-card hardware, C/C++ validation infrastructure, secure boot, and performance experiments.";
@@ -22,5 +22,5 @@ export const metadata: Metadata = {
 };
 
 export default function KernelPage() {
-  return <KernelPortfolioOverview />;
+  return <KernelStory />;
 }

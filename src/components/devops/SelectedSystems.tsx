@@ -3,17 +3,22 @@
 import { ArrowUpRight } from "lucide-react";
 import type { DemoId } from "@/data/demos";
 import { selectedProjects } from "@/data/devops/projects";
+import { DefaultProjectPreview } from "./DefaultProjectPreview";
 import { EvidenceDrawer } from "./EvidenceDrawer";
 import { useProjectInspector } from "./ProjectInspectorContext";
 import { DV } from "./tokens";
 
-const demoByProjectId: Partial<Record<string, DemoId>> = { "cloud-rdbms": "cloud" };
+const demoByProjectId: Partial<Record<string, DemoId>> = { "cloud-rdbms": "cloud", "ghost-scheduler": "ghost" };
+const featuredOrder = ["cloud-rdbms", "ghost-scheduler", "technical-portfolio", "cloud-hack"];
 
 export function SelectedSystems() {
   const { onInspectProject } = useProjectInspector();
+  const orderedProjects = [...selectedProjects].sort(
+    (a, b) => featuredOrder.indexOf(a.id) - featuredOrder.indexOf(b.id),
+  );
   return (
     <div className="mt-6 max-w-[74ch]">
-      {selectedProjects.map((project, index) => (
+      {orderedProjects.map((project, index) => (
         <article
           key={project.id}
           className="border-t py-7 first:border-t-0 first:pt-0"
@@ -56,7 +61,7 @@ export function SelectedSystems() {
             {project.links.map((link) => {
               const demoId = link.kind === "demo" ? demoByProjectId[project.id] : undefined;
               return demoId ? (
-                <button key={link.href} type="button" onClick={() => onInspectProject(demoId)} className="inline-flex min-h-[44px] items-center gap-1 text-[14px]" style={{ color: DV.cyan }}>Preview live implementation</button>
+                <button key={link.href} type="button" onClick={() => onInspectProject(demoId)} className="inline-flex min-h-[44px] items-center gap-1 text-[14px]" style={{ color: DV.cyan }}>Jump to open preview</button>
               ) : (
                 <a key={link.href} href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined} rel={link.href.startsWith("http") ? "noreferrer noopener" : undefined} className="inline-flex min-h-[44px] items-center gap-1 text-[14px]" style={{ color: DV.cyan }}>
                   {link.label}{link.href.startsWith("http") && <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />}
@@ -65,6 +70,7 @@ export function SelectedSystems() {
             })}
           </div>
           {project.evidenceId && <EvidenceDrawer ids={[project.evidenceId]} label="Inspect source classification" />}
+          {demoByProjectId[project.id] && <DefaultProjectPreview demoId={demoByProjectId[project.id]!} />}
         </article>
       ))}
     </div>

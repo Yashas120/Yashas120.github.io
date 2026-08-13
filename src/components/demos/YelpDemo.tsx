@@ -53,9 +53,24 @@ const COASTLINE: readonly MapPoint[] = [
 ] as const;
 
 const ARTERIALS: readonly (readonly MapPoint[])[] = [
-  [{ lat: 34.406, lng: -119.755 }, { lat: 34.412, lng: -119.731 }, { lat: 34.418, lng: -119.708 }, { lat: 34.425, lng: -119.676 }],
-  [{ lat: 34.444, lng: -119.742 }, { lat: 34.433, lng: -119.727 }, { lat: 34.420, lng: -119.704 }, { lat: 34.408, lng: -119.686 }],
-  [{ lat: 34.398, lng: -119.724 }, { lat: 34.414, lng: -119.713 }, { lat: 34.432, lng: -119.700 }, { lat: 34.444, lng: -119.691 }],
+  [
+    { lat: 34.406, lng: -119.755 },
+    { lat: 34.412, lng: -119.731 },
+    { lat: 34.418, lng: -119.708 },
+    { lat: 34.425, lng: -119.676 },
+  ],
+  [
+    { lat: 34.444, lng: -119.742 },
+    { lat: 34.433, lng: -119.727 },
+    { lat: 34.420, lng: -119.704 },
+    { lat: 34.408, lng: -119.686 },
+  ],
+  [
+    { lat: 34.398, lng: -119.724 },
+    { lat: 34.414, lng: -119.713 },
+    { lat: 34.432, lng: -119.700 },
+    { lat: 34.444, lng: -119.691 },
+  ],
 ] as const;
 
 const MODES = [
@@ -97,6 +112,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
   const [xKey, setXKey] = useState("checkins");
   const [yKey, setYKey] = useState("stars");
   const [mapColor, setMapColor] = useState<"status" | "risk">("status");
+  const [mapActive, setMapActive] = useState(false);
   const [view, setView] = useState<View>({ lat: 34.4208, lng: -119.6982, z: 14 });
   const [hover, setHover] = useState<{ idx: number; x: number; y: number } | null>(null);
   const [row, setRow] = useState<Row>({
@@ -181,7 +197,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     const cv = canvas.current;
     if (!cv) return;
     const onWheel = (e: WheelEvent) => {
-      if (MODES[st.current.mode].key !== "map") return;
+      if (MODES[st.current.mode].key !== "map" || !mapActive) return;
       e.preventDefault();
       const rect = cv.getBoundingClientRect();
       const mx = e.clientX - rect.left, my = e.clientY - rect.top;
@@ -199,7 +215,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     cv.addEventListener("wheel", onWheel, { passive: false });
     return () => cv.removeEventListener("wheel", onWheel);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, [mapActive, mode]);
 
   function pickMarker(mx: number, my: number): number {
     const cv = canvas.current;
@@ -215,6 +231,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     return best;
   }
   function onDown(e: ReactPointerEvent) {
+    if (!mapActive) return;
     if (MODES[st.current.mode].key !== "map") return;
     const cv = canvas.current!;
     cv.setPointerCapture(e.pointerId);
@@ -223,6 +240,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     setHover(null);
   }
   function onMove(e: ReactPointerEvent) {
+    if (!mapActive) return;
     const cv = canvas.current;
     if (!cv) return;
     if (drag.current) {
@@ -406,6 +424,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     ctx.fillStyle = lt ? "#edf0ea" : "#111820";
     ctx.fillRect(0, 0, w, h);
 
+    // Neighborhood washes give the marker clusters a readable spatial frame.
     NEIGHBORHOODS.forEach((nb, index) => {
       const p = point(nb);
       const radius = Math.max(26, Math.min(105, Math.abs(projX(nb.lng + nb.spread, z) - projX(nb.lng, z)) * 2.4));
@@ -417,18 +436,26 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
       ctx.fill();
     });
 
+    // Procedural local streets stay aligned while panning and scale with zoom.
     const spacing = Math.max(30, Math.min(120, 52 * Math.pow(2, z - 14)));
     const ox = ((-tlX % spacing) + spacing) % spacing;
     const oy = ((-tlY % spacing) + spacing) % spacing;
     ctx.strokeStyle = lt ? "rgba(63,63,70,0.13)" : "rgba(226,232,240,0.11)";
     ctx.lineWidth = 1;
     for (let x = ox - spacing; x < w + spacing; x += spacing) {
-      ctx.beginPath(); ctx.moveTo(x - 16, 0); ctx.lineTo(x + 16, h); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - 16, 0);
+      ctx.lineTo(x + 16, h);
+      ctx.stroke();
     }
     for (let y = oy - spacing; y < h + spacing; y += spacing) {
-      ctx.beginPath(); ctx.moveTo(0, y + 10); ctx.lineTo(w, y - 10); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, y + 10);
+      ctx.lineTo(w, y - 10);
+      ctx.stroke();
     }
 
+    // Draw a visible coastline and water band without relying on a tile CDN.
     const coast = COASTLINE.map(point);
     ctx.beginPath();
     coast.forEach((p, index) => index === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
@@ -439,6 +466,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     ctx.fill();
     road(COASTLINE, lt ? "rgba(8,145,178,0.55)" : "rgba(56,189,248,0.5)", 2);
 
+    // Major corridors sit above the local grid and provide map-like structure.
     ARTERIALS.forEach((path) => {
       road(path, lt ? "rgba(255,255,255,0.9)" : "rgba(8,9,12,0.8)", 7);
       road(path, lt ? "rgba(113,113,122,0.48)" : "rgba(161,161,170,0.42)", 2);
@@ -467,6 +495,9 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = lt ? "#e6e6ea" : "#0c0c0e";
+    ctx.fillRect(0, 0, w, h);
+
     const { lat, lng, z } = st.current.view;
     const tlX = projX(lng, z) - w / 2;
     const tlY = projY(lat, z) - h / 2;
@@ -512,6 +543,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
         ctx.stroke();
       }
     });
+
   }
 
   const contrib = contributions(model, row).sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
@@ -531,7 +563,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
   return (
     <LiveDemo
       title="Yelp Restaurant Analysis — closure predictor"
-      subtitle="From the Yelp project: a logistic-regression model, trained live in your browser on a seeded restaurant sample, estimates a restaurant's closure risk from its check-ins, reviews, rating and amenities — then shows which features matter, maps the businesses across the city, and surfaces the LDA topics pulled from reviews."
+      subtitle="A fictionalized educational scenario: a local logistic-regression model trains on seeded records, explains feature influence, and maps synthetic businesses. It makes no claim about any real restaurant."
       repoUrl={REPO}
       accent={ACC}
       embedded={embedded}
@@ -543,6 +575,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
           <div key={mm.key} className="flex items-center">
             <button
               onClick={() => setMode(i)}
+              aria-pressed={i === mode}
               className="whitespace-nowrap rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors"
               style={{
                 background: i === mode ? rgba(ACC, 0.15) : "transparent",
@@ -591,7 +624,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="font-mono text-[11px] text-zinc-400">
-              {CITY_NAME} · {sample.rows.length} restaurants · built-in vector map
+              {CITY_NAME} · {sample.rows.length} synthetic restaurants · illustrative map
             </div>
             <div className="flex gap-1">
               {(["status", "risk"] as const).map((c) => (
@@ -621,9 +654,14 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
               onPointerMove={onMove}
               onPointerUp={onUp}
               onPointerLeave={() => setHover(null)}
-              className="block w-full touch-none cursor-grab active:cursor-grabbing"
+              className={`block w-full ${mapActive ? "touch-none cursor-grab active:cursor-grabbing" : "touch-pan-y"}`}
               style={{ height: MAP_H }}
             />
+            {!mapActive && (
+              <button type="button" onClick={() => setMapActive(true)} className="absolute inset-x-4 top-1/2 mx-auto min-h-11 w-fit -translate-y-1/2 rounded-md border px-4 font-mono text-[11px] shadow-lg" style={{ background: "rgb(var(--ink-900) / 0.94)", borderColor: rgba(ACC, 0.5), color: accentText }}>
+                Activate map interactions
+              </button>
+            )}
             <div className="absolute right-2 top-2 flex flex-col gap-1">
               <MapBtn onClick={() => zoomBy(1)} label="zoom in"><PlusIcon className="h-3.5 w-3.5" /></MapBtn>
               <MapBtn onClick={() => zoomBy(-1)} label="zoom out"><MinusIcon className="h-3.5 w-3.5" /></MapBtn>
@@ -665,10 +703,9 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
             ))}
           </div>
           <p className="font-mono text-[10px] leading-relaxed text-zinc-600">
-            A curated subset of Santa Barbara restaurants, each placed at its approximate latitude/longitude
-            on a built-in illustrative vector basemap (Web Mercator projection) — drag to pan, use the +/− buttons to
-            zoom, and hover a marker for details. Marker size scales with review count; toggle to &quot;predicted
-            risk&quot; to recolor each point by the live model&apos;s closure probability.
+            Fictional business identities and seeded educational records are placed over an illustrative map extent.
+            After deliberate activation, drag to pan, use the +/− buttons to zoom, and hover a marker for details.
+            Marker size scales with synthetic review count; predicted risk is not a claim about any real business.
           </p>
         </div>
       ) : (
@@ -688,6 +725,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
                       </span>
                     </div>
                     <input
+                      aria-label={f.label}
                       type="range"
                       min={f.min}
                       max={f.max}
@@ -702,6 +740,7 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
                   <button
                     key={f.key}
                     onClick={() => setRow({ ...row, [f.key]: row[f.key] ? 0 : 1 })}
+                    aria-pressed={Boolean(row[f.key])}
                     className="flex w-full items-center justify-between rounded-md border px-2.5 py-1.5 font-mono text-[11px] transition-colors"
                     style={{
                       borderColor: row[f.key] ? rgba(ACC, 0.4) : "rgb(var(--line) / 0.12)",
@@ -767,8 +806,8 @@ export function YelpDemo({ embedded = false }: Readonly<{ embedded?: boolean }> 
       <p className="mt-3 font-mono text-[10px] leading-relaxed text-zinc-600">
         Mirrors the project&apos;s approach: check-in frequency and review signals drive an open-vs-closed classifier,
         and LDA surfaces the latent review topics that distinguish thriving from failing restaurants. The model is a
-        real logistic regression trained live via gradient descent on a seeded, realistic sample (the public Yelp
-        dataset is too large to ship); topic–outcome associations are illustrative of the paper&apos;s findings.
+        real logistic regression trained live via gradient descent on a fictionalized, seeded educational sample;
+        topic–outcome associations are illustrative and do not make claims about real businesses.
       </p>
     </LiveDemo>
   );

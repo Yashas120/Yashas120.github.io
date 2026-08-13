@@ -9,7 +9,7 @@ const LAYERS = [
   ["platform software", "currentColor"],
   ["table-driven programming", "currentColor"],
   ["CDR / hardware boundary", ORANGE],
-  ["modes + resource state", "currentColor"],
+  ["QPSK / HIGH-SPEED MODES + STATE", "currentColor"],
   ["secure recovery · PM · validation", GREEN],
 ] as const;
 

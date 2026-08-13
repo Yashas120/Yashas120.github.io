@@ -45,7 +45,7 @@ export function LiveDemo({
   if (embedded) return content;
 
   return (
-    <div id={id} className="scroll-mt-20 rounded-xl border bg-ink-800" style={{ borderColor: hexToRgba(accent, 0.18) }}>
+    <div id={id} data-live-demo={id ?? "demo"} className="scroll-mt-20 rounded-xl border bg-ink-800" style={{ borderColor: hexToRgba(accent, 0.18) }}>
       <div className="flex items-start justify-between gap-4 border-b px-5 py-4" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">

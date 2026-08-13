@@ -2,6 +2,9 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 const widths = [360, 768, 1280, 1536] as const;
+const range = (prefix: string, end: number) => Array.from({ length: end }, (_, index) => `${prefix}-${String(index + 1).padStart(2, "0")}`);
+const canonicalEvidenceIds = [...range("PE", 22), ...range("PR", 18), ...range("RS", 2), ...range("TE", 3), ...range("ED", 2), ...range("AW", 6), ...range("CP", 10), ...range("LK", 6)];
+const excludedEvidenceIds = new Set(["PR-15", "PR-16", "PR-17", "PR-18", "AW-01", "AW-03", "LK-04"]);
 
 async function openFde(page: Page, width = 1280, height = 900) {
   await page.setViewportSize({ width, height });
@@ -24,8 +27,17 @@ test("renders the complete verified record and honest actions", async ({ page })
   await expect(page.locator("#teaching")).toContainText("~40 learners");
   await expect(page.locator("#education")).toContainText("starting Sep 2026");
   await expect(page.getByRole("link", { name: /LinkedIn/ }).first()).toHaveText("LinkedIn");
-  await expect(page.getByRole("link", { name: "Resume", exact: true }).first()).toHaveAttribute("href", "/resume/Yashas-Kadambi-Resume.pdf");
+  await expect(page.getByRole("link", { name: "Resume", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /theme/i })).toHaveCount(0);
+});
+
+test("renders every public evidence ID and excludes only reasoned held records", async ({ page }) => {
+  await openFde(page);
+  const rendered = new Set(await page.locator("[data-evidence-id], [data-evidence-ids]").evaluateAll((nodes) =>
+    nodes.flatMap((node) => [node.getAttribute("data-evidence-id") ?? "", node.getAttribute("data-evidence-ids") ?? ""])
+      .flatMap((value) => value.split(/\s+/)).filter(Boolean)
+  ));
+  expect(canonicalEvidenceIds.filter((id) => !excludedEvidenceIds.has(id) && !rendered.has(id))).toEqual([]);
 });
 
 test("uses one reversible pinned film with one dominant scene", async ({ page }) => {
@@ -48,6 +60,40 @@ test("uses one reversible pinned film with one dominant scene", async ({ page })
 
   for (const index of [0, 2, 4, 6, 8, 10]) await sample(index);
   for (const index of [9, 7, 5, 3, 1, 0]) await sample(index);
+});
+
+test("releases the sticky stage directly into the verified annex", async ({ page }) => {
+  await openFde(page, 1280, 900);
+  const structure = await page.evaluate(() => {
+    const stage = document.querySelector(".fde-stage-track");
+    const next = stage?.nextElementSibling;
+    return { nextClass: next?.className ?? "", nextFirstId: next?.firstElementChild?.id ?? "" };
+  });
+  expect(structure.nextClass).toContain("fde-annex");
+  expect(structure.nextFirstId).toBe("evidence-index");
+  await expect(page.locator("#public-labs")).toHaveCount(1);
+});
+
+test("runs the public labs inside the dossier", async ({ page }) => {
+  await openFde(page, 1280, 900);
+  const labs = page.locator("#public-labs");
+  await labs.scrollIntoViewIfNeeded();
+  for (const id of ["ghost", "bitcoin", "chocollvm", "swift", "multiview", "cifar", "parallel", "cloud", "yelp", "petra"]) {
+    await expect(labs.locator(`[data-demo-handoff="${id}"]`)).toHaveCount(1);
+  }
+  await expect(page.locator('a[href^="/demos"], a[href*="yashas120.github.io/demos"]')).toHaveCount(0);
+  await expect(page.locator('a[href="#public-labs"]')).toHaveCount(0);
+  const ghostLab = labs.locator('[data-demo-handoff="ghost"]');
+  await ghostLab.scrollIntoViewIfNeeded();
+  await ghostLab.getByRole("button", { name: "Open live lab" }).click();
+  await expect(labs.locator('[data-shared-project-lab="ghost"]')).toBeVisible();
+});
+
+test("uses literal vertical mechanisms on compact scenes", async ({ page }) => {
+  await openFde(page, 360, 1024);
+  for (const [scene, label] of [["02", "EXPECTED BEHAVIOR"], ["03", "DEPLOYMENT + HANDOFF"], ["04", "OWNER MAPPED"], ["05", "BLOCKED UNTIL HEALTHY"], ["08", "GENERATED + PUBLISHED SDKS"], ["09", "PROOF OF CONCEPT · HUMAN CONTROLLED"]] as const) {
+    expect(await page.locator(`[data-fde-scene="${scene}"] svg text`).filter({ hasText: label }).count()).toBeGreaterThanOrEqual(1);
+  }
 });
 
 test("exposes a visible skip link and lands below the integrated header", async ({ page }) => {
@@ -82,6 +128,7 @@ test("reduced motion resolves all scenes into normal flow", async ({ page }) => 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openFde(page, 768, 1024);
   await expect(page.locator("[data-fde-reduced-motion] > section")).toHaveCount(11);
+  await expect(page.locator("[data-fde-reduced-motion] [data-fde-static-context]")).toHaveCount(11);
   await expect(page.locator(".fde-stage-track")).toHaveCount(0);
   await expect(page.locator("h1")).toHaveCount(1);
 });
@@ -90,11 +137,4 @@ test("passes an automated accessibility scan", async ({ page }) => {
   await openFde(page, 1280, 900);
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
-});
-
-test("all demo deep links resolve to their matching record", async ({ page }) => {
-  for (const id of ["bitcoin", "chocollvm", "swift", "multiview", "cifar", "parallel", "cloud", "yelp", "petra"]) {
-    await page.goto(`/demos/#${id}`, { waitUntil: "domcontentloaded" });
-    await expect(page.locator(`#${id}`)).toHaveCount(1);
-  }
 });

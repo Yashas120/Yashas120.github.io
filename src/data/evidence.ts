@@ -187,9 +187,12 @@ export const evidenceRecords = [
     relationship: ["Coursework"],
     status: "Completed",
     publicCopy:
-      "Compared kernel and user-space scheduling approaches using CFS, FIFO, and Shinjuku-style policies with and without ghOSt across RocksDB/backend workloads, burst and sustained load, 16/32 threads, and 16/32 GB configurations.",
-    contribution: "Kernel build/configuration, experiment design, workload execution, profiling, and analysis; the project evaluates ghOSt rather than claiming invention of it.",
-    hrefs: [{ label: "Systems portfolio", href: "/kernel/#ghost-scheduling", kind: "demo" }],
+      "Rebuilt and configured Linux for ghOSt, then compared kernel-only and user-space scheduling approaches on RocksDB using CFS, FIFO, and Shinjuku-style configurations across burst/sustained load, 16/32 threads, and 16/32 GB.",
+    contribution: "Kernel build/configuration, RocksDB experiment design and execution, profiling, and analysis; the project evaluates ghOSt rather than claiming invention of it.",
+    hrefs: [
+      { label: "Systems portfolio", href: "/kernel/#ghost-scheduling", kind: "demo" },
+      { label: "Interactive lab", href: "/demos#ghost", kind: "demo" },
+    ],
     disclosure: "public",
     destinations: ["featured-systems", "work-index", "scope"],
     category: "project",

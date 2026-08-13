@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { ProjectDemoPresentation } from "@/components/demos/ProjectDemoPresentation";
-import type { DemoId } from "@/data/demos";
+import { PROJECT_DEMO_EVIDENCE, type DemoId } from "@/data/demos";
 import {
   beyondLens,
   contact,
@@ -9,15 +9,20 @@ import {
   featuredSystems,
   leadership,
   links,
-  projectLedger,
   proofLinks,
-  publicExplorations,
   publications,
   scopeBands,
   teaching,
   type EvidenceItem,
   type PublicLink,
 } from "@/lib/clusterContent";
+import {
+  projectEvidenceGroups,
+  projectEvidenceLabels,
+  projectIndexIntro,
+  type ProjectEvidenceItem,
+  type ProjectEvidenceLink,
+} from "@/lib/clusterProjectIndex";
 import styles from "./cluster.module.css";
 
 function EvidenceLink({ link }: Readonly<{ link: PublicLink }>) {
@@ -59,7 +64,7 @@ function SectionIntro({ eyebrow, heading, body, headingId }: Readonly<{ eyebrow:
 
 function EditorialEvidenceRow({ item }: Readonly<{ item: EvidenceItem }>) {
   return (
-    <article className={styles.editorialRow}>
+    <article className={styles.editorialRow} data-editorial-evidence-row>
       <div>
         <h3 className={styles.entryTitle}>{item.name}</h3>
         <Labels items={item.labels} />
@@ -82,15 +87,13 @@ function EditorialEvidenceRow({ item }: Readonly<{ item: EvidenceItem }>) {
   );
 }
 
-const staticDemoByRepository: Record<string, DemoId> = {
-  "https://github.com/Yashas120/Bitcoin-Transactions-in-java": "bitcoin",
-  "https://github.com/Yashas120/SSP": "parallel",
-  "https://github.com/Yashas120/SWIFT": "swift",
-  "https://github.com/Yashas120/Multiview-3D-Reconstruction": "multiview",
-};
+const featuredAtTop = new Set<DemoId>(["cifar", "cloud"]);
 
-function staticDemoFor(item: EvidenceItem): DemoId | undefined {
-  return item.links.map((link) => staticDemoByRepository[link.href]).find(Boolean);
+function demoFor(item: EvidenceItem): DemoId | undefined {
+  const evidenceLinks = new Set(item.links.map((link) => link.href));
+  return PROJECT_DEMO_EVIDENCE.find(
+    (project) => project.projectSourceHref && evidenceLinks.has(project.projectSourceHref),
+  )?.demoId;
 }
 
 const compactTheme = {
@@ -102,32 +105,67 @@ const compactTheme = {
   label: "Evidence index · live implementation",
 };
 
-function LedgerRow({ item }: Readonly<{ item: EvidenceItem }>) {
+function IndexEvidenceLink({ link, title }: Readonly<{ link: ProjectEvidenceLink; title: string }>) {
+  const external = link.href.startsWith("http");
   return (
-    <article className={styles.ledgerRow}>
-      <div className={styles.ledgerCell}>
-        <p className={styles.ledgerKey}>Name / description</p>
-        <h3 className={styles.entryTitle}>{item.name}</h3>
-        <p className={styles.ledgerValue}>{item.description}</p>
+    <a
+      className={styles.indexEvidenceLink}
+      href={link.href}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noreferrer noopener" : undefined}
+      aria-label={`${link.label}: evidence for ${title}${external ? " (opens in a new tab)" : ""}`}
+    >
+      {link.label} <span aria-hidden="true">{external ? "↗" : "↑"}</span>
+    </a>
+  );
+}
+
+function ProjectIndexRow({ item }: Readonly<{ item: ProjectEvidenceItem }>) {
+  const metadata = [
+    ["Context", projectEvidenceLabels.context[item.context]],
+    ["Contribution model", projectEvidenceLabels.contribution[item.contributionModel]],
+    ["Repository", projectEvidenceLabels.provenance[item.repositoryProvenance]],
+    ["Artifact", projectEvidenceLabels.artifact[item.artifactKind]],
+    ["Lifecycle", projectEvidenceLabels.lifecycle[item.lifecycle]],
+  ] as const;
+
+  return (
+    <article
+      id={`evidence-${item.id}`}
+      className={styles.indexRow}
+      data-project-evidence-item={item.id}
+      data-evidence-group={item.group}
+      data-index-compact={item.compact || undefined}
+    >
+      <div className={styles.indexIdentity}>
+        <h4 className={styles.indexTitle}>{item.title}</h4>
+        <dl className={styles.indexMetadata}>
+          {metadata.map(([term, value]) => (
+            <div key={term}>
+              <dt>{term}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
-      <div className={styles.ledgerCell}>
-        <p className={styles.ledgerKey}>Contribution / status</p>
-        <p className={styles.ledgerValue}>{item.contribution}</p>
-        <p className={styles.ledgerValue}>
-          {item.relationship} · {item.status}
-        </p>
+
+      <div className={styles.indexNarrative}>
+        <p className={styles.indexDescription}>{item.description}</p>
+        <p className={styles.indexContribution}><span>Contribution</span>{item.contribution}</p>
+        {item.boundary && <p className={styles.indexBoundary}>{item.boundary}</p>}
+        {item.featuredAnchor && <a className={styles.indexDetailedLink} href={item.featuredAnchor}>Detailed above <span aria-hidden="true">↑</span></a>}
       </div>
-      <div className={styles.ledgerCell}>
-        <p className={styles.ledgerKey}>Domain / evidence</p>
-        <p className={styles.ledgerValue}>{item.domain}</p>
-        {item.links.length > 0 ? (
-          <div className={styles.entryLinks}>
-            {item.links.map((link) => (
-              <EvidenceLink key={link.href} link={link} />
-            ))}
+
+      <div className={styles.indexProof}>
+        <p className={styles.indexFieldLabel}>Domain</p>
+        <p className={styles.indexDomain}>{item.domains.join(" · ")}</p>
+        <p className={styles.indexFieldLabel}>Evidence</p>
+        <p className={styles.indexEvidenceType}>{item.evidenceTypes.map((type) => projectEvidenceLabels.evidence[type]).join(" · ")}</p>
+        {item.evidenceNote && <p className={styles.indexEvidenceNote}>{item.evidenceNote}</p>}
+        {item.links.length > 0 && (
+          <div className={styles.indexEvidenceLinks}>
+            {item.links.map((link) => <IndexEvidenceLink key={`${link.kind}-${link.href}`} link={link} title={item.title} />)}
           </div>
-        ) : (
-          <p className={styles.ledgerValue}>Public-safe experience evidence; no external link.</p>
         )}
       </div>
     </article>
@@ -148,7 +186,7 @@ export function CompleteProfileIndex() {
             />
             <div className={styles.timeline}>
               {experience.map((role) => (
-                <article className={styles.role} key={`${role.org}-${role.role}`}>
+                <article id={role.id} className={styles.role} key={role.id}>
                   <div className={styles.roleHeader}>
                     <h3 className={styles.entryTitle}>
                       {role.org} · {role.role}
@@ -173,12 +211,12 @@ export function CompleteProfileIndex() {
           <SectionIntro
             eyebrow="Systems evidence"
             heading="Public work with the boundary left intact."
-            body="These projects support the systems lens. They are not presented as production systems, and team and fork status remains visible."
+            body="These projects support the systems lens. They are not presented as production systems, and collaborative contribution and scope remain visible."
           />
           <div className={styles.editorialRows}>
             {featuredSystems.map((item) => {
-              const demoId = staticDemoFor(item);
-              return <Fragment key={item.name}><EditorialEvidenceRow item={item} />{demoId && <ProjectDemoPresentation demoId={demoId} theme={compactTheme} headingLevel={3} preview />}</Fragment>;
+              const demoId = demoFor(item);
+              return <Fragment key={item.name}><EditorialEvidenceRow item={item} />{demoId && !featuredAtTop.has(demoId) && <ProjectDemoPresentation demoId={demoId} theme={compactTheme} headingLevel={3} preview />}</Fragment>;
             })}
           </div>
         </section>
@@ -191,30 +229,37 @@ export function CompleteProfileIndex() {
           />
           <div className={styles.editorialRows}>
             {beyondLens.map((item) => {
-              const demoId = staticDemoFor(item);
+              const demoId = demoFor(item);
               return <Fragment key={item.name}><EditorialEvidenceRow item={item} />{demoId && <ProjectDemoPresentation demoId={demoId} theme={compactTheme} headingLevel={3} preview />}</Fragment>;
             })}
           </div>
         </section>
 
-        <section id="complete-project-index" className={styles.profileSection}>
-          <SectionIntro
-            eyebrow="Complete project and evidence index"
-            heading="Every substantive project, with provenance."
-            body="Contribution, status, domain, and evidence remain visible even when the strongest honest statement is that ownership needs further documentation."
-          />
-          <div className={styles.ledger} aria-label="Complete project and evidence ledger">
-            {projectLedger.map((item) => (
-              <LedgerRow key={item.name} item={item} />
+        <section id="complete-project-index" className={styles.profileSection} aria-labelledby="project-evidence-index-heading">
+          <SectionIntro eyebrow={projectIndexIntro.eyebrow} heading={projectIndexIntro.heading} headingId="project-evidence-index-heading" body={projectIndexIntro.body} />
+          <dl className={styles.indexLegend} aria-label="Project evidence legend">
+            {projectIndexIntro.legend.map((item) => (
+              <div key={item.term}><dt>{item.term}</dt><dd>{item.definition}</dd></div>
             ))}
-          </div>
-          <div className={styles.subordinate}>
-            <h3 className={styles.subheading}>Public forks and explorations</h3>
-            <div className={styles.ledger}>
-              {publicExplorations.map((item) => (
-                <LedgerRow key={item.name} item={item} />
-              ))}
-            </div>
+          </dl>
+          <div className={styles.indexGroups} aria-label="Complete project and evidence ledger">
+            {projectEvidenceGroups.map((group, index) => (
+              <section
+                key={group.id}
+                className={`${styles.indexGroup} ${group.subordinate ? styles.indexGroupSubordinate : ""}`}
+                aria-labelledby={`evidence-group-${group.id}`}
+                data-evidence-group-section={group.id}
+              >
+                <header className={styles.indexGroupHeader}>
+                  <p className={styles.indexGroupNumber}>{String(index + 1).padStart(2, "0")} / 07</p>
+                  <h3 id={`evidence-group-${group.id}`}>{group.title}</h3>
+                  <p>{group.introduction}</p>
+                </header>
+                <div className={styles.indexRows}>
+                  {group.items.map((item) => <ProjectIndexRow key={item.id} item={item} />)}
+                </div>
+              </section>
+            ))}
           </div>
         </section>
 
@@ -293,7 +338,7 @@ export function CompleteProfileIndex() {
             ))}
           </div>
           <p className={styles.boundary}>
-            Claim boundary: managed services are named as dependencies, personal contribution is separated from team work, and prototypes, coursework, forks, and research retain their actual provenance.
+            Claim boundary: managed services are named as dependencies, personal contribution is separated from team work, and prototypes, coursework, collaborative work, and research retain their actual provenance.
           </p>
         </section>
 

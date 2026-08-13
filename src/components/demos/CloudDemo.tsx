@@ -106,7 +106,7 @@ export function CloudDemo({ embedded = false }: Readonly<{ embedded?: boolean }>
   return (
     <LiveDemo
       title="Cloud Provisioning — PL/pgSQL stored-procedure tracer"
-      subtitle="Not a cloud console — a look inside the RDBMS implementation. Provisioning is one deeply-nested composite argument to create_VM, which threads a call chain of quota functions. Build the call and step through it: watch the nested LIMIT_QUOTAS lookups, the RAM-block bin-packing over rack IDs, and the dotted-path composite UPDATE that commits the allocation."
+      subtitle="An in-memory TypeScript trace of the RDBMS implementation. Build the create_VM call and inspect modeled quota lookups, rack allocation, and commit or reject behavior; no PostgreSQL server is running."
       repoUrl={REPO}
       accent={ACC}
       embedded={embedded}
@@ -183,6 +183,7 @@ export function CloudDemo({ embedded = false }: Readonly<{ embedded?: boolean }>
                   <button
                     key={f.fn}
                     onClick={() => setSel(i)}
+                    aria-pressed={active}
                     className="flex w-full items-start gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors"
                     style={{
                       marginLeft: f.depth * 14,
@@ -321,10 +322,10 @@ export function CloudLab() {
 
 function Ctl({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div>
-      <div className="mb-1 font-mono text-[9px] uppercase tracking-wide text-zinc-500">{label}</div>
+    <fieldset>
+      <legend className="mb-1 font-mono text-[9px] uppercase tracking-wide text-zinc-500">{label}</legend>
       {children}
-    </div>
+    </fieldset>
   );
 }
 
@@ -333,8 +334,10 @@ function Seg({ options, value, onChange }: { options: { v: string; l: string }[]
     <div className="flex flex-wrap gap-1">
       {options.map((o) => (
         <button
+          type="button"
           key={o.v}
           onClick={() => onChange(o.v)}
+          aria-pressed={value === o.v}
           className="rounded px-2 py-1 font-mono text-[10px] transition-colors"
           style={{
             background: value === o.v ? rgba(ACC, 0.15) : "transparent",

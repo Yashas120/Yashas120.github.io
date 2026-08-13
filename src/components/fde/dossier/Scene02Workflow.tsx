@@ -7,7 +7,7 @@
  */
 
 import { motion, useTransform } from "framer-motion";
-import { Ann, COBALT, Dim, useRange, stagger } from "./kit";
+import { Ann, COBALT, Dim, GREEN, useRange, stagger } from "./kit";
 import type { SceneVisualProps } from "./types";
 
 const SPINE_X = 214;
@@ -52,13 +52,53 @@ function Strip({
   );
 }
 
+const COMPACT_STEPS = [
+  ["COMPONENT", "PART / FEATURE IDENTIFIER"],
+  ["REQUIRED TEST", "TEST-SCOPE RELATIONSHIP"],
+  ["EXPECTED BEHAVIOR", "RESULT / FAILURE MODE"],
+] as const;
+
+function CompactWorkflow({ p }: Readonly<{ p: SceneVisualProps["p"] }>) {
+  const connector = useRange(p, 0.12, 0.78, 0, 1);
+  const resolved = useRange(p, 0.66, 0.94, 0, 1);
+  return (
+    <g>
+      <Ann x={112} y={54} size={13} color={COBALT}>DERIVED FROM DOMAIN INTERVIEWS</Ann>
+      <motion.line x1={340} y1={116} x2={340} y2={356} stroke={COBALT} strokeWidth={2} style={{ pathLength: connector }} />
+      {COMPACT_STEPS.map(([label, detail], index) => (
+        <CompactWorkflowStep key={label} p={p} index={index} label={label} detail={detail} />
+      ))}
+      <motion.g style={{ opacity: resolved }}>
+        <path d="M 126 396 H 112 V 70 H 126" fill="none" stroke="currentColor" strokeWidth={1.2} opacity={0.55} />
+        <Ann x={340} y={426} size={14} anchor="middle" color={GREEN}>RESOLVED DOMAIN MAP → SPECIFICATION</Ann>
+      </motion.g>
+    </g>
+  );
+}
+
+function CompactWorkflowStep({ p, index, label, detail }: Readonly<{ p: SceneVisualProps["p"]; index: number; label: string; detail: string }>) {
+  const opacity = useRange(p, 0.04 + index * 0.2, 0.26 + index * 0.2, 0, 1);
+  const y = 76 + index * 118;
+  return (
+    <motion.g style={{ opacity }}>
+      <rect x={146} y={y} width={388} height={82} fill="none" stroke="currentColor" strokeWidth={1.2} opacity={0.7} />
+      <rect x={146} y={y} width={7} height={82} fill={index === 2 ? GREEN : COBALT} />
+      <Ann x={170} y={y + 32} size={17} color={index === 2 ? GREEN : COBALT}>{label}</Ann>
+      <Ann x={170} y={y + 58} size={12} opacity={0.64}>{detail}</Ann>
+      {index < 2 ? <path d={`M 331 ${y + 91} l 9 10 l 9 -10`} fill="none" stroke={COBALT} strokeWidth={1.6} /> : null}
+    </motion.g>
+  );
+}
+
 export function Scene02Workflow({ p, compact }: Readonly<SceneVisualProps>) {
-  const n = compact ? 10 : 20;
-  const gap = compact ? 24 : 13;
+  const n = 20;
+  const gap = 13;
   const spineH = useRange(p, 0.2, 0.9, 0, TOP + n * gap - TOP + 10);
   const annOpacity = useRange(p, 0.62, 0.9, 0, 1);
   const dimOpacity = useRange(p, 0.4, 0.72, 0, 1);
   const bracket = useRange(p, 0.7, 0.96, 0, 1);
+
+  if (compact) return <CompactWorkflow p={p} />;
 
   return (
     <g>

@@ -17,6 +17,37 @@ const RAIL_X1 = 48;
 const RAIL_X2 = 640;
 const N = leverageItems.length;
 
+const COMPACT_PAIRS = [
+  ["API SPEC CHANGE", "GENERATED + PUBLISHED SDKS", "CISCO INTERNSHIP · INDIVIDUALLY BUILT"],
+  ["HARDWARE-COUPLED TEST", "FEEDBACK IN SECONDS", "CISCO OPTICAL · CO-AUTHORED / V3 STUBBING OWNED"],
+  ["ENVIRONMENT BLOCKERS", "REUSABLE SETUP PATHS", "CISCO BACKEND + CLOUD / INTERNSHIP"],
+  ["TACIT KNOWLEDGE", "VERSIONED GUIDES + KT", "ACROSS ROLES · AUTHORED + HANDED OFF"],
+] as const;
+
+function CompactLeverage({ p }: Readonly<{ p: SceneVisualProps["p"] }>) {
+  const rail = useRange(p, 0.05, 0.88, 0, 1);
+  return (
+    <g>
+      <motion.line x1={116} y1={50} x2={116} y2={414} stroke={COBALT} strokeWidth={2} style={{ pathLength: rail }} />
+      {COMPACT_PAIRS.map((pair, index) => <CompactPair key={pair[0]} p={p} index={index} pair={pair} />)}
+    </g>
+  );
+}
+
+function CompactPair({ p, index, pair }: Readonly<{ p: SceneVisualProps["p"]; index: number; pair: (typeof COMPACT_PAIRS)[number] }>) {
+  const opacity = useRange(p, 0.05 + index * 0.19, 0.28 + index * 0.19, 0, 1);
+  const y = 48 + index * 96;
+  return (
+    <motion.g style={{ opacity }}>
+      <circle cx={116} cy={y + 30} r={7} fill="var(--fde-paper)" stroke={GREEN} strokeWidth={2} />
+      <Ann x={150} y={y + 14} size={11} color={ORANGE}>{pair[0]}</Ann>
+      <Ann x={150} y={y + 38} size={15} color={GREEN}>→ {pair[1]}</Ann>
+      <Ann x={150} y={y + 60} size={9.5} opacity={0.64}>{pair[2]}</Ann>
+      <line x1={150} y1={y + 72} x2={550} y2={y + 72} stroke="currentColor" strokeWidth={0.7} opacity={0.25} />
+    </motion.g>
+  );
+}
+
 function Token({ p, i, compact }: Readonly<{ p: SceneVisualProps["p"]; i: number; compact: boolean }>) {
   const a = 0.06 + (i / N) * 0.78;
   const b = a + 0.16;
@@ -93,6 +124,8 @@ export function Scene06Leverage({ p, compact }: Readonly<SceneVisualProps>) {
   const railDraw = useRange(p, 0.02, 0.3, 0, 1);
   const capsuleW = useRange(p, 0.12, 0.92, 0, RAIL_X2 - 356);
   const capsuleLabel = useRange(p, 0.5, 0.7, 0, 1);
+
+  if (compact) return <CompactLeverage p={p} />;
 
   return (
     <g>

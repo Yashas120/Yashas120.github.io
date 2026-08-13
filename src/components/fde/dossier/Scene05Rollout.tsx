@@ -19,6 +19,41 @@ interface LaneProps {
   compact: boolean;
 }
 
+const COMPACT_PLAN = [
+  ["INDEPENDENT WORK", "READY · PARALLEL-SAFE"],
+  ["PREREQUISITE", "REQUIRED · ORDERED"],
+  ["HEALTH GATE", "BLOCKED UNTIL HEALTHY"],
+  ["DEPENDENT STAGE", "WAITING FOR PREREQUISITE"],
+  ["RELEASE", "VERIFIED · RELEASED"],
+] as const;
+
+function CompactRollout({ p }: Readonly<{ p: SceneVisualProps["p"] }>) {
+  const path = useRange(p, 0.06, 0.9, 0, 1);
+  return (
+    <g>
+      <motion.line x1={150} y1={62} x2={150} y2={402} stroke={COBALT} strokeWidth={2} style={{ pathLength: path }} />
+      {COMPACT_PLAN.map(([label, state], index) => <CompactPlanStep key={label} p={p} index={index} label={label} state={state} />)}
+      <Ann x={122} y={438} size={12} color={GREEN}>SAFE SPEED = MODELED DEPENDENCIES</Ann>
+    </g>
+  );
+}
+
+function CompactPlanStep({ p, index, label, state }: Readonly<{ p: SceneVisualProps["p"]; index: number; label: string; state: string }>) {
+  const opacity = useRange(p, 0.05 + index * 0.15, 0.23 + index * 0.15, 0, 1);
+  const released = index === COMPACT_PLAN.length - 1;
+  const blocked = index === 2;
+  const color = released ? GREEN : blocked ? ORANGE : COBALT;
+  const y = 48 + index * 76;
+  return (
+    <motion.g style={{ opacity }}>
+      <circle cx={150} cy={y + 21} r={8} fill="var(--fde-paper-deep)" stroke={color} strokeWidth={2} />
+      <rect x={192} y={y} width={356} height={44} fill="none" stroke={color} strokeWidth={blocked ? 1.5 : 1} strokeDasharray={blocked ? "5 4" : undefined} />
+      <Ann x={210} y={y + 20} size={14} color={color}>{label}</Ann>
+      <Ann x={210} y={y + 36} size={9.5} color={color} opacity={0.8}>{state}</Ann>
+    </motion.g>
+  );
+}
+
 function Instance({
   x,
   y,
@@ -119,6 +154,8 @@ function Lane({ p, y, label, delay, compact }: Readonly<LaneProps>) {
 export function Scene05Rollout({ p, compact }: Readonly<SceneVisualProps>) {
   const moduleOpacity = useRange(p, 0.06, 0.28, 0, 1);
   const saving = useRange(p, 0.82, 0.98, 0, 1);
+
+  if (compact) return <CompactRollout p={p} />;
 
   return (
     <g>

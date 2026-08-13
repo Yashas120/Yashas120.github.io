@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronRight, Pause, Play, RotateCcw } from "lucide-react";
 import { LiveDemo } from "./LiveDemo";
-import { usePrefersReducedMotion } from "./bitcoin/parts";
+import { useOnScreen, usePrefersReducedMotion } from "./bitcoin/parts";
 import {
   applyRadialMask,
   conv3x3,
@@ -63,13 +63,16 @@ function useIsLight(): boolean {
 
 // Loads a sample image and derives (a) the HTMLImageElement for colour previews
 // and (b) an N×N grayscale field the signal-processing visualizations run on.
-function useSampleImage(src: string): { img: HTMLImageElement | null; gray: Float32Array | null } {
-  const [state, setState] = useState<{ img: HTMLImageElement | null; gray: Float32Array | null }>({
+function useSampleImage(src: string, enabled: boolean, attempt: number): { img: HTMLImageElement | null; gray: Float32Array | null; error: string | null } {
+  const [state, setState] = useState<{ img: HTMLImageElement | null; gray: Float32Array | null; error: string | null }>({
     img: null,
     gray: null,
+    error: null,
   });
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
+    setState({ img: null, gray: null, error: null });
     const img = new Image();
     img.onload = () => {
       if (cancelled) return;
@@ -77,7 +80,10 @@ function useSampleImage(src: string): { img: HTMLImageElement | null; gray: Floa
       cv.width = N;
       cv.height = N;
       const ctx = cv.getContext("2d");
-      if (!ctx) return;
+      if (!ctx) {
+        setState({ img: null, gray: null, error: "The browser could not prepare the sample image." });
+        return;
+      }
       ctx.drawImage(img, 0, 0, N, N);
       const data = ctx.getImageData(0, 0, N, N).data;
       const gray = new Float32Array(N * N);
@@ -87,13 +93,16 @@ function useSampleImage(src: string): { img: HTMLImageElement | null; gray: Floa
         const b = data[i * 4 + 2];
         gray[i] = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
       }
-      setState({ img, gray });
+      setState({ img, gray, error: null });
+    };
+    img.onerror = () => {
+      if (!cancelled) setState({ img: null, gray: null, error: "The SWIFT sample image could not be loaded." });
     };
     img.src = src;
     return () => {
       cancelled = true;
     };
-  }, [src]);
+  }, [attempt, enabled, src]);
   return state;
 }
 
@@ -103,9 +112,12 @@ export function SwiftDemo({ embedded = false }: Readonly<{ embedded?: boolean }>
   const [sample, setSample] = useState<SampleKind>("panda");
   const [active, setActive] = useState(0); // index into LAYERS
   const [playing, setPlaying] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const workGateRef = useRef<HTMLDivElement>(null);
+  const onScreen = useOnScreen(workGateRef);
 
   const current = SAMPLES.find((s) => s.id === sample) ?? SAMPLES[0];
-  const { img, gray } = useSampleImage(current.src);
+  const { img, gray, error } = useSampleImage(current.src, onScreen, loadAttempt);
   // Forward spectrum computed once per sample; reused for the Fourier viz.
   const spectrum = useMemo<Complex | null>(
     () => (gray ? fft2(gray, new Float32Array(N * N), N, false) : null),
@@ -155,7 +167,7 @@ export function SwiftDemo({ embedded = false }: Readonly<{ embedded?: boolean }>
       {...cardProps("swift")}
     >
       {/* controls */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div ref={workGateRef} className="mb-4 flex flex-wrap items-center gap-2">
         <button
           onClick={toggle}
           className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-xs font-medium text-ink-900 transition-opacity hover:opacity-90"
@@ -182,6 +194,7 @@ export function SwiftDemo({ embedded = false }: Readonly<{ embedded?: boolean }>
             <button
               key={s.id}
               onClick={() => setSample(s.id)}
+              aria-pressed={sample === s.id}
               className="rounded px-2 py-1 font-mono text-[10px]"
               style={{
                 background: sample === s.id ? rgba(SWIFT, 0.15) : "transparent",
@@ -241,7 +254,14 @@ export function SwiftDemo({ embedded = false }: Readonly<{ embedded?: boolean }>
             className="flex-1 rounded-lg border bg-ink-900 p-3"
             style={{ borderColor: "rgb(var(--line) / 0.12)", minHeight: 320 }}
           >
-            {gray && spectrum && img ? (
+            {error ? (
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-center" role="alert">
+                <p className="font-mono text-xs text-zinc-400">{error}</p>
+                <button type="button" onClick={() => setLoadAttempt((value) => value + 1)} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 font-mono text-xs" style={{ borderColor: rgba(SWIFT, 0.4), color: p.accent }}>
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Retry sample
+                </button>
+              </div>
+            ) : gray && spectrum && img ? (
               <LayerViz viz={layer.viz} gray={gray} spectrum={spectrum} img={img} recon={current.recon} p={p} />
             ) : (
               <div className="flex h-full items-center justify-center font-mono text-xs text-zinc-500">
@@ -317,6 +337,7 @@ function ArchPipeline({
               <div key={l.id} className="flex flex-1 items-center">
                 <button
                   onClick={() => onPick(i)}
+                  aria-pressed={on}
                   className="flex w-full flex-col items-center gap-0.5 rounded-md border px-1.5 py-1.5 transition-colors"
                   style={{
                     background: on ? rgba(SWIFT, 0.16) : "transparent",
@@ -591,6 +612,7 @@ function FourierViz({ gray, spectrum, p }: { gray: Float32Array; spectrum: Compl
           <span className="w-16 font-mono text-[10px] text-zinc-500">cutoff</span>
           <input
             type="range"
+            aria-label="Fourier frequency cutoff"
             min={1}
             max={N / 2}
             value={radius}
@@ -610,6 +632,7 @@ function FourierViz({ gray, spectrum, p }: { gray: Float32Array; spectrum: Compl
             <button
               key={String(o.id)}
               onClick={() => setHighpass(o.id)}
+              aria-pressed={highpass === o.id}
               className="rounded-md border px-2.5 py-1 font-mono text-[10px]"
               style={{
                 background: highpass === o.id ? rgba(SWIFT, 0.14) : "transparent",
@@ -774,6 +797,8 @@ function PaperReconViz({ recon, p }: { recon: ReconCrops; p: Palette }) {
                 setPhase(i);
               }}
               title={v.label}
+              aria-label={`Show ${v.label} reconstruction`}
+              aria-pressed={i === phase % variants.length}
               className="h-2.5 w-2.5 rounded-full transition-transform"
               style={{
                 background: i === phase % variants.length ? SWIFT : "rgb(var(--line) / 0.3)",

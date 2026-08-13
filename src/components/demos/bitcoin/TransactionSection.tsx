@@ -108,6 +108,7 @@ export function TransactionSection({
           recipient address
         </label>
         <input
+          aria-label="Recipient address"
           value={recipient}
           spellCheck={false}
           onChange={(e) => {
@@ -122,6 +123,7 @@ export function TransactionSection({
         </label>
         <input
           type="range"
+          aria-label="Amount to send in satoshis"
           min={1000}
           max={inputValue - fee}
           step={1000}

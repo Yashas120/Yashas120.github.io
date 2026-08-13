@@ -36,8 +36,39 @@ const NODES = [
 const HIDDEN = [
   { from: [268, 196], to: [268, 268], label: "undocumented consumer", at: 0.42 },
   { from: [396, 196], to: [396, 108], label: "scheduled job", at: 0.52 },
-  { from: [396, 196], to: [470, 262], label: "partner integration", at: 0.6 },
+  { from: [396, 196], to: [470, 262], label: "downstream consumer", at: 0.6 },
 ] as const;
+
+const COMPACT_NODES = ["REQUEST EDGE", "AUTH / API", "SERVICE", "INTEGRATION", "ACTIVE CONSUMER"] as const;
+
+function CompactProduction({ p }: Readonly<{ p: SceneVisualProps["p"] }>) {
+  const trace = useRange(p, 0.08, 0.76, 0, 1);
+  const cutover = useRange(p, 0.72, 0.96, 0, 1);
+  return (
+    <g>
+      <Ann x={126} y={44} size={13} color={COBALT}>OBSERVED PRODUCTION TRAFFIC</Ann>
+      <motion.line x1={176} y1={74} x2={176} y2={386} stroke={GREEN} strokeWidth={2.2} style={{ pathLength: trace }} />
+      {COMPACT_NODES.map((label, index) => <CompactProductionNode key={label} p={p} index={index} label={label} />)}
+      <motion.g style={{ opacity: cutover }}>
+        <Ann x={218} y={426} size={14} color={GREEN}>VALIDATED → CONTROLLED CUTOVER</Ann>
+      </motion.g>
+    </g>
+  );
+}
+
+function CompactProductionNode({ p, index, label }: Readonly<{ p: SceneVisualProps["p"]; index: number; label: string }>) {
+  const opacity = useRange(p, 0.08 + index * 0.13, 0.26 + index * 0.13, 0, 1);
+  const owner = useRange(p, 0.22 + index * 0.13, 0.36 + index * 0.13, 0, 1);
+  const y = 72 + index * 74;
+  return (
+    <motion.g style={{ opacity }}>
+      <circle cx={176} cy={y + 18} r={8} fill="var(--fde-paper)" stroke={index === 0 ? COBALT : GREEN} strokeWidth={2} />
+      <rect x={214} y={y} width={328} height={38} fill="none" stroke="currentColor" strokeWidth={1} opacity={0.58} />
+      <Ann x={232} y={y + 25} size={14}>{label}</Ann>
+      <motion.g style={{ opacity: owner }}><Ann x={526} y={y + 25} size={10} anchor="end" color={index === 0 ? COBALT : GREEN}>{index === 0 ? "TRACE SOURCE" : "OWNER MAPPED"}</Ann></motion.g>
+    </motion.g>
+  );
+}
 
 function Node({
   p,
@@ -110,6 +141,8 @@ export function Scene04Production({ p, compact }: Readonly<SceneVisualProps>) {
   const layers = useRange(p, 0.72, 0.92, 0, 1);
   const jars = useRange(p, 0.86, 1, 0, 1);
   const scale = useRange(p, 0.2, 0.5, 0, 1);
+
+  if (compact) return <CompactProduction p={p} />;
 
   return (
     <g transform="translate(0 22)">

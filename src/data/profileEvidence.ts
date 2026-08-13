@@ -23,6 +23,7 @@ export type EvidenceStatus =
   | "Active"
   | "Archived"
   | "Published"
+  | "Published prototype"
   | "Proof of concept"
   | "Prototype"
   | "Completed"
@@ -60,9 +61,10 @@ export const contact = {
   email: "ykadambi@ucsd.edu",
   github: "https://github.com/Yashas120",
   linkedin: "https://www.linkedin.com/in/yashas120",
-  demos: "/demos/",
   portfolioRepo: "https://github.com/Yashas120/Yashas120.github.io",
-  resumeUrl: "/resume/Yashas-Kadambi-Resume.pdf" as string | null,
+  // The bundled 2025 PDF predates the current UCSD context, so /fde omits a
+  // Resume action until a verified current document replaces it.
+  resumeUrl: null as string | null,
 } as const;
 
 export const professionalRecords = [
@@ -202,7 +204,6 @@ export const featuredSystems = [
     sourceRefs: ["CV-2026-08-11", "public-repository", "demo-cloud"],
     evidenceLinks: [
       { label: "Repository", href: "https://github.com/Yashas120/Cloud-Provisioning-using-RDBMS", external: true },
-      { label: "Live demo", href: "/demos/#cloud" },
     ],
     disclosure: "public-safe",
     destinationIds: ["featured-systems", "work-index", "scope"],
@@ -225,7 +226,6 @@ export const featuredSystems = [
     sourceRefs: ["CV-2026-08-11", "public-repository", "demo-multiview", "github-profile-2026-08-12"],
     evidenceLinks: [
       { label: "Repository", href: "https://github.com/Yashas120/Multiview-3D-Reconstruction", external: true },
-      { label: "Live demo", href: "/demos/#multiview" },
     ],
     disclosure: "public-safe",
     destinationIds: ["featured-systems", "work-index", "scope"],
@@ -248,7 +248,6 @@ export const featuredSystems = [
     sourceRefs: ["CV-2026-08-11", "public-repository", "demo-bitcoin"],
     evidenceLinks: [
       { label: "Repository", href: "https://github.com/Yashas120/Bitcoin-Transactions-in-java", external: true },
-      { label: "Live demo", href: "/demos/#bitcoin" },
     ],
     disclosure: "public-safe",
     destinationIds: ["featured-systems", "work-index", "scope"],
@@ -272,7 +271,6 @@ export const featuredSystems = [
     evidenceLinks: [
       { label: "DOI", href: "https://doi.org/10.47852/bonviewAIA42021930", external: true },
       { label: "Official implementation", href: "https://github.com/iVishalr/SWIFT", external: true },
-      { label: "Live demo", href: "/demos/#swift" },
     ],
     disclosure: "public-safe",
     destinationIds: ["featured-systems", "work-index", "research", "scope"],
@@ -298,19 +296,19 @@ const work = (
 });
 
 export const workIndex = [
-  work({ id: "PR-01", title: "Performance Analysis of the ghOSt Scheduler", kind: ["Coursework"], ownership: "Owned", status: "Completed", publicCopy: "Built and instrumented a Linux/ghOSt environment; compared CFS, FIFO, and Shinjuku-style policies on RocksDB/backend workloads across varying load, threads, and memory; interpreted latency and throughput tradeoffs.", evidenceLinks: [], domain: "Kernel/systems performance", stack: ["Linux", "ghOSt", "RocksDB", "profiling"] }),
+  work({ id: "PR-01", title: "Performance Analysis of the ghOSt Scheduler", kind: ["Coursework"], ownership: "Owned", status: "Completed", publicCopy: "Rebuilt and configured Linux for ghOSt; compared kernel-only and user-space CFS, FIFO, and Shinjuku-style scheduling configurations on RocksDB across varying load, threads, and memory; interpreted latency and throughput tradeoffs.", evidenceLinks: [], domain: "Kernel/systems performance", stack: ["Linux", "ghOSt", "RocksDB", "profiling"] }),
   featuredSystems[3],
   featuredSystems[1],
-  work({ id: "PR-04", title: "ChocoLLVM", kind: ["Coursework", "Collaborative", "Fork"], ownership: "Unknown-requires-verification", status: "Completed", publicCopy: "Worked on a compiler front end spanning parsing, AST and type checking, Python emission, LLVM-oriented output, CLI modes, and tests; individual modules are not assigned without verification.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/chocollvm", external: true }, { label: "Live demo", href: "/demos/#chocollvm" }], domain: "Compilers" }),
-  work({ id: "PR-05", title: "Spark Streaming for ML on CIFAR-10", kind: ["Coursework", "Collaborative", "Fork"], ownership: "Unknown-requires-verification", status: "Completed", publicCopy: "Collaborative streaming-ML system using Spark/PySpark, Kafka/Python, and TensorFlow-era tooling; examined batch-size effects on model behavior.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/SSML-spark-streaming-for-machine-learning", external: true }, { label: "Live demo", href: "/demos/#cifar" }], domain: "Distributed ML" }),
+  work({ id: "PR-04", title: "ChocoLLVM", kind: ["Coursework", "Collaborative", "Fork"], ownership: "Unknown-requires-verification", status: "Completed", publicCopy: "Public coursework fork of a compiler front end spanning parsing, AST and type checking, Python emission, LLVM-oriented output, CLI modes, and tests. The visible fork history does not substantiate an individual code contribution.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/chocollvm", external: true }], domain: "Compilers" }),
+  work({ id: "PR-05", title: "Spark Streaming for ML on CIFAR-10", kind: ["Coursework", "Collaborative", "Fork"], ownership: "Unknown-requires-verification", status: "Completed", publicCopy: "Collaborative streaming-ML system using Spark/PySpark, Kafka/Python, and TensorFlow-era tooling; examined batch-size effects on model behavior.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/SSML-spark-streaming-for-machine-learning", external: true }], domain: "Distributed ML" }),
   featuredSystems[2],
-  work({ id: "PR-07", title: "Restaurant Closure-Risk Analysis with Yelp Data", kind: ["Coursework", "Collaborative", "Fork"], ownership: "Unknown-requires-verification", status: "Completed", publicCopy: "Collaborative analysis of check-in, review, and amenity signals with exploratory analysis, classification, and LDA topic modeling; the exact personal analysis boundary remains conservative.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/Restaurant-analysis-using-YELP-dataset", external: true }, { label: "Live demo", href: "/demos/#yelp" }], domain: "Data science" }),
-  work({ id: "PR-08", title: "Systems and Parallel Programming Experiments", kind: ["Coursework"], ownership: "Owned", status: "Completed", publicCopy: "Focused C and Python experiments for thread correctness, work splitting, parallel computation, cache and memory locality, loop structure, and profiling.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/SSP", external: true }, { label: "Live demo", href: "/demos/#parallel" }], domain: "Parallel/low-level systems" }),
+  work({ id: "PR-07", title: "Restaurant Closure-Risk Analysis with Yelp Data", kind: ["Coursework", "Collaborative", "Fork"], ownership: "Unknown-requires-verification", status: "Completed", publicCopy: "Collaborative analysis of check-in, review, and amenity signals with exploratory analysis, classification, and LDA topic modeling; the exact personal analysis boundary remains conservative.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/Restaurant-analysis-using-YELP-dataset", external: true }], domain: "Data science" }),
+  work({ id: "PR-08", title: "Systems and Parallel Programming Experiments", kind: ["Coursework"], ownership: "Owned", status: "Completed", publicCopy: "Focused C and Python experiments for thread correctness, work splitting, parallel computation, cache and memory locality, loop structure, and profiling.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/SSP", external: true }], domain: "Parallel/low-level systems" }),
   featuredSystems[0],
   work({ id: "PR-10", title: "Cloud-Hack", kind: ["Coursework"], ownership: "Supporting", status: "Completed", publicCopy: "Small Flask and MongoDB blogging system packaged with Docker and Kubernetes using Deployments, Services, ConfigMaps, Secrets, and Mongo Express; no production-scale claim.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/Cloud-Hack", external: true }], domain: "Cloud-native" }),
-  work({ id: "PR-11", title: "PeTra", kind: ["Collaborative", "Fork"], ownership: "Co-owned", status: "Archived", publicCopy: "React booking interface for hotel and pet-sitter discovery, built in a three-person team and integrated with a separately maintained backend.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/Petra", external: true }, { label: "Live demo", href: "/demos/#petra" }], domain: "Product/frontend" }),
+  work({ id: "PR-11", title: "PeTra", kind: ["Collaborative", "Fork"], ownership: "Co-owned", status: "Archived", publicCopy: "React booking interface for hotel and pet-sitter discovery, built in a three-person team and integrated with a separately maintained backend.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/Petra", external: true }], domain: "Product/frontend" }),
   work({ id: "PR-12", title: "Multilingual RAG Voice Assistant for Farmers", kind: ["Collaborative"], ownership: "Co-owned", status: "Prototype", publicCopy: "Collaborative CPU-only voice and retrieval prototype for government subsidy and relief information in multiple languages; production concerns include latency, freshness, retrieval quality, and attribution.", evidenceLinks: [], domain: "Applied AI" }),
-  work({ id: "PR-13", title: "Underwater Data Center Monitoring and Alert Prototype", kind: ["Research", "Collaborative"], ownership: "Co-owned", status: "Published", publicCopy: "Arduino-class monitoring and alert concept for inaccessible infrastructure, with early detection, redundancy, and continuity considerations documented in a peer-reviewed paper.", evidenceLinks: [{ label: "IEEE record", href: "https://doi.org/10.1109/CSITSS54238.2021.9683449", external: true }], domain: "Embedded/IoT/reliability" }),
+  work({ id: "PR-13", title: "Underwater Data Center Monitoring and Alert Prototype", kind: ["Research", "Collaborative"], ownership: "Co-owned", status: "Published prototype", publicCopy: "Arduino-class monitoring and alert concept for inaccessible infrastructure, with early detection, redundancy, and continuity considerations documented in a peer-reviewed paper.", evidenceLinks: [{ label: "IEEE record", href: "https://doi.org/10.1109/CSITSS54238.2021.9683449", external: true }], domain: "Embedded/IoT/reliability" }),
   work({ id: "PR-14", title: "Technical Portfolio", kind: ["Original"], ownership: "Owned", status: "Active", publicCopy: "Original data-driven Next.js and TypeScript portfolio that interprets one evidence universe through multiple role-specific interfaces with static deployment.", evidenceLinks: [{ label: "Repository", href: "https://github.com/Yashas120/Yashas120.github.io", external: true }], domain: "Product/web/systems communication" }),
 ] satisfies readonly ProfileEvidenceRecord[];
 
@@ -326,7 +324,6 @@ export const publications = [
     links: [
       { label: "DOI", href: "https://doi.org/10.47852/bonviewAIA42021930", external: true },
       { label: "Official implementation", href: "https://github.com/iVishalr/SWIFT", external: true },
-      { label: "Live demo", href: "/demos/#swift" },
     ],
   },
   {
@@ -436,6 +433,7 @@ export const exclusionRecords = [
   { id: "PR-18", title: "US Stocks Tax Calculator", reason: "Public fork alone does not verify substantive contribution." },
   { id: "AW-01", title: "AWS Certified Developer – Associate", reason: "Credential title, status, date, and evidence link require verification." },
   { id: "AW-03", title: "CTF placements and team membership", reason: "Event names, dates, rank scope, participant counts, and public wording require verification." },
+  { id: "LK-04", title: "Résumé", reason: "The bundled 2025 PDF predates the current UCSD context and is withheld from /fde until replaced by a verified current résumé." },
 ] as const;
 
 export const supplementalCoverage = [
@@ -459,7 +457,6 @@ export const supplementalCoverage = [
   { id: "LK-01", destinations: ["contact"] },
   { id: "LK-02", destinations: ["work-index", "contact"] },
   { id: "LK-03", destinations: ["contact"] },
-  { id: "LK-04", destinations: ["contact"] },
   { id: "LK-05", destinations: ["work-index", "contact"] },
   { id: "LK-06", destinations: ["research"] },
 ] as const;

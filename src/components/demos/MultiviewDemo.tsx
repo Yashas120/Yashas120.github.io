@@ -521,6 +521,7 @@ export function MultiviewDemo({ embedded = false }: Readonly<{ embedded?: boolea
             <button
               key={sc.id}
               onClick={() => setSceneId(sc.id)}
+              aria-pressed={sceneId === sc.id}
               className="rounded px-2 py-1 font-mono text-[10px]"
               style={{
                 background: sceneId === sc.id ? rgba(MV, 0.15) : "transparent",
@@ -628,6 +629,7 @@ function StepPipeline({
         <div key={s.key} className="flex items-center">
           <button
             onClick={() => onPick(i)}
+            aria-pressed={i === active}
             className="whitespace-nowrap rounded-md px-2 py-1 font-mono text-[10px] transition-colors"
             style={{
               background: i === active ? rgba(MV, 0.15) : "transparent",

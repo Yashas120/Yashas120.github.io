@@ -9,6 +9,7 @@ export function ProjectDemoPresentation({
   preview = false,
   autoOpen = false,
   eyebrow,
+  standaloneHref,
 }: Readonly<{
   demoId: DemoId;
   theme?: ProjectDemoTheme;
@@ -16,13 +17,14 @@ export function ProjectDemoPresentation({
   preview?: boolean;
   autoOpen?: boolean;
   eyebrow?: string;
+  standaloneHref?: string | null;
 }>) {
   const project = demoEvidence(demoId);
   const handoffHeading = Math.min(headingLevel + 1, 4) as 3 | 4;
   return (
     <article data-project-id={project.projectId}>
       <ProjectEvidenceHeader projectId={project.projectId} theme={theme} headingLevel={headingLevel} compact={preview} eyebrow={eyebrow} />
-      <ProjectDemoHandoff demoId={demoId} theme={theme} headingLevel={handoffHeading} variant={preview ? "preview" : "embedded"} autoOpen={autoOpen} />
+      <ProjectDemoHandoff demoId={demoId} theme={theme} headingLevel={handoffHeading} variant={preview ? "preview" : "embedded"} autoOpen={autoOpen} standaloneHref={standaloneHref} />
     </article>
   );
 }

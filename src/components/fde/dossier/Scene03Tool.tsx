@@ -30,6 +30,39 @@ function Passing({ p, i, n }: Readonly<{ p: SceneVisualProps["p"]; i: number; n:
   );
 }
 
+const COMPACT_STATES = [
+  ["01 · SCHEMA", "COMPONENT → TEST → EXPECTED BEHAVIOR"],
+  ["02 · GENERATED PLAN", "EXCEL TEST PLAN · FUNCTIONALLY VERIFIED"],
+  ["03 · DEPLOYMENT + HANDOFF", "LOCAL WINDOWS + SSO · DOCS + KT"],
+] as const;
+
+function CompactTool({ p }: Readonly<{ p: SceneVisualProps["p"] }>) {
+  const connector = useRange(p, 0.08, 0.78, 0, 1);
+  const released = useRange(p, 0.72, 0.96, 0, 1);
+  return (
+    <g>
+      <motion.line x1={340} y1={92} x2={340} y2={358} stroke={COBALT} strokeWidth={2} style={{ pathLength: connector }} />
+      {COMPACT_STATES.map(([label, detail], index) => <CompactToolState key={label} p={p} index={index} label={label} detail={detail} />)}
+      <motion.g style={{ opacity: released }}>
+        <Ann x={132} y={414} size={14} color={GREEN}>VERIFIED · DEPLOYED · HANDED OFF</Ann>
+      </motion.g>
+    </g>
+  );
+}
+
+function CompactToolState({ p, index, label, detail }: Readonly<{ p: SceneVisualProps["p"]; index: number; label: string; detail: string }>) {
+  const opacity = useRange(p, 0.04 + index * 0.22, 0.28 + index * 0.22, 0, 1);
+  const y = 48 + index * 118;
+  return (
+    <motion.g style={{ opacity }}>
+      <rect x={126} y={y} width={428} height={82} fill="none" stroke={index === 2 ? GREEN : "currentColor"} strokeWidth={1.2} opacity={0.74} />
+      <Ann x={150} y={y + 32} size={16} color={index === 2 ? GREEN : COBALT}>{label}</Ann>
+      <Ann x={150} y={y + 58} size={11.5} opacity={0.64}>{detail}</Ann>
+      {index < 2 ? <path d={`M 331 ${y + 91} l 9 10 l 9 -10`} fill="none" stroke={COBALT} strokeWidth={1.6} /> : null}
+    </motion.g>
+  );
+}
+
 export function Scene03Tool({ p, compact }: Readonly<SceneVisualProps>) {
   const n = compact ? 5 : 9;
   const perimeter = (WIN.w + WIN.h) * 2;
@@ -42,6 +75,8 @@ export function Scene03Tool({ p, compact }: Readonly<SceneVisualProps>) {
   const beforeLabel = useTransform(p, [0.6, 0.68], [1, 0], { clamp: true });
 
   const users = useRange(p, 0.84, 0.99, 0, 1);
+
+  if (compact) return <CompactTool p={p} />;
 
   return (
     <g>
@@ -125,6 +160,12 @@ export function Scene03Tool({ p, compact }: Readonly<SceneVisualProps>) {
         <Ann x={WIN.x + 12} y={382} size={9} color={GREEN}>
           deployed · documented · still in use
         </Ann>
+        {(["VERIFIED", "DEPLOYED", "HANDED OFF"] as const).map((label, index) => (
+          <g key={label} transform={`translate(${258 + index * 104} 408)`}>
+            <rect width={94} height={24} fill="none" stroke={GREEN} strokeWidth={1} />
+            <Ann x={47} y={16} size={8} anchor="middle" color={GREEN}>{label}</Ann>
+          </g>
+        ))}
       </motion.g>
     </g>
   );

@@ -3,15 +3,12 @@ import Link from "next/link";
 import { ArrowLeft, Zap, BookOpen } from "lucide-react";
 import { DEMOS } from "@/data/demos";
 import { GhostDemo } from "@/components/demos/GhostDemo";
-import { BitcoinDemo } from "@/components/demos/BitcoinDemo";
 import { ChocoLLVMDemo } from "@/components/demos/ChocoLLVMDemo";
 import { CifarSparkDemo } from "@/components/demos/CifarSparkDemo";
-import { CloudDemo } from "@/components/demos/CloudDemo";
-import { MultiviewDemo } from "@/components/demos/MultiviewDemo";
 import { ParallelDemo } from "@/components/demos/ParallelDemo";
 import { PetraDemo } from "@/components/demos/PetraDemo";
-import { SwiftDemo } from "@/components/demos/SwiftDemo";
 import { YelpDemo } from "@/components/demos/YelpDemo";
+import { ProjectDemoPresentation } from "@/components/demos/ProjectDemoPresentation";
 
 const DEMOS_DESC =
   "Ten projects with browser-native ports, simulations, live computation, and clearly labeled explainers. Every demo separates original work, contribution, and browser fidelity.";
@@ -45,8 +42,8 @@ export default function DemosPage() {
         <header className="mb-8 max-w-2xl">
           <h1 className="text-2xl font-bold text-zinc-100">Live demos</h1>
           <p className="mt-2 text-sm text-zinc-400">
-            Some of these GitHub projects can actually <em>run</em> — right here in your browser, with
-            no backend. Everything below computes client-side on your machine.
+            Inspect browser-native ports, simulations, live computation, and interactive explainers. Each card states
+            what runs locally, what is modeled or precomputed, and how the original project is attributed.
           </p>
         </header>
 
@@ -79,20 +76,20 @@ export default function DemosPage() {
 
         <GhostDemo />
 
-        <div className="mt-10">
-          <BitcoinDemo />
+        <div className="mt-10 scroll-mt-20" id="bitcoin">
+          <ProjectDemoPresentation demoId="bitcoin" autoOpen />
         </div>
 
         <div className="mt-10">
           <ChocoLLVMDemo />
         </div>
 
-        <div className="mt-10">
-          <SwiftDemo />
+        <div className="mt-10 scroll-mt-20" id="swift">
+          <ProjectDemoPresentation demoId="swift" autoOpen />
         </div>
 
-        <div className="mt-10">
-          <MultiviewDemo />
+        <div className="mt-10 scroll-mt-20" id="multiview">
+          <ProjectDemoPresentation demoId="multiview" autoOpen />
         </div>
 
         <div className="mt-10">
@@ -103,8 +100,8 @@ export default function DemosPage() {
           <ParallelDemo />
         </div>
 
-        <div className="mt-10">
-          <CloudDemo />
+        <div className="mt-10 scroll-mt-20" id="cloud">
+          <ProjectDemoPresentation demoId="cloud" autoOpen />
         </div>
 
         <div className="mt-10">

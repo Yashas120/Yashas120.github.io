@@ -124,7 +124,6 @@ export const evidenceSources: readonly EvidenceSource[] = [
   { id: "repo-swift", label: "SWIFT repository", kind: "repository", href: "https://github.com/Yashas120/SWIFT" },
   { id: "paper-swift", label: "SWIFT paper", kind: "paper", href: "https://doi.org/10.47852/bonviewAIA42021930" },
   { id: "paper-underwater", label: "Underwater data-center monitoring paper", kind: "paper", href: "https://doi.org/10.1109/CSITSS54238.2021.9683449" },
-  { id: "demo-registry", label: "Portfolio demo registry", kind: "demo", href: "/demos" },
 ] as const;
 
 export const roleEvidence: readonly RoleEvidence[] = [
@@ -221,8 +220,8 @@ export const workEvidence: readonly WorkEvidence[] = [
   {
     id: "ghost-scheduler",
     title: "Performance Analysis of the Google ghOSt Scheduler",
-    summary: "Repeatable CFS, FIFO, and ghOSt policy comparisons across RocksDB and backend workloads.",
-    contribution: "Built and evaluated controlled scheduling experiments across load, concurrency, and memory configurations.",
+    summary: "A rebuilt ghOSt-enabled Linux environment for comparing kernel-only and user-space scheduling on RocksDB.",
+    contribution: "Rebuilt and configured Linux for ghOSt, ran controlled RocksDB scheduling experiments, and analyzed behavior across load, concurrency, and memory configurations.",
     ownership: ["COURSEWORK", "RESEARCH"], status: ["COMPLETED"],
     technologies: ["Linux", "C/C++", "ghOSt", "RocksDB", "Benchmarking"], sourceIds: ["master-cv"], links: [], routeRelevance: ["Systems", "Performance"],
   },
@@ -235,7 +234,7 @@ export const workEvidence: readonly WorkEvidence[] = [
     ownership: ["RESEARCH", "COLLABORATIVE", "PUBLIC FORK"], status: ["PUBLISHED"],
     featuredLabels: ["RESEARCH", "COLLABORATIVE", "PUBLISHED"],
     technologies: ["Python", "PyTorch", "Swin Transformer V2", "Fast Fourier Convolution", "Docker", "TorchServe"], sourceIds: ["master-cv", "repo-swift", "paper-swift"],
-    links: [{ label: "Repository", href: "https://github.com/Yashas120/SWIFT" }, { label: "Paper", href: "https://doi.org/10.47852/bonviewAIA42021930" }, { label: "Interactive demo", href: "/demos#swift" }], routeRelevance: ["Research", "Reproducibility"],
+    links: [{ label: "Repository", href: "https://github.com/Yashas120/SWIFT" }, { label: "Paper", href: "https://doi.org/10.47852/bonviewAIA42021930" }], routeRelevance: ["Research", "Reproducibility"],
   },
   {
     id: "multiview",
@@ -246,16 +245,16 @@ export const workEvidence: readonly WorkEvidence[] = [
     ownership: ["ORIGINAL"], descriptors: ["COMPUTER VISION"], status: ["COMPLETED"],
     featuredLabels: ["ORIGINAL", "COMPUTER VISION", "COMPLETED"],
     technologies: ["Python", "OpenCV", "NumPy", "SciPy", "SIFT", "PnP/RANSAC", "Bundle adjustment"], sourceIds: ["master-cv", "repo-multiview"],
-    links: [{ label: "Repository", href: "https://github.com/Yashas120/Multiview-3D-Reconstruction" }, { label: "Interactive demo", href: "/demos#multiview" }], routeRelevance: ["Computer vision", "Algorithmic systems"],
+    links: [{ label: "Repository", href: "https://github.com/Yashas120/Multiview-3D-Reconstruction" }], routeRelevance: ["Computer vision", "Algorithmic systems"],
   },
   {
     id: "chocollvm",
     title: "ChocoLLVM Compiler Frontend",
     summary: "A ChocoPy-to-LLVM course compiler spanning parsing, type checking, IR generation, execution, and tests.",
-    contribution: "Contribution requires verification; no more specific module-level authorship claim is currently supported.",
+    contribution: "The visible fork history contains no Yashas-authored commit, so no individual module contribution is claimed.",
     ownership: ["COURSEWORK", "PUBLIC FORK"], descriptors: ["TEAM"], status: ["COMPLETED", "REQUIRES VERIFICATION"],
     technologies: ["Python", "LLVM IR", "llvmlite", "PyTest"], sourceIds: ["master-cv"],
-    links: [{ label: "Repository", href: "https://github.com/Yashas120/chocollvm" }, { label: "Interactive demo", href: "/demos#chocollvm" }], routeRelevance: ["Systems", "Compilers"], verification: verifyContribution("chocollvm"),
+    links: [{ label: "Repository", href: "https://github.com/Yashas120/chocollvm" }], routeRelevance: ["Systems", "Compilers"], verification: verifyContribution("chocollvm"),
   },
   {
     id: "ssml",
@@ -264,7 +263,7 @@ export const workEvidence: readonly WorkEvidence[] = [
     contribution: "Contribution requires verification; no more specific authorship claim is currently supported.",
     ownership: ["COURSEWORK", "PUBLIC FORK"], descriptors: ["TEAM"], status: ["COMPLETED", "REQUIRES VERIFICATION"],
     technologies: ["Apache Spark", "Python", "Streaming ML", "CIFAR-10"], sourceIds: ["master-cv"],
-    links: [{ label: "Repository", href: "https://github.com/Yashas120/SSML-spark-streaming-for-machine-learning" }, { label: "Interactive demo", href: "/demos#cifar" }], routeRelevance: ["Distributed systems", "ML"], verification: verifyContribution("ssml"),
+    links: [{ label: "Repository", href: "https://github.com/Yashas120/SSML-spark-streaming-for-machine-learning" }], routeRelevance: ["Distributed systems", "ML"], verification: verifyContribution("ssml"),
   },
   {
     id: "bitcoin",
@@ -275,7 +274,7 @@ export const workEvidence: readonly WorkEvidence[] = [
     ownership: ["ORIGINAL"], descriptors: ["EDUCATIONAL"], status: ["COMPLETED"],
     featuredLabels: ["ORIGINAL", "EDUCATIONAL", "COMPLETED"],
     technologies: ["Java", "Maven", "SHA-256", "RIPEMD-160", "secp256k1", "ECDSA", "P2PKH"], sourceIds: ["master-cv", "repo-bitcoin"],
-    links: [{ label: "Repository", href: "https://github.com/Yashas120/Bitcoin-Transactions-in-java" }, { label: "Interactive demo", href: "/demos#bitcoin" }], routeRelevance: ["Systems depth", "Protocol implementation"],
+    links: [{ label: "Repository", href: "https://github.com/Yashas120/Bitcoin-Transactions-in-java" }], routeRelevance: ["Systems depth", "Protocol implementation"],
   },
   {
     id: "yelp",
@@ -284,7 +283,7 @@ export const workEvidence: readonly WorkEvidence[] = [
     contribution: "Contribution requires verification; no more specific analysis ownership is currently supported.",
     ownership: ["COURSEWORK", "PUBLIC FORK"], descriptors: ["TEAM"], status: ["COMPLETED", "REQUIRES VERIFICATION"],
     technologies: ["Python", "Logistic regression", "LDA", "Yelp dataset"], sourceIds: ["master-cv"],
-    links: [{ label: "Repository", href: "https://github.com/Yashas120/Restaurant-analysis-using-YELP-dataset" }, { label: "Interactive demo", href: "/demos#yelp" }], routeRelevance: ["Data", "Applied ML"], verification: verifyContribution("yelp"),
+    links: [{ label: "Repository", href: "https://github.com/Yashas120/Restaurant-analysis-using-YELP-dataset" }], routeRelevance: ["Data", "Applied ML"], verification: verifyContribution("yelp"),
   },
   {
     id: "parallel",
@@ -293,7 +292,7 @@ export const workEvidence: readonly WorkEvidence[] = [
     contribution: "Implemented and analyzed systems-performance exercises and documented the mechanisms they exposed.",
     ownership: ["COURSEWORK"], status: ["COMPLETED"],
     technologies: ["C", "Python", "pthreads", "Profiling", "Cache locality"], sourceIds: ["master-cv"],
-    links: [{ label: "Repository", href: "https://github.com/Yashas120/SSP" }, { label: "Interactive demo", href: "/demos#parallel" }], routeRelevance: ["Systems", "Concurrency"],
+    links: [{ label: "Repository", href: "https://github.com/Yashas120/SSP" }], routeRelevance: ["Systems", "Concurrency"],
   },
   {
     id: "cloud-provisioning",
@@ -301,8 +300,9 @@ export const workEvidence: readonly WorkEvidence[] = [
     summary: "A PostgreSQL-backed cloud allocator with quota, transaction, and lifecycle behavior.",
     contribution: "Contribution requires verification; no more specific component ownership is currently supported.",
     ownership: ["COURSEWORK", "PUBLIC FORK"], descriptors: ["TEAM"], status: ["COMPLETED", "REQUIRES VERIFICATION"],
+    featuredLabels: ["COURSEWORK", "TEAM", "PUBLIC FORK", "COMPLETED", "REQUIRES VERIFICATION"],
     technologies: ["PostgreSQL", "PL/pgSQL", "Node.js", "React"], sourceIds: ["master-cv"],
-    links: [{ label: "Repository", href: "https://github.com/Yashas120/Cloud-Provisioning-using-RDBMS" }, { label: "Interactive demo", href: "/demos#cloud" }], routeRelevance: ["Backend", "Cloud control planes"], verification: verifyContribution("cloud-provisioning"),
+    links: [{ label: "Repository", href: "https://github.com/Yashas120/Cloud-Provisioning-using-RDBMS" }], routeRelevance: ["Backend", "Cloud control planes"], verification: verifyContribution("cloud-provisioning"),
   },
   {
     id: "cloud-hack",
@@ -322,7 +322,7 @@ export const workEvidence: readonly WorkEvidence[] = [
     contribution: "Contribution requires verification; the equal-contribution record is candidate-supplied and commit scope remains unverified.",
     ownership: ["COURSEWORK", "PUBLIC FORK"], descriptors: ["TEAM"], status: ["ARCHIVED", "COMPLETED", "REQUIRES VERIFICATION"],
     technologies: ["React", "Express", "MongoDB"], sourceIds: ["master-cv"],
-    links: [{ label: "Repository", href: "https://github.com/Yashas120/Petra" }, { label: "Interactive demo", href: "/demos#petra" }], routeRelevance: ["Product breadth", "Full stack"], verification: verifyContribution("petra"),
+    links: [{ label: "Repository", href: "https://github.com/Yashas120/Petra" }], routeRelevance: ["Product breadth", "Full stack"], verification: verifyContribution("petra"),
   },
   {
     id: "farmer-rag",
@@ -377,7 +377,8 @@ export const workEvidence: readonly WorkEvidence[] = [
   },
 ] as const;
 
-export const featuredWorkIds = ["cloud-hack", "bitcoin", "multiview", "swift"] as const;
+export const featuredWorkIds = ["cloud-provisioning", "bitcoin", "multiview", "swift"] as const;
+export const backendProjectLabIds = ["cloud", "bitcoin", "multiview", "swift"] as const;
 export const indexWorkIds = [
   "ghost-scheduler", "swift", "multiview", "chocollvm", "ssml", "bitcoin", "yelp", "parallel",
   "cloud-provisioning", "cloud-hack", "petra", "farmer-rag", "underwater", "portfolio", "packet-photon",
@@ -420,16 +421,15 @@ export const skillLayers = [
 ] as const;
 
 export const sceneRanges = [
-  { id: "overview", nav: "Overview", start: 0, end: 0.075, heading: "Backend and platform engineering, backed by operating evidence." },
-  { id: "experience", nav: "Experience", start: 0.075, end: 0.155, heading: "One career, several system layers." },
-  { id: "infrastructure", nav: "Infrastructure", start: 0.155, end: 0.275, heading: "Infrastructure became a dependency graph, not a checklist." },
-  { id: "events", nav: "Events", start: 0.275, end: 0.385, heading: "One durable write became a regional delivery path." },
-  { id: "reliability", nav: "Reliability", start: 0.385, end: 0.51, heading: "Reliability work starts where the diagram stops." },
-  { id: "systems", nav: "Systems", start: 0.51, end: 0.625, heading: "The same reliability discipline continued down to the line card." },
-  { id: "automation", nav: "Automation", start: 0.625, end: 0.7, heading: "Automation is a durable career pattern." },
-  { id: "projects", nav: "Projects", start: 0.7, end: 0.805, heading: "Proof objects, with ownership made explicit." },
-  { id: "research-teaching", nav: "Research & Teaching", start: 0.805, end: 0.885, heading: "Breadth that strengthens engineering judgment." },
-  { id: "work-index", nav: "Work Index", start: 0.885, end: 0.96, heading: "The complete, auditable work index." },
+  { id: "overview", nav: "Overview", start: 0, end: 0.1, heading: "Backend and platform engineering, backed by operating evidence." },
+  { id: "experience", nav: "Experience", start: 0.1, end: 0.22, heading: "One career, several system layers." },
+  { id: "infrastructure", nav: "Infrastructure", start: 0.22, end: 0.4, heading: "Infrastructure became a dependency graph, not a checklist." },
+  { id: "events", nav: "Events", start: 0.4, end: 0.53, heading: "One durable write became a regional delivery path." },
+  { id: "reliability", nav: "Reliability", start: 0.53, end: 0.66, heading: "Reliability work starts where the diagram stops." },
+  { id: "systems", nav: "Systems", start: 0.66, end: 0.78, heading: "The same reliability discipline continued down to the line card." },
+  { id: "projects", nav: "Projects", start: 0.78, end: 0.96, heading: "The mechanism resolves into the real demo." },
+  { id: "research-teaching", nav: "Research & Teaching", start: 1, end: 1, heading: "Breadth that strengthens engineering judgment." },
+  { id: "work-index", nav: "Work Index", start: 1, end: 1, heading: "The complete, auditable work index." },
   { id: "contact", nav: "Contact", start: 0.96, end: 1, heading: "Build the control plane with me." },
 ] as const;
 
@@ -451,7 +451,7 @@ function assertBackendEvidence() {
   if (featuredWorkIds.length !== 4 || new Set(featuredWorkIds).size !== 4) {
     throw new Error("The backend lens must feature exactly four unique projects.");
   }
-  const expectedFeatured = ["cloud-hack", "bitcoin", "multiview", "swift"];
+  const expectedFeatured = ["cloud-provisioning", "bitcoin", "multiview", "swift"];
   if (featuredWorkIds.some((id, index) => id !== expectedFeatured[index])) {
     throw new Error("The backend featured-project contract changed.");
   }
@@ -463,12 +463,9 @@ function assertBackendEvidence() {
   for (const role of roleEvidence) {
     for (const sourceId of role.sourceIds) if (!sourceIds.has(sourceId)) throw new Error(`Missing source ${sourceId} for ${role.id}`);
   }
-  const demoIds = new Set(["bitcoin", "chocollvm", "swift", "multiview", "cifar", "parallel", "cloud", "yelp", "petra"]);
   for (const work of workEvidence) {
-    for (const link of work.links) {
-      if (link.label === "Interactive demo" && !demoIds.has(link.href.split("#")[1] ?? "")) {
-        throw new Error(`Unknown demo anchor on ${work.id}: ${link.href}`);
-      }
+    if (work.links.some((link) => link.href.startsWith("/demos"))) {
+      throw new Error(`Backend work cannot hand off to /demos: ${work.id}`);
     }
   }
   const teachingTotal = teaching.reduce((sum, course) => sum + course.count, 0);

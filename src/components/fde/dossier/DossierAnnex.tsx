@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PublicLabs } from "@/components/fde/PublicLabs";
 import {
   contact,
   educationRecords,
@@ -29,13 +30,13 @@ function EvidenceLinks({ links }: Readonly<{ links: readonly EvidenceLink[] }>) 
   return <span className="flex flex-wrap gap-x-5 gap-y-1">{links.map((item) => <SourceLink key={`${item.label}-${item.href}`} link={item} />)}</span>;
 }
 
-function FolioHeading({ folio, eyebrow, title, copy }: Readonly<{ folio: string; eyebrow: string; title: string; copy?: string }>) {
+function FolioHeading({ folio, eyebrow, title, copy, titleId }: Readonly<{ folio: string; eyebrow: string; title: string; copy?: string; titleId?: string }>) {
   return (
     <header className="fde-folio-head grid gap-5 border-t pt-5 md:grid-cols-[9rem_1fr]">
       <div className="font-mono text-[10px] uppercase tracking-[0.18em] opacity-50">Folio {folio}</div>
       <div>
         <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--fde-cobalt)" }}>{eyebrow}</p>
-        <h2 className="mt-2 max-w-[28ch] text-[clamp(1.75rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">{title}</h2>
+        <h2 id={titleId} className="mt-2 max-w-[28ch] text-[clamp(1.75rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">{title}</h2>
         {copy ? <p className="mt-4 max-w-[68ch] text-[0.98rem] leading-7 opacity-70">{copy}</p> : null}
       </div>
     </header>
@@ -47,12 +48,19 @@ function RecordLabels({ record }: Readonly<{ record: ProfileEvidenceRecord }>) {
 }
 
 function ProfessionalRecord() {
+  const roleEvidenceIds: Record<string, string> = {
+    "PE-01": "PE-01 PE-02 PE-03 PE-04 PE-05 PE-06 PE-07",
+    "PE-08": "PE-08 PE-09 PE-10 PE-11 PE-12 PE-13 PE-14 PE-15 PE-16",
+    "PE-17": "PE-17 PE-18 PE-19 PE-20",
+    "PE-21": "PE-21",
+    "PE-22": "PE-22",
+  };
   return (
     <section id="professional-record" className={`${anchorClass} fde-annex-section`}>
       <FolioHeading folio="02" eyebrow="PROFESSIONAL CHRONOLOGY" title="Professional record" copy="Five verified roles. Production work stays central; supporting work remains visible." />
       <div className="mt-10 border-t">
         {professionalRecords.map((record, index) => (
-          <article key={record.id} data-evidence-id={record.id} className="fde-ledger-row grid gap-6 border-b py-8 md:grid-cols-[9rem_1fr]">
+          <article key={record.id} data-evidence-id={record.id} data-evidence-ids={roleEvidenceIds[record.id]} className="fde-ledger-row grid gap-6 border-b py-8 md:grid-cols-[9rem_1fr]">
             <div className="font-mono text-[10px] uppercase tracking-[0.14em] opacity-50"><span>{String(index + 1).padStart(2, "0")}</span><br />{record.period}</div>
             <div>
               <RecordLabels record={record} />
@@ -146,7 +154,7 @@ const breadth = [
 function Breadth() {
   return (
     <section className="fde-annex-section" aria-labelledby="breadth-title">
-      <FolioHeading folio="05" eyebrow="BREADTH TRACE" title="Beyond this lens" copy="Forward-deployed engineering is the ordering principle—not the boundary of the work." />
+      <FolioHeading folio="05" eyebrow="BREADTH TRACE" title="Beyond this lens" titleId="breadth-title" copy="Forward-deployed engineering is the ordering principle—not the boundary of the work." />
       <p className="mt-8 max-w-[76ch] leading-7 opacity-72">The same record also includes optical line-card software, backend and cloud platforms, reliability and developer tooling, low-level protocol and performance projects, machine-learning and computer-vision research, product integration, and teaching. Each item keeps its original domain, ownership, and status.</p>
       <div className="mt-8 border-t">{breadth.map(([label, copy, href]) => <a key={label} href={href} className="fde-breadth-row grid min-h-16 items-center gap-2 border-b py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 md:grid-cols-[15rem_1fr_2rem]"><span className="font-mono text-[10px] uppercase tracking-[0.13em]" style={{ color: "var(--fde-cobalt)" }}>{label}</span><span className="text-[0.9rem] leading-6 opacity-70">{copy}</span><span aria-hidden>→</span></a>)}</div>
     </section>
@@ -155,7 +163,7 @@ function Breadth() {
 
 function Research() {
   return (
-    <section id="research" className={`${anchorClass} fde-annex-section`}>
+    <section id="research" data-evidence-ids="LK-06" className={`${anchorClass} fde-annex-section`}>
       <FolioHeading folio="06" eyebrow="PEER-REVIEWED RECORD" title="Research and publications" />
       <div className="mt-10 border-t">{publications.map((record, index) => <article key={record.id} data-evidence-id={record.id} className="grid gap-5 border-b py-8 md:grid-cols-[9rem_1fr]"><div className="font-mono text-[10px] uppercase tracking-[0.14em] opacity-50">Paper {String(index + 1).padStart(2, "0")}</div><div><p className="font-mono text-[10px] uppercase tracking-[0.13em] opacity-55">{record.label}</p><h3 className="mt-2 max-w-[40ch] text-xl font-semibold leading-7">{record.title}</h3><p className="mt-3 max-w-[82ch] text-[0.9rem] leading-6 opacity-60">{record.citation}</p><p className="mt-4 max-w-[78ch] leading-7 opacity-76">{record.copy}</p><div className="mt-4"><EvidenceLinks links={record.links} /></div></div></article>)}</div>
     </section>
@@ -200,11 +208,10 @@ function Contact() {
     { label: "Email", href: `mailto:${contact.email}` },
     { label: "GitHub", href: contact.github, external: true },
     { label: "LinkedIn", href: contact.linkedin, external: true },
-    { label: "Live demos", href: contact.demos },
     ...(contact.resumeUrl ? [{ label: "Resume", href: contact.resumeUrl, external: true }] : []),
   ];
   return (
-    <section id="contact" className={`${anchorClass} fde-contact border-t px-5 py-20 md:px-10 md:py-28`}>
+    <section id="contact" data-evidence-ids="LK-01 LK-02 LK-03 LK-05" className={`${anchorClass} fde-contact border-t px-5 py-20 md:px-10 md:py-28`}>
       <div className="mx-auto max-w-6xl">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--fde-green)" }}>FINAL HANDOFF · OPEN CHANNEL</p>
         <h2 className="mt-4 max-w-[23ch] text-[clamp(2rem,5vw,4.5rem)] font-semibold leading-[0.98] tracking-[-0.035em]">If the problem spans users, systems, and deployment, I’d like to hear about it.</h2>
@@ -225,12 +232,13 @@ export function DossierAnnex() {
         <div className="mx-auto max-w-6xl">
           <FolioHeading folio="01" eyebrow="DOSSIER ANNEX · THE VERIFIED RECORD" title="The role lens changes the order. It does not change the record." copy="Forward-deployed work leads this page because it is the hiring lens. The record below remains complete: five roles, production systems, public projects, research, teaching, and current graduate-study context." />
           <nav aria-label="Verified record index" className="mt-8 flex flex-wrap border-y py-2">{indexLinks.map(([label, href]) => <a key={href} href={href} className="inline-flex min-h-11 items-center px-4 font-mono text-[10px] uppercase tracking-[0.13em] opacity-65 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">{label}</a>)}</nav>
-          <div className="mt-6 flex flex-wrap gap-x-7"><SourceLink link={{ label: "GitHub", href: contact.github, external: true }} /><SourceLink link={{ label: "LinkedIn", href: contact.linkedin, external: true }} /><SourceLink link={{ label: "Live demos", href: contact.demos }} /></div>
+          <div className="mt-6 flex flex-wrap gap-x-7"><SourceLink link={{ label: "GitHub", href: contact.github, external: true }} /><SourceLink link={{ label: "LinkedIn", href: contact.linkedin, external: true }} /></div>
         </div>
       </section>
       <div className="fde-annex-body mx-auto max-w-6xl px-5 md:px-10">
         <ProfessionalRecord />
         <FeaturedSystems />
+        <PublicLabs />
         <WorkIndex />
         <Breadth />
         <Research />
@@ -242,4 +250,3 @@ export function DossierAnnex() {
     </div>
   );
 }
-

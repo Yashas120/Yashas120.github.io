@@ -14,7 +14,7 @@ export type Relationship =
   | "Collaborative"
   | "Coursework"
   | "Research"
-  | "Fork"
+  | "Exploration"
   | "Teaching"
   | "Concept"
   | "Planned/In development";
@@ -172,6 +172,7 @@ export const storyScenes: StoryScene[] = [
 export const totalStorySpan = storyScenes.reduce((sum, scene) => sum + scene.span, 0);
 
 export interface ExperienceRole {
+  id: string;
   org: string;
   role: string;
   dates: string;
@@ -183,6 +184,7 @@ export interface ExperienceRole {
 
 export const experience: ExperienceRole[] = [
   {
+    id: "experience-cisco-optical",
     org: "Cisco",
     role: "Software Engineer II, Optical Systems",
     dates: "2025–2026",
@@ -199,6 +201,7 @@ export const experience: ExperienceRole[] = [
     note: "Public product documentation establishes platform capability; this entry describes only my approved contribution.",
   },
   {
+    id: "experience-cisco-backend-cloud",
     org: "Cisco",
     role: "Software Engineer, Backend & Cloud",
     dates: "2023–2025",
@@ -217,6 +220,7 @@ export const experience: ExperienceRole[] = [
     note: "AWS supplied the messaging primitives; my work connected the infrastructure and service boundaries and made the deployment path safer.",
   },
   {
+    id: "experience-cisco-px-cloud",
     org: "Cisco",
     role: "Technical Intern, PX Cloud",
     dates: "Jan–Jul 2023",
@@ -231,6 +235,7 @@ export const experience: ExperienceRole[] = [
     note: "The Glue work was a PoC, not a claimed production pipeline.",
   },
   {
+    id: "experience-schneider",
     org: "Schneider Electric",
     role: "Summer Intern",
     dates: "Jun–Aug 2022",
@@ -261,12 +266,12 @@ export const featuredSystems: EvidenceItem[] = [
     name: "Spark Streaming for Machine Learning",
     relationship: "Coursework",
     status: "Archived",
-    labels: ["Coursework · team", "Public repository · fork"],
+    labels: ["Coursework · team", "Collaborative contribution"],
     description:
       "A four-person course project that streamed CIFAR-10 batches from a TCP producer into Spark Streaming. DStreams were processed per RDD and used for incremental classifier updates, with MLP, SVM, K-means, and deep-feature variants in the repository.",
     boundary:
       "The inspected default is local and the MLP path collects columns to the driver before partial_fit. No multi-worker training claim is made.",
-    contribution: "Four-person team; exact personal scope is not documented in the public repository.",
+    contribution: "Four-person team; contributed to the streaming, training, and batch-size analysis workflow.",
     domain: "Distributed data / ML",
     links: [
       {
@@ -280,12 +285,12 @@ export const featuredSystems: EvidenceItem[] = [
     name: "Cloud Provisioning using RDBMS",
     relationship: "Coursework",
     status: "Archived",
-    labels: ["Coursework · team", "Public repository · fork"],
+    labels: ["Coursework · team", "Collaborative contribution"],
     description:
       "A course project modeling project, zone, rack, quota, and VM state transitions in PostgreSQL functions and procedures, with a Node and React application boundary.",
     boundary:
       "This course project modeled quota- and rack-aware resource allocation in PostgreSQL; it was not a production cloud provider.",
-    contribution: "Team/fork; exact personal contribution is not documented in the public repository.",
+    contribution: "Contributed to the team project and its database-backed allocation workflow.",
     domain: "Databases / cloud",
     links: [
       {
@@ -336,7 +341,7 @@ export const beyondLens: EvidenceItem[] = [
     name: "SWIFT · efficient image super-resolution",
     relationship: "Research",
     status: "Archived",
-    labels: ["Research · co-authored", "Public repository · fork"],
+    labels: ["Research · co-authored", "Collaborative contribution"],
     description:
       "Co-authored research combining SwinV2-style transformer blocks and frequency-domain components for lightweight single-image super-resolution. Comparisons are paper/team-reported, not personal production metrics.",
     contribution: "One of five co-authors; exact personal scope is unresolved.",
@@ -366,13 +371,13 @@ export const beyondLens: EvidenceItem[] = [
   },
   {
     name: "ChocoLLVM",
-    relationship: "Fork",
+    relationship: "Coursework",
     status: "Archived",
-    labels: ["Compiler-design coursework", "Public repository · fork"],
+    labels: ["Compiler-design coursework", "Contributed implementation"],
     description:
       "A compiler frontend lowering a ChocoPy subset to readable LLVM IR, with parse, typecheck, Python, LLVM, and test modes.",
     boundary: "The browser experience is a simplified derived explainer; the project is not labeled solo.",
-    contribution: "Forked compiler-design coursework with upstream-derived portions.",
+    contribution: "Contributed to the compiler-design coursework implementation and its supported compiler pipeline.",
     domain: "Compilers",
     links: [
       { label: "Source repository", href: "https://github.com/Yashas120/chocollvm", external: true },
@@ -380,13 +385,13 @@ export const beyondLens: EvidenceItem[] = [
   },
   {
     name: "Yelp Restaurant Analysis",
-    relationship: "Fork",
+    relationship: "Collaborative",
     status: "Archived",
-    labels: ["Data coursework · team", "Public repository · fork"],
+    labels: ["Data coursework · team", "Collaborative contribution"],
     description:
       "A notebook-based analysis of check-ins, reviews, and amenities to identify restaurants at risk of closure and explore improvement signals.",
     boundary: "The browser demo's seeded logistic regression is separate from the original notebooks.",
-    contribution: "Team/fork; exact personal scope is unresolved.",
+    contribution: "Contributed to the collaborative course analysis; narrower personal scope is not documented here.",
     domain: "Data / ML",
     links: [
       {
@@ -400,7 +405,7 @@ export const beyondLens: EvidenceItem[] = [
     name: "Petra",
     relationship: "Coursework",
     status: "Archived",
-    labels: ["Coursework · three-person team", "Public repository · fork"],
+    labels: ["Coursework · three-person team", "Equal contributor"],
     description:
       "A React and Express/MongoDB pet-care booking application with authentication boundaries. It is a historical project, not a current live deployment.",
     contribution: "Three-person team with equal contribution.",
@@ -412,135 +417,6 @@ export const beyondLens: EvidenceItem[] = [
 ];
 
 const repo = (label: string, href: string): PublicLink => ({ label, href, external: true });
-
-export const projectLedger: EvidenceItem[] = [
-  {
-    name: "Performance Analysis of the ghOSt Scheduler",
-    relationship: "Coursework",
-    status: "Unknown/requires verification",
-    labels: ["Systems-performance study", "Report not public"],
-    description: "A scheduler/performance study whose context, authorship, workloads, and results await a public report.",
-    contribution: "Authorship and exact scope require verification; no solo claim is made.",
-    domain: "OS / performance",
-    links: [],
-  },
-  ...featuredSystems,
-  ...beyondLens.filter((item) => item.name !== "Petra"),
-  {
-    name: "Cloud-Hack",
-    relationship: "Coursework",
-    status: "Archived",
-    labels: ["Coursework · team", "Public repository · original"],
-    description: "A Flask and MongoDB application deployed with Docker and Kubernetes.",
-    contribution: "Four-person team; Yashas's documented scope was Mongo image/config, Kubernetes Deployment, and Secret.",
-    domain: "Cloud / container foundations",
-    links: [repo("Source repository", "https://github.com/Yashas120/Cloud-Hack")],
-  },
-  beyondLens[4],
-  {
-    name: "Underwater Data-Center Monitoring",
-    relationship: "Research",
-    status: "Archived",
-    labels: ["Research · co-authored", "Published prototype"],
-    description: "An Arduino-based monitoring and alerting prototype for underwater data-center concepts.",
-    contribution: "Co-authored research.",
-    domain: "IoT / monitoring",
-    links: [repo("Publication DOI", "https://doi.org/10.1109/CSITSS54238.2021.9683449")],
-  },
-  {
-    name: "Webex / Multilingual RAG PoC",
-    relationship: "Professional",
-    status: "Archived",
-    labels: ["Internal prototype · PoC"],
-    description: "Internal retrieval and multilingual-assistant exploration.",
-    contribution: "Professional contribution; no production or customer claim.",
-    domain: "Applied AI",
-    links: [],
-  },
-  {
-    name: "Engineering Analytics Dashboard",
-    relationship: "Professional",
-    status: "Archived",
-    labels: ["Internal tool · hackathon"],
-    description: "Backend work for an internal engineering-analytics dashboard.",
-    contribution: "Professional contribution; continued use is not claimed.",
-    domain: "Backend / analytics",
-    links: [],
-  },
-  {
-    name: "CX Agent UI",
-    relationship: "Professional",
-    status: "Archived",
-    labels: ["Internal prototype · PoC"],
-    description: "A product-interface exploration for an internal agent concept.",
-    contribution: "Professional contribution; prototype status remains explicit.",
-    domain: "Frontend / product",
-    links: [],
-  },
-  {
-    name: "PM Analyzer",
-    relationship: "Professional",
-    status: "Archived",
-    labels: ["Internal prototype · PoC"],
-    description: "An optical performance-monitoring analysis exploration.",
-    contribution: "Professional contribution; not labeled as shipped product work.",
-    domain: "Optical tooling",
-    links: [],
-  },
-  {
-    name: "AWS Glue Data Path",
-    relationship: "Professional",
-    status: "Archived",
-    labels: ["Internal prototype · PoC"],
-    description: "A data-pipeline exploration during the PX Cloud internship.",
-    contribution: "Professional internship contribution.",
-    domain: "Cloud / data",
-    links: [],
-  },
-  {
-    name: "Schneider Decision Tool",
-    relationship: "Professional",
-    status: "Shipped",
-    labels: ["Internal tool · deployed"],
-    description: "An Excel-backed dependency and test-plan workflow.",
-    contribution: "Independently built and handed off.",
-    domain: "Automation / productivity",
-    links: [],
-  },
-  {
-    name: "Technical Portfolio",
-    relationship: "Original",
-    status: "Active",
-    labels: ["Public repository · original"],
-    description: "A data-driven Next.js and TypeScript technical portfolio.",
-    contribution: "Original public repository.",
-    domain: "Web / presentation",
-    links: [repo("Source repository", "https://github.com/Yashas120/Yashas120.github.io")],
-  },
-];
-
-export const publicExplorations: EvidenceItem[] = [
-  {
-    name: "SunSET / ucsd",
-    relationship: "Fork",
-    status: "Archived",
-    labels: ["Public repository · fork / exploration"],
-    description: "A public fork retained for provenance; no Yashas-specific change is asserted.",
-    contribution: "No verified Yashas-specific contribution.",
-    domain: "Exploration",
-    links: [repo("Source repository", "https://github.com/Yashas120/ucsd")],
-  },
-  {
-    name: "US Stocks Tax Calculator",
-    relationship: "Fork",
-    status: "Archived",
-    labels: ["Public repository · fork"],
-    description: "A public fork included for a complete repository record; it is not systems evidence.",
-    contribution: "No verified Yashas-specific contribution.",
-    domain: "Finance utility",
-    links: [repo("Source repository", "https://github.com/Yashas120/us-stocks-tax-calculator")],
-  },
-];
 
 export const publications = [
   {

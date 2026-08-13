@@ -41,12 +41,12 @@ if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) errors.push("the route must
 const requiredText = [
   "50% faster deployments",
   "40% faster page loads",
-  "roughly 4 hours of manual release work",
-  "approximately 500 GB AWS Glue data pipeline as a PROOF OF CONCEPT",
+  "roughly 4 hours of manual generation and publication",
+  "approximately 500 GB AWS Glue PROOF OF CONCEPT",
   "onboarded four engineers",
   "This is my complete engineering portfolio, ordered through a backend and platform lens.",
   "15 of 15 work records shown",
-  "COURSEWORK TEAM COMPLETED Cloud-Hack — Containerized Blogging Microservices",
+  "COURSEWORK TEAM PUBLIC FORK COMPLETED REQUIRES VERIFICATION Cloud Provisioning Using an RDBMS",
   "ORIGINAL EDUCATIONAL COMPLETED Bitcoin Transactions from Scratch in Java",
   "ORIGINAL COMPUTER VISION COMPLETED Multiview 3D Reconstruction from 2D Images",
   "RESEARCH COLLABORATIVE PUBLISHED SWIFT — Lightweight Image Super-Resolution",
@@ -56,19 +56,23 @@ const requiredText = [
   "SunSET / UCSD Academic-History Utility",
   "OOAD-Project-Blockchain",
   "ykadambi@ucsd.edu",
+  "operator intent",
+  "human review",
+  "DynamoDB write",
+  "SNS fan-out",
+  "current hardware state",
+  "CONVERGED · READY FOR THE NEXT SYSTEM",
 ];
 for (const phrase of requiredText) if (!text.includes(phrase)) errors.push(`missing rendered contract text: ${phrase}`);
 
-for (const anchor of ["bitcoin", "chocollvm", "swift", "multiview", "cifar", "parallel", "cloud", "yelp", "petra"]) {
-  if (!html.includes(`/demos#${anchor}`)) errors.push(`missing demo destination: /demos#${anchor}`);
-}
+if (/href=["']\/demos(?:[\/#"'])/.test(html)) errors.push("backend must mount labs in place and cannot link to /demos");
 
 const resumePath = resolve(exportRoot, "resume/Yashas-Kadambi-Resume.pdf");
 if (!html.includes('/resume/Yashas-Kadambi-Resume.pdf')) errors.push("approved résumé link is absent");
 if (!existsSync(resumePath)) errors.push("approved résumé PDF is absent from export");
 else if (!readFileSync(resumePath).subarray(0, 4).equals(Buffer.from("%PDF"))) errors.push("résumé asset is not a PDF");
 
-for (const phrase of ["7 products", "$2B", "Retrying", "Solo project", "dispatch intent", "loop closed", "gated faster deployments"]) {
+for (const phrase of ["7 products", "$2B", "Retrying", "Solo project", "dispatch intent", "loop closed", "gated faster deployments", "Yashas's AI agent"]) {
   if (text.includes(phrase)) errors.push(`forbidden exported phrase: ${phrase}`);
 }
 
@@ -77,4 +81,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`Backend export validation passed: ${ids.length} unique IDs, ${requiredScenes.length} scenes, and 9 demo destinations.`);
+console.log(`Backend export validation passed: ${ids.length} unique IDs, ${requiredScenes.length} scenes, and no /demos handoff.`);

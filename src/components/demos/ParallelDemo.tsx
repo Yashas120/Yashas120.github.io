@@ -438,6 +438,7 @@ export function ParallelDemo({ embedded = false }: Readonly<{ embedded?: boolean
                 setMode(i);
                 restart();
               }}
+              aria-pressed={i === mode}
               className="whitespace-nowrap rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors"
               style={{
                 background: i === mode ? rgba(ACC, 0.15) : "transparent",
@@ -482,6 +483,7 @@ export function ParallelDemo({ embedded = false }: Readonly<{ embedded?: boolean
                   setThreads(tv);
                   restart();
                 }}
+                aria-pressed={threads === tv}
                 className="rounded px-2 py-1 font-mono text-[10px]"
                 style={{
                   background: threads === tv ? rgba(ACC, 0.15) : "transparent",
@@ -500,6 +502,7 @@ export function ParallelDemo({ embedded = false }: Readonly<{ embedded?: boolean
               setLocked((v) => !v);
               restart();
             }}
+            aria-pressed={locked}
             className="ml-auto flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-mono text-xs transition-colors"
             style={{
               borderColor: locked ? rgba("#4ade80", 0.5) : "rgb(var(--line) / 0.12)",
@@ -522,6 +525,7 @@ export function ParallelDemo({ embedded = false }: Readonly<{ embedded?: boolean
                   setColumnMajor(o.v);
                   restart();
                 }}
+                aria-pressed={columnMajor === o.v}
                 className="rounded px-2 py-1 font-mono text-[10px]"
                 style={{
                   background: columnMajor === o.v ? rgba(ACC, 0.15) : "transparent",
@@ -538,7 +542,7 @@ export function ParallelDemo({ embedded = false }: Readonly<{ embedded?: boolean
 
       {/* code + mechanism */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div>
+        <div className="min-w-0">
           <div className="mb-1.5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-zinc-500">
             <span style={{ color: accentText }}>{m.file}</span>
           </div>
@@ -562,7 +566,7 @@ export function ParallelDemo({ embedded = false }: Readonly<{ embedded?: boolean
           </pre>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wide text-zinc-500">how it works</div>
           <ol className="space-y-2">
             {m.steps.map((s, i) => (

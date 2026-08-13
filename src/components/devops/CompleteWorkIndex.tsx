@@ -3,6 +3,7 @@
 import { ArrowUpRight } from "lucide-react";
 import type { DemoId } from "@/data/demos";
 import { completeWork } from "@/data/devops/projects";
+import { DefaultProjectPreview } from "./DefaultProjectPreview";
 import { useProjectInspector } from "./ProjectInspectorContext";
 import { DV } from "./tokens";
 
@@ -58,7 +59,7 @@ export function CompleteWorkIndex() {
                   work.links.map((link) => {
                     const demoId = link.kind === "demo" ? demoByProjectId[work.id] : undefined;
                     return demoId ? (
-                      <button key={`${work.id}-${link.href}`} type="button" onClick={() => onInspectProject(demoId)} className="inline-flex min-h-[44px] items-center gap-1 text-[14px]" style={{ color: DV.cyan }} aria-label={`Inspect live implementation — ${work.title}`}>Preview</button>
+                      <button key={`${work.id}-${link.href}`} type="button" onClick={() => onInspectProject(demoId)} className="inline-flex min-h-[44px] items-center gap-1 text-[14px]" style={{ color: DV.cyan }} aria-label={`Jump to open preview — ${work.title}`}>Open preview</button>
                     ) : (
                       <a key={`${work.id}-${link.href}`} href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined} rel={link.href.startsWith("http") ? "noreferrer noopener" : undefined} className="inline-flex min-h-[44px] items-center gap-1 text-[14px]" style={{ color: DV.cyan }} aria-label={`${link.label} — ${work.title}${link.href.startsWith("http") ? " (opens in a new tab)" : ""}`}>
                         {link.label}{link.href.startsWith("http") && <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />}
@@ -72,6 +73,7 @@ export function CompleteWorkIndex() {
                 )}
               </div>
             </article>
+            {demoByProjectId[work.id] && <DefaultProjectPreview demoId={demoByProjectId[work.id]} />}
           </li>
         ))}
       </ol>

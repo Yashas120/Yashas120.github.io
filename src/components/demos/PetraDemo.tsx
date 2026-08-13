@@ -1,374 +1,220 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Minus, Pause, Play, PawPrint, Plus, RotateCcw } from "lucide-react";
-import { LiveDemo } from "./LiveDemo";
-import { useOnScreen } from "./bitcoin/parts";
-import {
-  ACTIONS,
-  HOTELS,
-  NODE_META,
-  type FlowStep,
-  type NodeId,
-  bookingCost,
-  inr,
-} from "@/lib/demos/petra";
+import { useState } from "react";
+import { ArrowRight, Database, ExternalLink, KeyRound, Monitor, RotateCcw, Server } from "lucide-react";
 import { cardProps } from "@/data/demos";
+import {
+  AUTH_FLOW,
+  BACKEND_ROUTES,
+  PETRA_CHAPTERS,
+  READ_FLOW,
+  SESSION_MOMENTS,
+  type PetraActor,
+  type PetraChapterId,
+  type PetraTraceStep,
+} from "@/lib/demos/petra";
+import { LiveDemo } from "./LiveDemo";
 
 const REPO = "https://github.com/Yashas120/Petra";
-const ACC = "#14b8a6"; // teal
+const BACKEND_REPO = "https://github.com/iVishalr/petra-backend";
+const ACCENT = "#14b8a6";
 
-const KIND_COLOR: Record<FlowStep["kind"], string> = {
-  req: "#14b8a6",
-  res: "#4ade80",
-  query: "#fbbf24",
-  ext: "#f472b6",
-  render: "#a78bfa",
-};
-const KIND_LABEL: Record<FlowStep["kind"], string> = {
-  req: "request",
-  res: "response",
-  query: "db query",
-  ext: "external",
-  render: "client render",
+const actorColor: Record<PetraActor, string> = {
+  React: "#60a5fa",
+  Google: "#f472b6",
+  Express: "#14b8a6",
+  MongoDB: "#4ade80",
+  Browser: "#fbbf24",
 };
 
-// SVG node geometry (viewBox 600×230)
-const NODE: Record<NodeId, { x: number; y: number; hw: number; hh: number }> = {
-  client: { x: 92, y: 152, hw: 62, hh: 28 },
-  api: { x: 300, y: 152, hw: 62, hh: 28 },
-  db: { x: 508, y: 152, hw: 62, hh: 28 },
-  google: { x: 300, y: 46, hw: 62, hh: 24 },
-};
+function Trace({ steps }: Readonly<{ steps: readonly PetraTraceStep[] }>) {
+  const [active, setActive] = useState(0);
+  const step = steps[active];
 
-function rgba(hex: string, a: number): string {
-  const h = hex.replace("#", "");
-  return `rgba(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)}, ${a})`;
+  return (
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,.88fr)_minmax(0,1.12fr)]">
+      <ol className="space-y-1" aria-label="Request trace">
+        {steps.map((item, index) => (
+          <li key={`${item.actor}-${item.title}`}>
+            <button
+              type="button"
+              aria-pressed={active === index}
+              onClick={() => setActive(index)}
+              className="flex min-h-11 w-full items-center gap-2 rounded-md border px-3 text-left"
+              style={{
+                borderColor: active === index ? actorColor[item.actor] : "rgb(var(--line) / 0.12)",
+                background: active === index ? `${actorColor[item.actor]}12` : "transparent",
+              }}
+            >
+              <span className="font-mono text-[9px] text-zinc-500">{String(index + 1).padStart(2, "0")}</span>
+              <span className="font-mono text-[10px] font-semibold" style={{ color: actorColor[item.actor] }}>{item.actor}</span>
+              <span className="min-w-0 truncate text-[12px] text-zinc-300">{item.title}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+
+      <section className="rounded-lg border bg-ink-900 p-4" style={{ borderColor: "rgb(var(--line) / 0.14)" }} aria-live="polite">
+        <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide" style={{ color: actorColor[step.actor] }}>
+          {step.actor}<ArrowRight className="h-3 w-3" aria-hidden /> step {active + 1} of {steps.length}
+        </div>
+        <h4 className="mt-3 text-sm font-semibold text-zinc-100">{step.title}</h4>
+        <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">{step.detail}</p>
+        <pre className="mt-3 overflow-x-auto rounded-md border p-3 font-mono text-[10px] leading-relaxed text-zinc-300" style={{ borderColor: "rgb(var(--line) / 0.12)" }}>{step.code}</pre>
+      </section>
+    </div>
+  );
 }
-function border(a: { x: number; y: number; hw: number; hh: number }, b: { x: number; y: number }) {
-  const dx = b.x - a.x, dy = b.y - a.y;
-  if (Math.abs(dx) > Math.abs(dy)) return { x: a.x + Math.sign(dx) * a.hw, y: a.y };
-  return { x: a.x, y: a.y + Math.sign(dy) * a.hh };
-}
-const ease = (t: number) => t * t * (3 - 2 * t);
 
-function useIsLight(): boolean {
-  const [light, setLight] = useState(false);
-  useEffect(() => {
-    const el = document.documentElement;
-    const update = () => setLight(el.classList.contains("light"));
-    update();
-    const obs = new MutationObserver(update);
-    obs.observe(el, { attributes: true, attributeFilter: ["class"] });
-    return () => obs.disconnect();
-  }, []);
-  return light;
+function RouteInventory() {
+  return (
+    <div className="overflow-x-auto rounded-lg border" style={{ borderColor: "rgb(var(--line) / 0.14)" }}>
+      <table className="w-full min-w-[580px] border-collapse text-left text-[11px]">
+        <caption className="sr-only">Documented Petra backend routes</caption>
+        <thead className="font-mono uppercase tracking-wide text-zinc-500">
+          <tr>{["method", "path", "Mongo read", "response", "JWT guard"].map((label) => <th key={label} className="border-b px-3 py-2" style={{ borderColor: "rgb(var(--line) / 0.12)" }}>{label}</th>)}</tr>
+        </thead>
+        <tbody>
+          {BACKEND_ROUTES.map((route) => (
+            <tr key={`${route.method}-${route.path}`} className="text-zinc-300">
+              <td className="border-b px-3 py-2 font-mono" style={{ borderColor: "rgb(var(--line) / 0.08)", color: ACCENT }}>{route.method}</td>
+              <td className="border-b px-3 py-2 font-mono" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>{route.path}</td>
+              <td className="border-b px-3 py-2" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>{route.reads}</td>
+              <td className="border-b px-3 py-2" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>{route.response}</td>
+              <td className="border-b px-3 py-2 font-mono text-amber-400" style={{ borderColor: "rgb(var(--line) / 0.08)" }}>{route.guarded ? "yes" : "none"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SessionTrace() {
+  const [active, setActive] = useState(0);
+  const moment = SESSION_MOMENTS[active];
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-1.5">
+        {SESSION_MOMENTS.map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            aria-pressed={active === index}
+            onClick={() => setActive(index)}
+            className="min-h-11 rounded-md border px-3 font-mono text-[10px]"
+            style={{ borderColor: active === index ? ACCENT : "rgb(var(--line) / 0.12)", color: active === index ? ACCENT : "rgb(var(--zinc-500))" }}
+          >
+            {item.label}
+          </button>
+        ))}
+        <button type="button" onClick={() => setActive(0)} className="min-h-11 rounded-md border px-3 text-zinc-400" style={{ borderColor: "rgb(var(--line) / 0.12)" }} aria-label="Reset session trace"><RotateCcw className="h-3.5 w-3.5" aria-hidden /></button>
+      </div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-[.72fr_1.28fr]">
+        <section className="rounded-lg border p-4" style={{ borderColor: "rgb(var(--line) / 0.14)" }}>
+          <p className="font-mono text-[10px] uppercase tracking-wide" style={{ color: ACCENT }}>{moment.route}</p>
+          <h4 className="mt-2 text-sm font-semibold text-zinc-100">{moment.label}</h4>
+          <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">{moment.change}</p>
+        </section>
+        <div className="space-y-2">
+          {moment.values.map((value) => (
+            <section key={value.key} className="rounded-lg border p-3" style={{ borderColor: "rgb(var(--line) / 0.12)" }}>
+              <div className="flex items-center gap-2"><Database className="h-3.5 w-3.5" style={{ color: ACCENT }} aria-hidden /><strong className="font-mono text-[11px] text-zinc-200">sessionStorage.{value.key}</strong></div>
+              <code className="mt-2 block overflow-x-auto font-mono text-[10px] text-zinc-400">{value.preview}</code>
+              <p className="mt-1 text-[11px] text-zinc-500">{value.purpose}</p>
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BackendAndSession() {
+  return (
+    <div>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {[
+          { icon: Server, title: "Express · :3001", lines: "CORS, JSON routes, static hotel images", color: actorColor.Express },
+          { icon: Database, title: "MongoDB · petraDB", lines: "users, city summaries, full hotel records", color: actorColor.MongoDB },
+          { icon: Monitor, title: "Browser · current tab", lines: "router state and four sessionStorage keys", color: actorColor.Browser },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <section key={item.title} className="rounded-lg border p-3" style={{ borderColor: `${item.color}40`, background: `${item.color}08` }}>
+              <div className="flex items-center gap-2" style={{ color: item.color }}>
+                <Icon className="h-4 w-4" aria-hidden />
+                <h4 className="font-mono text-[11px] font-semibold">{item.title}</h4>
+              </div>
+              <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">{item.lines}</p>
+            </section>
+          );
+        })}
+      </div>
+
+      <div className="mt-4">
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-wide text-zinc-500">How the backend reads</p>
+        <RouteInventory />
+      </div>
+
+      <div className="mt-5 border-t pt-4" style={{ borderColor: "rgb(var(--line) / 0.1)" }}>
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-wide text-zinc-500">How the browser session changes</p>
+        <SessionTrace />
+      </div>
+
+      <div className="mt-4 grid gap-3 rounded-lg border p-3 md:grid-cols-[1fr_auto] md:items-center" style={{ borderColor: "rgba(245, 158, 11, 0.32)", background: "rgba(245, 158, 11, 0.05)" }}>
+        <p className="text-[11px] leading-relaxed text-zinc-400">
+          <strong className="font-medium text-amber-400">The real boundary:</strong> Express returns a seven-day JWT after Google verification, but the React app never stores or sends it. The auth-prefixed read routes do not validate a token, and <code>express-session</code> is not configured. Petra&apos;s continuing login state is the tab&apos;s <code>sessionStorage</code>, not a server session.
+        </p>
+        <a href={BACKEND_REPO} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 rounded-md border px-3 py-2 font-mono text-[10px] text-zinc-400 hover:text-zinc-100" style={{ borderColor: "rgb(var(--line) / 0.14)" }}>
+          backend source <ExternalLink className="h-3 w-3" aria-hidden />
+        </a>
+      </div>
+    </div>
+  );
 }
 
 export function PetraDemo({ embedded = false }: Readonly<{ embedded?: boolean }> = {}) {
-  const light = useIsLight();
-  const [actionIdx, setActionIdx] = useState(0);
-  const [stepIdx, setStepIdx] = useState(0);
-  const [playing, setPlaying] = useState(true);
-
-  const action = ACTIONS[actionIdx];
-  const steps = action.steps;
-  const step = steps[Math.min(stepIdx, steps.length - 1)];
-  const showCost = action.key === "view" || action.key === "reserve";
-
-  const tRef = useRef(0);
-  const packetRef = useRef<SVGCircleElement>(null);
-  const diagramRef = useRef<HTMLDivElement>(null);
-  // Only run the packet animation while the diagram is on screen.
-  const onScreen = useOnScreen(diagramRef);
-  const stRef = useRef({ steps, stepIdx, playing });
-  stRef.current = { steps, stepIdx, playing };
-
-  const selectStep = (i: number) => {
-    setStepIdx(i);
-    tRef.current = 0;
-  };
-  const restart = () => {
-    setStepIdx(0);
-    tRef.current = 0;
-    setPlaying(true);
-  };
-  useEffect(() => {
-    setStepIdx(0);
-    tRef.current = 0;
-  }, [actionIdx]);
-
-  useEffect(() => {
-    if (!onScreen) return;
-    let raf = 0;
-    let last = performance.now();
-    const loop = (now: number) => {
-      const dt = now - last;
-      last = now;
-      const s = stRef.current;
-      const cur = s.steps[s.stepIdx];
-      const dur = cur.from === cur.to ? 1200 : 950;
-      if (s.playing) {
-        tRef.current += dt / dur;
-        if (tRef.current >= 1) {
-          tRef.current = 0;
-          setStepIdx((i) => (i + 1) % s.steps.length);
-        }
-      } else if (tRef.current < 1) {
-        tRef.current = Math.min(1, tRef.current + dt / dur);
-      }
-      const pk = packetRef.current;
-      if (pk) {
-        if (cur.from === cur.to) {
-          pk.style.opacity = "0";
-        } else {
-          const A = NODE[cur.from], B = NODE[cur.to];
-          const p1 = border(A, B), p2 = border(B, A);
-          const e = ease(Math.min(1, tRef.current));
-          pk.setAttribute("cx", String(p1.x + (p2.x - p1.x) * e));
-          pk.setAttribute("cy", String(p1.y + (p2.y - p1.y) * e));
-          pk.style.opacity = "1";
-        }
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [onScreen]);
-
-  const kc = KIND_COLOR[step.kind];
-  const activeNodes = new Set<NodeId>([step.from, step.to]);
+  const [chapter, setChapter] = useState<PetraChapterId>("read");
+  const selected = PETRA_CHAPTERS.find((item) => item.id === chapter) ?? PETRA_CHAPTERS[0];
 
   return (
     <LiveDemo
-      title="Petra — a hand-built MERN booking app"
-      subtitle="Not a UI tour: this traces how Petra's full stack actually serves a request. Pick a user action and watch it travel the React SPA → the custom Express API on :3001 → MongoDB (and out to Google for auth) and back — with the real endpoints, DB operations, and the app's own pet-care pricing."
+      title="Petra — three full-stack walkthroughs"
+      subtitle="One hotel read, one Google authentication handoff, and one source-grounded view of the Express backend and browser session. No live Google, Express, or MongoDB service is contacted."
       repoUrl={REPO}
-      accent={ACC}
+      accent={ACCENT}
       embedded={embedded}
       {...cardProps("petra")}
     >
-      {/* action tabs */}
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
-        {ACTIONS.map((a, i) => (
+      <div className="mb-4 flex flex-wrap gap-1.5" role="tablist" aria-label="Petra explainer chapters">
+        {PETRA_CHAPTERS.map((item) => (
           <button
-            key={a.key}
-            onClick={() => setActionIdx(i)}
-            className="rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors"
-            style={{
-              background: i === actionIdx ? rgba(ACC, 0.15) : "transparent",
-              color: i === actionIdx ? (light ? "#0f766e" : ACC) : "rgb(var(--zinc-500))",
-              border: `1px solid ${i === actionIdx ? rgba(ACC, 0.4) : "rgb(var(--line) / 0.12)"}`,
-            }}
+            key={item.id}
+            type="button"
+            role="tab"
+            aria-selected={chapter === item.id}
+            onClick={() => setChapter(item.id)}
+            className="min-h-11 rounded-md border px-3 text-left"
+            style={{ borderColor: chapter === item.id ? ACCENT : "rgb(var(--line) / 0.12)", background: chapter === item.id ? `${ACCENT}12` : "transparent" }}
           >
-            {a.label}
+            <span className="block font-mono text-[9px] text-zinc-500">{item.number} · {item.label}</span>
+            <span className="mt-0.5 block text-[12px] text-zinc-200">{item.title}</span>
           </button>
         ))}
       </div>
-      <p className="mb-4 text-[13px] leading-relaxed text-zinc-400">{action.blurb}</p>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* architecture diagram + timeline */}
-        <div>
-          <div ref={diagramRef} className="overflow-hidden rounded-lg border bg-ink-900 p-2" style={{ borderColor: "rgb(var(--line) / 0.12)" }}>
-            <svg viewBox="0 0 600 230" className="w-full">
-              {/* edges */}
-              {([["client", "api"], ["api", "db"], ["api", "google"]] as [NodeId, NodeId][]).map(([f, t]) => {
-                const p1 = border(NODE[f], NODE[t]);
-                const p2 = border(NODE[t], NODE[f]);
-                const on = activeNodes.has(f) && activeNodes.has(t);
-                return (
-                  <line
-                    key={`${f}-${t}`}
-                    x1={p1.x}
-                    y1={p1.y}
-                    x2={p2.x}
-                    y2={p2.y}
-                    stroke={on ? kc : light ? "rgba(9,9,11,0.14)" : "rgba(255,255,255,0.12)"}
-                    strokeWidth={on ? 2 : 1.2}
-                    strokeDasharray={on ? "none" : "4 4"}
-                  />
-                );
-              })}
-              {/* packet */}
-              <circle ref={packetRef} r={5} fill={kc} style={{ opacity: 0 }}>
-                <animate attributeName="r" values="5;6.5;5" dur="0.9s" repeatCount="indefinite" />
-              </circle>
-              {/* nodes */}
-              {(Object.keys(NODE) as NodeId[]).map((id) => {
-                const n = NODE[id];
-                const on = activeNodes.has(id);
-                const meta = NODE_META[id];
-                return (
-                  <g key={id}>
-                    <rect
-                      x={n.x - n.hw}
-                      y={n.y - n.hh}
-                      width={n.hw * 2}
-                      height={n.hh * 2}
-                      rx={8}
-                      fill={light ? "#ffffff" : "#0a0a0a"}
-                      stroke={on ? kc : light ? "rgba(9,9,11,0.2)" : "rgba(255,255,255,0.2)"}
-                      strokeWidth={on ? 2 : 1}
-                    />
-                    <text x={n.x} y={n.y - 2} textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize="12" fontWeight="700" fill={on ? kc : light ? "#3f3f46" : "#e4e4e7"}>
-                      {meta.label}
-                    </text>
-                    <text x={n.x} y={n.y + 13} textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize="9" fill="#71717a">
-                      {meta.sub}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-
-          {/* controls */}
-          <div className="mt-2 flex items-center gap-2">
-            <button onClick={() => setPlaying((v) => !v)} className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-xs font-medium text-ink-900" style={{ background: ACC }}>
-              {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-              {playing ? "pause" : "play"}
-            </button>
-            <button onClick={restart} aria-label="Restart the request flow" title="restart" className="rounded-lg border px-2.5 py-1.5 text-zinc-400 hover:text-zinc-200" style={{ borderColor: "rgb(var(--line) / 0.12)" }}>
-              <RotateCcw className="h-3.5 w-3.5" />
-            </button>
-            <span className="ml-auto font-mono text-[10px] text-zinc-500">
-              step {Math.min(stepIdx, steps.length - 1) + 1} / {steps.length}
-            </span>
-          </div>
-
-          {/* step timeline */}
-          <div className="mt-2 space-y-1">
-            {steps.map((s, i) => {
-              const on = i === stepIdx;
-              const c = KIND_COLOR[s.kind];
-              return (
-                <button key={i} onClick={() => selectStep(i)} className="flex w-full items-center gap-2 rounded px-2 py-1 text-left transition-colors" style={{ background: on ? rgba(c, 0.12) : "transparent" }}>
-                  <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full font-mono text-[9px] font-bold" style={{ background: rgba(c, 0.2), color: c }}>
-                    {i + 1}
-                  </span>
-                  <span className="font-mono text-[11px]" style={{ color: on ? (light ? "#18181b" : "#e4e4e7") : "rgb(var(--zinc-500))" }}>
-                    {s.title}
-                  </span>
-                  <span className="ml-auto font-mono text-[9px] text-zinc-600">
-                    {NODE_META[s.from].label}
-                    {s.from !== s.to ? ` → ${NODE_META[s.to].label}` : ""}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* current step detail */}
-        <div>
-          <div className="mb-1.5 flex items-center gap-2">
-            <span className="rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wide" style={{ background: rgba(kc, 0.15), color: kc }}>
-              {KIND_LABEL[step.kind]}
-            </span>
-            <span className="font-mono text-[11px] text-zinc-500">
-              {NODE_META[step.from].label}
-              {step.from !== step.to ? ` → ${NODE_META[step.to].label}` : ""}
-            </span>
-          </div>
-          <div className="font-mono text-sm font-semibold" style={{ color: kc }}>{step.title}</div>
-          <pre className="mt-2 overflow-x-auto rounded-lg border p-3 font-mono text-[11px] leading-[1.6] text-zinc-300" style={{ borderColor: "rgb(var(--line) / 0.12)", background: "rgb(var(--line) / 0.04)" }}>
-            {step.body}
-          </pre>
-        </div>
+      <p className="mb-4 text-[13px] leading-relaxed text-zinc-400">{selected.summary}</p>
+      <div role="tabpanel">
+        {chapter === "read" && <Trace steps={READ_FLOW} />}
+        {chapter === "auth" && <><div className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-zinc-500"><KeyRound className="h-3.5 w-3.5" aria-hidden /> identity proof crosses a server verification boundary</div><Trace steps={AUTH_FLOW} /></>}
+        {chapter === "session" && <BackendAndSession />}
       </div>
-
-      {showCost && <CostPanel light={light} />}
-
-      <p className="mt-4 font-mono text-[10px] leading-relaxed text-zinc-600">
-        Faithful to the repo: routes, payloads and endpoints are lifted from <code>Header.jsx</code>, <code>SignUp.jsx</code>
-        and <code>Product.jsx</code> (Express base <code>http://localhost:3001</code>); auth flips every route to the
-        <code> /auth/google/account/*</code> namespace and is threaded through <code>sessionStorage</code>; pricing uses the
-        app&apos;s own fields — <code>ppn</code>, <code>service_fee</code>, <code>taxes</code>, and per-hour
-        <code> spa_cost</code>/<code>sitter_cost</code> billed 5&nbsp;hrs/day. Backend responses are stubbed; the flow is the app&apos;s.
-      </p>
     </LiveDemo>
   );
 }
 
 export function PetraLab() {
   return <PetraDemo embedded />;
-}
-
-function CostPanel({ light }: { light: boolean }) {
-  const [hotelIdx, setHotelIdx] = useState(0);
-  const [nights, setNights] = useState(3);
-  const [pets, setPets] = useState(1);
-  const [withSitter, setWithSitter] = useState(true);
-  const [withSpa, setWithSpa] = useState(false);
-  const accentText = light ? "#0f766e" : ACC;
-  const hotel = HOTELS[hotelIdx];
-  const cost = useMemo(() => bookingCost(hotel, nights, pets, withSitter, withSpa), [hotel, nights, pets, withSitter, withSpa]);
-
-  return (
-    <div className="mt-5 rounded-lg border p-4" style={{ borderColor: "rgb(var(--line) / 0.12)" }}>
-      <div className="mb-3 font-mono text-[10px] uppercase tracking-wide text-zinc-500">
-        cost breakdown · <code style={{ color: accentText }}>bookingCost()</code> from the hotel document
-      </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="space-y-3">
-          <div className="flex flex-wrap gap-1">
-            {HOTELS.map((h, i) => (
-              <button key={h.id} onClick={() => setHotelIdx(i)} className="rounded px-1.5 py-1 font-mono text-[9.5px] transition-colors"
-                style={{ background: i === hotelIdx ? rgba(ACC, 0.15) : "transparent", color: i === hotelIdx ? accentText : "rgb(var(--zinc-500))", border: `1px solid ${i === hotelIdx ? rgba(ACC, 0.4) : "rgb(var(--line) / 0.12)"}` }}>
-                {h.title}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <div className="mb-1 font-mono text-[9px] uppercase tracking-wide text-zinc-500">nights · {nights}</div>
-              <input type="range" min={1} max={7} value={nights} onChange={(e) => setNights(Number(e.target.value))} className="h-1 w-full cursor-pointer appearance-none rounded-full" style={{ accentColor: ACC, background: "rgb(var(--line) / 0.15)" }} />
-            </div>
-            <div>
-              <div className="mb-1 font-mono text-[9px] uppercase tracking-wide text-zinc-500">pets</div>
-              <div className="flex items-center justify-between rounded border px-1.5 py-1" style={{ borderColor: "rgb(var(--line) / 0.12)" }}>
-                <button onClick={() => setPets((v) => Math.max(0, v - 1))} className="text-zinc-500 hover:text-zinc-200"><Minus className="h-3 w-3" /></button>
-                <span className="flex items-center gap-1 font-mono text-[11px] text-zinc-200"><PawPrint className="h-3 w-3" />{pets}</span>
-                <button onClick={() => setPets((v) => Math.min(4, v + 1))} className="text-zinc-500 hover:text-zinc-200"><Plus className="h-3 w-3" /></button>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Toggle label={`sitter · ${inr(hotel.sitter_cost)}/hr`} on={withSitter} disabled={pets === 0} onClick={() => setWithSitter((v) => !v)} accentText={accentText} />
-            <Toggle label={`spa · ${inr(hotel.spa_cost)}/hr`} on={withSpa} disabled={pets === 0} onClick={() => setWithSpa((v) => !v)} accentText={accentText} />
-          </div>
-        </div>
-        <div className="space-y-1 font-mono text-[11px]">
-          <Row label={`${inr(hotel.ppn)} × ${nights} night${nights > 1 ? "s" : ""}`} val={inr(cost.base)} />
-          <Row label="service fee" val={inr(cost.service_fee)} sub />
-          <Row label="other charges (taxes)" val={inr(cost.taxes)} sub />
-          <Row label={pets > 0 ? `pet care · (${withSpa ? "spa+" : ""}${withSitter ? "sitter" : withSpa ? "" : "none"}) × 5 hrs/day` : "pet care · no pets"} val={inr(cost.petPerDay)} sub />
-          <div className="mt-1 flex items-center justify-between border-t pt-2 text-sm font-semibold" style={{ borderColor: "rgb(var(--line) / 0.1)" }}>
-            <span className="text-zinc-200">total</span>
-            <span style={{ color: accentText }}>{inr(cost.total)}</span>
-          </div>
-          <p className="pt-1 text-[9.5px] text-zinc-600">&quot;You won&apos;t be charged as yet&quot; — Reserve is auth-gated; a guest is bounced to /login and returned to finish.</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Toggle({ label, on, disabled, onClick, accentText }: { label: string; on: boolean; disabled: boolean; onClick: () => void; accentText: string }) {
-  return (
-    <button onClick={onClick} disabled={disabled} className="flex-1 rounded px-2 py-1.5 font-mono text-[10px] transition-colors disabled:opacity-40"
-      style={{ background: on && !disabled ? rgba(ACC, 0.15) : "transparent", color: on && !disabled ? accentText : "rgb(var(--zinc-500))", border: `1px solid ${on && !disabled ? rgba(ACC, 0.4) : "rgb(var(--line) / 0.12)"}` }}>
-      {on ? "✓ " : ""}{label}
-    </button>
-  );
-}
-
-function Row({ label, val, sub }: { label: string; val: string; sub?: boolean }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className={sub ? "text-zinc-500" : "text-zinc-300"}>{label}</span>
-      <span className={sub ? "text-zinc-500" : "text-zinc-200"}>{val}</span>
-    </div>
-  );
 }

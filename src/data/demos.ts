@@ -31,7 +31,9 @@ export type DemoOwnership =
   | "original"
   | "collaborative"
   | "coursework"
-  | "fork"
+  | "coursework · research"
+  | "coursework · team · public fork"
+  | "research · collaborative · public fork"
   | "research";
 
 export type ProjectDemoEvidence = {
@@ -64,7 +66,7 @@ export const PROJECT_DEMO_EVIDENCE: readonly ProjectDemoRecord[] = [
     demoId: "ghost",
     anchorId: "project-ghost-scheduler",
     projectTitle: "Performance Analysis of the ghOSt Scheduler",
-    ownership: "coursework",
+    ownership: "coursework · research",
     status: "completed",
     fidelity: "interactive-explainer",
     contribution: "Rebuilt and configured Linux for ghOSt, prepared kernel-only and user-space scheduling configurations, ran controlled RocksDB experiments, and analyzed scheduler performance.",
@@ -93,10 +95,10 @@ export const PROJECT_DEMO_EVIDENCE: readonly ProjectDemoRecord[] = [
     demoId: "chocollvm",
     anchorId: "project-chocollvm",
     projectTitle: "ChocoLLVM",
-    ownership: "fork",
+    ownership: "coursework · team · public fork",
     status: "completed",
     fidelity: "browser-port",
-    contribution: "The public repository is a coursework fork. Its visible fork history does not substantiate an individual module contribution, so none is claimed here.",
+    contribution: "The visible public-fork history does not substantiate an individual module contribution, so none is claimed.",
     browserRuns: "A TypeScript browser compiler pipeline for the demo's supported ChocoPy subset, including lexing, parsing, validation, and LLVM IR generation.",
     simplification: "The browser port supports a documented subset and does not run the original Python/llvmlite compiler or LLVM lli runtime.",
     projectSourceHref: "https://github.com/Yashas120/chocollvm",
@@ -108,10 +110,10 @@ export const PROJECT_DEMO_EVIDENCE: readonly ProjectDemoRecord[] = [
     demoId: "swift",
     anchorId: "project-swift",
     projectTitle: "SWIFT — Lightweight Image Super-Resolution",
-    ownership: "research",
+    ownership: "research · collaborative · public fork",
     status: "completed",
     fidelity: "precomputed-model-output",
-    contribution: "Co-authored the research and contributed to the architecture, implementation, and evaluation represented by the official public repository.",
+    contribution: "Contributed to the collaborative research implementation and evaluation described by the paper and public fork.",
     browserRuns: "An interactive architecture explainer with illustrative and precomputed model-output comparisons.",
     simplification: "The trained PyTorch SWIFT model is not running in the browser; the browser does not claim live neural-network inference.",
     projectSourceHref: "https://github.com/Yashas120/SWIFT",
@@ -137,7 +139,7 @@ export const PROJECT_DEMO_EVIDENCE: readonly ProjectDemoRecord[] = [
     demoId: "cifar",
     anchorId: "project-cifar",
     projectTitle: "Spark Streaming CIFAR-10",
-    ownership: "fork",
+    ownership: "coursework · team · public fork",
     status: "completed",
     fidelity: "synthetic-live-computation",
     contribution: "Named member of the four-person course team; worked on the streaming, training, and batch-size analysis workflow.",
@@ -166,10 +168,10 @@ export const PROJECT_DEMO_EVIDENCE: readonly ProjectDemoRecord[] = [
     demoId: "cloud",
     anchorId: "project-cloud",
     projectTitle: "Cloud Provisioning using RDBMS",
-    ownership: "fork",
+    ownership: "coursework · team · public fork",
     status: "completed",
     fidelity: "in-memory-simulation",
-    contribution: "Contributed to the collaborative course project; the public fork does not establish a narrower commit-level ownership boundary.",
+    contribution: "Contribution requires verification; the public fork does not establish a narrower individual module boundary.",
     browserRuns: "An in-memory TypeScript trace of the PL/pgSQL allocation, quota, bin-packing, commit, and reject logic.",
     simplification: "No PostgreSQL server is running. Transactions, stored-procedure calls, inventory, and quotas are modeled in browser memory.",
     projectSourceHref: "https://github.com/Yashas120/Cloud-Provisioning-using-RDBMS",
@@ -181,10 +183,10 @@ export const PROJECT_DEMO_EVIDENCE: readonly ProjectDemoRecord[] = [
     demoId: "yelp",
     anchorId: "project-yelp",
     projectTitle: "Restaurant Analysis using Yelp",
-    ownership: "fork",
+    ownership: "coursework · team · public fork",
     status: "completed",
     fidelity: "synthetic-live-computation",
-    contribution: "Contributed to the collaborative course analysis; the public fork does not substantiate a narrower individual module boundary.",
+    contribution: "Contributed to the collaborative course analysis and its restaurant-risk exploration workflow.",
     browserRuns: "A local logistic-regression and topic-analysis explainer trained on fictionalized, seeded educational records.",
     simplification: "The data is synthetic and the map is illustrative; the lab does not load the Yelp dataset or make claims about any real business.",
     projectSourceHref: "https://github.com/Yashas120/Restaurant-analysis-using-YELP-dataset",
@@ -197,12 +199,12 @@ export const PROJECT_DEMO_EVIDENCE: readonly ProjectDemoRecord[] = [
     demoId: "petra",
     anchorId: "project-petra",
     projectTitle: "Petra",
-    ownership: "fork",
+    ownership: "coursework · team · public fork",
     status: "archived",
     fidelity: "interactive-explainer",
     contribution: "Equal contributor in the three-person course team, focused on the React booking workflow and frontend integration.",
-    browserRuns: "A request-path explainer for the archived React booking workflow using deterministic stubbed responses.",
-    simplification: "No live Express or MongoDB backend is contacted, and the browser trace does not reproduce the separately maintained backend.",
+    browserRuns: "Three source-grounded walkthroughs covering one hotel read, Google identity verification, and the project's Express/MongoDB and sessionStorage state model.",
+    simplification: "No live Google, Express, or MongoDB service is contacted. Code excerpts and state transitions are deterministic reconstructions of the archived frontend and separately maintained backend.",
     projectSourceHref: "https://github.com/Yashas120/Petra",
     upstreamHref: "https://github.com/iVishalr/petra",
     browserImplementationHref: browserSource("PetraDemo.tsx"),
@@ -237,7 +239,7 @@ export const DEMOS: DemoMeta[] = [
   { id: "parallel", title: "Parallel computing playground", blurb: "Inspect C, threading, races, and cache layout without claiming native pthread execution.", accent: "#818cf8", kind: "explainer", tech: ["C", "pthreads", "False sharing", "Cache locality"] },
   { id: "cloud", title: "Cloud provisioning (RDBMS)", blurb: "Trace PL/pgSQL allocation logic through an in-memory browser simulation.", accent: "#22d3ee", kind: "interactive", tech: ["PostgreSQL project", "PL/pgSQL", "In-memory trace", "Bin-packing"] },
   { id: "yelp", title: "Restaurant analysis", blurb: "Explore a fictionalized educational closure-risk scenario with synthetic records.", accent: "#f43f5e", kind: "interactive", tech: ["Logistic Regression", "LDA topics", "Synthetic data", "Illustrative map"] },
-  { id: "petra", title: "Petra booking interface", blurb: "Trace the archived React booking flow through deterministic stubbed responses.", accent: "#14b8a6", kind: "explainer", tech: ["React", "Product workflow", "Stubbed request trace"] },
+  { id: "petra", title: "Petra full-stack walkthrough", blurb: "Inspect one read path, the Google auth handoff, and the real browser-session boundary.", accent: "#14b8a6", kind: "explainer", tech: ["React", "Express", "MongoDB", "Google auth", "sessionStorage"] },
 ];
 
 export const demoMeta = (id: DemoId): DemoMeta => {

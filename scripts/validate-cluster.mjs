@@ -4,6 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 const sourceFiles = [
   "src/lib/clusterContent.ts",
+  "src/lib/clusterProjectIndex.ts",
   "src/components/cluster/ClusterStaticStory.tsx",
   "src/components/cluster/ClusterFilm.tsx",
   "src/components/cluster/CompleteProfileIndex.tsx",
@@ -32,7 +33,14 @@ const required = [
   "Graduate Deep Learning",
   "University of California San Diego",
   "PES University",
-  "Every substantive project, with provenance.",
+  "Every project has a provenance. Every claim states its boundary.",
+  "Selected production mechanisms",
+  "Systems, infrastructure, and protocols",
+  "Research, ML, and computer vision",
+  "Compilers, data, and product systems",
+  "Professional prototypes and internal tools",
+  "Repository context",
+  "Evidence pending",
   "Let's talk about systems that have to change safely.",
 ];
 

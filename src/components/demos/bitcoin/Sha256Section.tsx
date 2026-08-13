@@ -83,6 +83,7 @@ export function Sha256Section() {
       </p>
 
       <input
+        aria-label="Message to hash"
         value={msg}
         onChange={(e) => {
           setMsg(e.target.value);
@@ -143,6 +144,7 @@ export function Sha256Section() {
           </button>
           <input
             type="range"
+            aria-label="SHA-256 compression round"
             min={0}
             max={64}
             value={r}

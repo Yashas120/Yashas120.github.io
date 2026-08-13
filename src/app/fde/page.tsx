@@ -1,7 +1,6 @@
 import { DossierAnnex } from "@/components/fde/dossier/DossierAnnex";
 import { DossierHeader } from "@/components/fde/dossier/DossierHeader";
 import { DossierStage } from "@/components/fde/dossier/DossierStage";
-import { PublicLabs } from "@/components/fde/PublicLabs";
 import { BG, COBALT, INK } from "@/components/fde/dossier/kit";
 
 const skipClass =
@@ -15,7 +14,6 @@ export default function FdePage() {
       <DossierHeader />
       <main>
         <DossierStage />
-        <PublicLabs />
         <DossierAnnex />
       </main>
     </div>

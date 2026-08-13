@@ -18,9 +18,16 @@ const sourceFiles = [
   "src/app/devtools/page.tsx",
   "src/app/devtools/layout.tsx",
   "src/app/globals.css",
+  "src/components/devops/DevToolsExperience.tsx",
+  "src/components/devops/CompleteWorkIndex.tsx",
+  "src/components/devops/DefaultProjectPreview.tsx",
+  "src/components/devops/ScrollInspectorStage.tsx",
+  "src/components/devops/SelectedSystems.tsx",
   "src/components/devops/InspectorTabs.tsx",
   "src/components/devops/MobileInspectorSheet.tsx",
+  "src/components/devops/useScrollNarrative.ts",
   "src/components/devops/useInspectorState.ts",
+  "src/data/devops/scrollScenes.ts",
 ];
 const source = sourceFiles.map((file) => readFileSync(resolve(root, file), "utf8")).join("\n");
 
@@ -68,7 +75,7 @@ for (const pattern of forbidden) if (pattern.test(html)) errors.push(`forbidden 
 const h1Count = (html.match(/<h1(?:\s|>)/g) ?? []).length;
 if (h1Count !== 1) errors.push(`expected one h1, found ${h1Count}`);
 if (!html.includes('rel="canonical" href="https://yashas120.github.io/devtools/"')) errors.push("missing canonical metadata");
-if (!html.includes('property="og:image" content="https://yashas120.github.io/devtools-og.png"')) errors.push("missing route social image");
+if (!/property="og:image" content="https:\/\/yashas120\.github\.io\/devtools-og\.(?:png|svg)"/.test(html)) errors.push("missing route social image");
 if (!html.includes('type="application/ld+json"')) errors.push("missing Person JSON-LD");
 
 for (const behavior of ["history.pushState", "history.replaceState", 'addEventListener("popstate"', 'e.key === "Escape"', 'key === "ArrowRight"', 'key === "Home"', "prefers-reduced-motion"]) {
@@ -76,6 +83,14 @@ for (const behavior of ["history.pushState", "history.replaceState", 'addEventLi
 }
 for (const forbiddenBehavior of ["onWheel", "onTouchMove", "scroll-snap-type"]) {
   if (source.includes(forbiddenBehavior)) errors.push(`forbidden scroll behavior: ${forbiddenBehavior}`);
+}
+
+for (const primitive of ["useScroll", "useTransform", "useSpring", "SceneProgress", "planExpanded", "approval", "stable"]) {
+  if (!source.includes(primitive)) errors.push(`missing deterministic scroll narrative primitive: ${primitive}`);
+}
+
+for (const previewContract of ["DefaultProjectPreview", "autoOpen", "inspect-${demoId}", "Jump to open preview"]) {
+  if (!source.includes(previewContract)) errors.push(`missing default-open project preview contract: ${previewContract}`);
 }
 
 const hrefs = [...html.matchAll(/href="([^"]+)"/g)].map((match) => match[1].replaceAll("&amp;", "&"));

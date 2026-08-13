@@ -18,8 +18,8 @@ function LeverageLine({ p, i, n, line }: Readonly<{ p: MotionValue<number>; i: n
 
 export function LeverageCopy({ p, scene, compact }: Readonly<{ p: MotionValue<number>; scene: DossierScene; compact: boolean }>) {
   return (
-    <CopyBlock scene={scene.id} slug={scene.slug} eyebrow={scene.eyebrow} headline={scene.headline} body={compact ? undefined : scene.body} compact={compact} as="div">
-      <ul className={compact ? "mt-3 space-y-1.5" : "mt-5 space-y-3"}>
+    <CopyBlock scene={scene.id} slug={scene.slug} eyebrow={scene.eyebrow} headline={scene.headline} body={scene.body} compact={compact} as="div">
+      <ul className={compact ? "hidden" : "mt-5 space-y-3"}>
         {leverageItems.map((item, i) => <LeverageLine key={item.id} p={p} i={i} n={leverageItems.length} line={item.line} />)}
       </ul>
     </CopyBlock>

@@ -41,6 +41,7 @@ export function KeysSection({
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <input
+          aria-label="Private key in hexadecimal"
           value={privHex}
           spellCheck={false}
           onChange={(e) => setPrivHex(e.target.value)}

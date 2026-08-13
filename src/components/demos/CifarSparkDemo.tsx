@@ -74,6 +74,8 @@ export function CifarSparkDemo({ embedded = false }: Readonly<{ embedded?: boole
   const [acc, setAcc] = useState(0);
   const [processed, setProcessed] = useState(0);
   const [epoch, setEpoch] = useState(0);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   // data + model refs
   const meta = useRef<CifarMeta | null>(null);
@@ -109,66 +111,82 @@ export function CifarSparkDemo({ embedded = false }: Readonly<{ embedded?: boole
 
   // -------------------------------- load data ------------------------------
   useEffect(() => {
+    if (!onScreen || ready) return;
     let cancelled = false;
+    setLoadError(null);
     (async () => {
-      const m: CifarMeta = await fetch("/demos/cifar/meta.json").then((r) => r.json());
-      const img = new Image();
-      img.onload = () => {
-        if (cancelled) return;
-        const cv = document.createElement("canvas");
-        cv.width = m.cols * m.tile;
-        cv.height = m.rows * m.tile;
-        const ctx = cv.getContext("2d", { willReadFrequently: true })!;
-        ctx.drawImage(img, 0, 0);
-        sprite.current = cv;
-        meta.current = m;
+      try {
+        const response = await fetch("/demos/cifar/meta.json");
+        if (!response.ok) throw new Error(`metadata request failed (${response.status})`);
+        const m: CifarMeta = await response.json();
+        const img = new Image();
+        img.onload = () => {
+          if (cancelled) return;
+          try {
+            const cv = document.createElement("canvas");
+            cv.width = m.cols * m.tile;
+            cv.height = m.rows * m.tile;
+            const ctx = cv.getContext("2d", { willReadFrequently: true });
+            if (!ctx) throw new Error("canvas context unavailable");
+            ctx.drawImage(img, 0, 0);
+            sprite.current = cv;
+            meta.current = m;
 
-        const rawArr: Float32Array[] = [];
-        for (let i = 0; i < m.count; i++) {
-          const tx = (i % m.cols) * m.tile;
-          const ty = Math.floor(i / m.cols) * m.tile;
-          rawArr.push(poolFeatures(ctx.getImageData(tx, ty, m.tile, m.tile).data, m.tile, POOL));
-        }
-        raw.current = rawArr;
+            const rawArr: Float32Array[] = [];
+            for (let i = 0; i < m.count; i++) {
+              const tx = (i % m.cols) * m.tile;
+              const ty = Math.floor(i / m.cols) * m.tile;
+              rawArr.push(poolFeatures(ctx.getImageData(tx, ty, m.tile, m.tile).data, m.tile, POOL));
+            }
+            raw.current = rawArr;
 
-        const trainIdx: number[] = [];
-        const testIdx: number[] = [];
-        for (let i = 0; i < m.count; i++) {
-          (i % m.perClass < TRAIN_PER ? trainIdx : testIdx).push(i);
-        }
-        const dim = rawArr[0].length;
-        const sd = new Standardizer(dim);
-        sd.fit(trainIdx.map((i) => rawArr[i]));
-        std.current = sd;
+            const trainIdx: number[] = [];
+            const testIdx: number[] = [];
+            for (let i = 0; i < m.count; i++) {
+              (i % m.perClass < TRAIN_PER ? trainIdx : testIdx).push(i);
+            }
+            const dim = rawArr[0].length;
+            const sd = new Standardizer(dim);
+            sd.fit(trainIdx.map((i) => rawArr[i]));
+            std.current = sd;
 
-        trainX.current = trainIdx.map((i) => sd.transform(rawArr[i]));
-        trainY.current = trainIdx.map((i) => m.labels[i]);
-        testX.current = testIdx.map((i) => sd.transform(rawArr[i]));
-        testY.current = testIdx.map((i) => m.labels[i]);
-        stream.current = seededShuffle(trainIdx.map((_, k) => k), 1337);
-        trainTile.current = trainIdx;
+            trainX.current = trainIdx.map((i) => sd.transform(rawArr[i]));
+            trainY.current = trainIdx.map((i) => m.labels[i]);
+            testX.current = testIdx.map((i) => sd.transform(rawArr[i]));
+            testY.current = testIdx.map((i) => m.labels[i]);
+            stream.current = seededShuffle(trainIdx.map((_, k) => k), 1337);
+            trainTile.current = trainIdx;
 
-        model.current = new Softmax(dim + 1, 10);
-        const e0 = model.current.evaluate(testX.current, testY.current);
-        confusion.current = e0.confusion;
-        setAcc(e0.acc);
+            model.current = new Softmax(dim + 1, 10);
+            const e0 = model.current.evaluate(testX.current, testY.current);
+            confusion.current = e0.confusion;
+            setAcc(e0.acc);
 
-        // deterministic featurize sample
-        const ft = trainIdx[0];
-        feat.current = {
-          tile: ft,
-          pooled: rawArr[ft],
-          std: sd.transform(rawArr[ft]),
-          label: m.labels[ft],
+            // deterministic featurize sample
+            const ft = trainIdx[0];
+            feat.current = {
+              tile: ft,
+              pooled: rawArr[ft],
+              std: sd.transform(rawArr[ft]),
+              label: m.labels[ft],
+            };
+            setReady(true);
+          } catch {
+            if (!cancelled) setLoadError("The CIFAR sample could not be processed in this browser.");
+          }
         };
-        setReady(true);
-      };
-      img.src = "/demos/cifar/sprite.png";
+        img.onerror = () => {
+          if (!cancelled) setLoadError("The bundled CIFAR image could not be loaded.");
+        };
+        img.src = "/demos/cifar/sprite.png";
+      } catch {
+        if (!cancelled) setLoadError("The CIFAR metadata could not be loaded.");
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadAttempt, onScreen, ready]);
 
   useEffect(() => {
     stepEnter.current = performance.now();
@@ -718,7 +736,7 @@ export function CifarSparkDemo({ embedded = false }: Readonly<{ embedded?: boole
   return (
     <LiveDemo
       title="Spark Streaming — CIFAR-10 classifier"
-      subtitle="A guided walkthrough of how a streaming ML system is built: a producer pushes CIFAR-10 over a socket, Spark discretizes it into micro-batch RDDs, executors featurize partitions in parallel, and the driver reduces the gradients into one SGD step. Step through each stage — everything is computed live in your browser."
+      subtitle="A browser re-enactment of the project flow: bundled CIFAR-10 samples feed modeled micro-batches and executor stages while a local softmax classifier trains live. Apache Spark itself is not running."
       repoUrl={REPO}
       accent={SPARK}
       embedded={embedded}
@@ -752,6 +770,7 @@ export function CifarSparkDemo({ embedded = false }: Readonly<{ embedded?: boole
               <button
                 key={b}
                 onClick={() => setBatchSize(b)}
+                aria-pressed={batchSize === b}
                 className="rounded px-2 py-1 font-mono text-[10px]"
                 style={{
                   background: batchSize === b ? rgba(SPARK, 0.15) : "transparent",
@@ -769,6 +788,7 @@ export function CifarSparkDemo({ embedded = false }: Readonly<{ embedded?: boole
               <button
                 key={e}
                 onClick={() => setExecutors(e)}
+                aria-pressed={executors === e}
                 className="rounded px-2 py-1 font-mono text-[10px]"
                 style={{
                   background: executors === e ? rgba(SPARK, 0.15) : "transparent",
@@ -792,6 +812,7 @@ export function CifarSparkDemo({ embedded = false }: Readonly<{ embedded?: boole
                 setPlaying(false);
                 setStep(i);
               }}
+              aria-pressed={i === step}
               className="whitespace-nowrap rounded-md px-2 py-1 font-mono text-[10px] transition-colors"
               style={{
                 background: i === step ? rgba(SPARK, 0.15) : "transparent",
@@ -845,7 +866,14 @@ export function CifarSparkDemo({ embedded = false }: Readonly<{ embedded?: boole
             className="flex-1 overflow-hidden rounded-lg border bg-ink-900 p-2"
             style={{ borderColor: "rgb(var(--line) / 0.12)" }}
           >
-            {ready ? (
+            {loadError ? (
+              <div className="flex h-48 flex-col items-center justify-center gap-3 text-center" role="alert">
+                <p className="font-mono text-xs text-zinc-400">{loadError}</p>
+                <button type="button" onClick={() => setLoadAttempt((value) => value + 1)} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 font-mono text-xs" style={{ borderColor: rgba(SPARK, 0.4), color: accentText }}>
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Retry sample
+                </button>
+              </div>
+            ) : ready ? (
               <canvas
                 ref={canvas}
                 role="img"

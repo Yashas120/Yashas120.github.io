@@ -60,6 +60,7 @@ export function Desktop({
   onRoutedAppClose,
   onReplayBoot,
   returnHref,
+  onReturn,
 }: Readonly<{
   apps: AppDef[];
   initialOpen: string[];
@@ -70,7 +71,8 @@ export function Desktop({
   onDemoOpen?: (id: DemoId) => void;
   onRoutedAppClose?: () => void;
   onReplayBoot: () => void;
-  returnHref: string;
+  returnHref?: string;
+  onReturn?: () => void;
 }>) {
   const [wins, setWins] = useState<WinState[]>(() =>
     initialOpen
@@ -229,6 +231,7 @@ export function Desktop({
           onHelp={() => setTourOpen(true)}
           onReplayBoot={onReplayBoot}
           returnHref={returnHref}
+          onReturn={onReturn}
         />
 
         <div ref={surfaceRef} className="wallpaper relative min-h-0 flex-1 overflow-hidden">

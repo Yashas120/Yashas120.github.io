@@ -55,17 +55,17 @@ const SCENE_REGISTRY = scenes.map((scene) => ({ scene, Visual: VISUAL_BY_KEY[sce
 const SCENE_COUNT = SCENE_REGISTRY.length;
 
 const ALIGN = [
-  "md:items-center",
-  "md:items-start",
-  "md:items-center",
-  "md:items-end",
-  "md:items-center",
-  "md:items-start",
-  "md:items-center",
-  "md:items-start",
-  "md:items-center",
-  "md:items-center",
-  "md:items-center",
+  "lg:items-center",
+  "lg:items-start",
+  "lg:items-center",
+  "lg:items-end",
+  "lg:items-center",
+  "lg:items-start",
+  "lg:items-center",
+  "lg:items-start",
+  "lg:items-center",
+  "lg:items-center",
+  "lg:items-center",
 ] as const;
 
 function StaticLeverageList() {
@@ -92,6 +92,13 @@ function SceneCopy({ scene, index, p, compact, semantic }: Readonly<{ scene: Dos
       as={semantic ? (index === 0 ? "h1" : "h2") : "div"}
     >
       {scene.visual === "leverage" ? <StaticLeverageList /> : null}
+      {semantic ? (
+        <dl data-fde-static-context className="mt-6 grid gap-3 border-t pt-5 text-[0.86rem] leading-6 opacity-72">
+          <div><dt className="inline font-mono text-[10px] uppercase tracking-[0.12em]">Status · </dt><dd className="inline">{scene.status}</dd></div>
+          <div><dt className="inline font-mono text-[10px] uppercase tracking-[0.12em]">Meaning · </dt><dd className="inline">{scene.meaning}</dd></div>
+          <div><dt className="inline font-mono text-[10px] uppercase tracking-[0.12em]">Transition · </dt><dd className="inline">{scene.transition}</dd></div>
+        </dl>
+      ) : null}
     </CopyBlock>
   );
 }
@@ -109,7 +116,7 @@ function SemanticTranscript() {
 function SemanticScene({ scene, index }: Readonly<{ scene: DossierScene; index: number }>) {
   const complete = useMotionValue(1);
   return (
-    <section id={`scene-${scene.id}`}>
+    <section id={`scene-${scene.id}`} data-evidence-ids={scene.evidenceIds.join(" ")}>
       <SceneCopy scene={scene} index={index} p={complete} compact={false} semantic />
     </section>
   );
@@ -128,14 +135,15 @@ function SceneLayer({ entry, index, progress, compact }: Readonly<{ entry: (type
       aria-hidden="true"
       style={{ opacity, visibility }}
       data-fde-scene={entry.scene.id}
-      className={`fde-scene-layer absolute inset-0 grid min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[58svh_minmax(0,1fr)] gap-2 px-5 pb-6 pt-[calc(var(--fde-header)+12px)] md:grid-rows-1 md:gap-10 md:pb-12 md:pl-10 md:pr-[92px] md:pt-[calc(var(--fde-header)+64px)] ${index === 0 ? "md:grid-cols-[48%_52%]" : "md:grid-cols-[43%_57%]"}`}
+      data-evidence-ids={entry.scene.evidenceIds.join(" ")}
+      className={`fde-scene-layer absolute inset-0 grid min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[58svh_minmax(0,1fr)] gap-2 px-5 pb-6 pt-[calc(var(--fde-header)+12px)] lg:grid-rows-1 lg:gap-10 lg:pb-12 lg:pl-10 lg:pr-[92px] lg:pt-[calc(var(--fde-header)+64px)] ${index === 0 ? "lg:grid-cols-[48%_52%]" : "lg:grid-cols-[43%_57%]"}`}
     >
       {deep ? <div className="absolute inset-0 -z-10" style={{ background: BG_DEEP }} /> : null}
       <div data-fde-copy-pane className={`relative flex min-w-0 items-start overflow-hidden pb-2 md:h-full ${ALIGN[index]}`}>
         <SceneCopy scene={entry.scene} index={index} p={mech} compact={compact} semantic={false} />
       </div>
       <motion.div className="relative flex min-h-0 min-w-0 items-center justify-center overflow-hidden" style={{ y: sheetY }}>
-        <svg viewBox={`0 0 ${SHEET.w} ${SHEET.h}`} className="h-auto max-h-full w-full max-w-full" aria-hidden="true" focusable="false">
+        <svg viewBox={compact ? `90 0 500 ${SHEET.h}` : `0 0 ${SHEET.w} ${SHEET.h}`} className="h-auto max-h-full w-full max-w-full" aria-hidden="true" focusable="false">
           <rect x={8} y={8} width={SHEET.w - 16} height={SHEET.h - 16} fill={deep ? PAPER_DEEP : PAPER} stroke="currentColor" strokeWidth={0.8} strokeOpacity={0.18} />
           <RegMark x={22} y={22} />
           <RegMark x={SHEET.w - 22} y={22} />
@@ -181,12 +189,12 @@ function StackedDocument({ compact }: Readonly<{ compact: boolean }>) {
       {SCENE_REGISTRY.map(({ scene, Visual }, index) => {
         const deep = scene.panel === "deep";
         return (
-          <section key={scene.id} id={`scene-${scene.id}`} className="px-5 py-16 md:px-10 md:py-24" style={{ background: deep ? BG_DEEP : BG, color: INK }}>
-            <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[43%_57%] md:items-center">
+          <section key={scene.id} id={`scene-${scene.id}`} data-evidence-ids={scene.evidenceIds.join(" ")} className="px-5 py-16 md:px-10 md:py-24" style={{ background: deep ? BG_DEEP : BG, color: INK }}>
+            <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[43%_57%] lg:items-center">
               <SceneCopy scene={scene} index={index} p={done} compact={compact} semantic />
-              <svg viewBox={`0 0 ${SHEET.w} ${SHEET.h}`} className="h-auto w-full" aria-hidden="true" focusable="false">
+              <svg viewBox={compact ? `90 0 500 ${SHEET.h}` : `0 0 ${SHEET.w} ${SHEET.h}`} className="h-auto w-full" aria-hidden="true" focusable="false">
                 <rect x={8} y={8} width={SHEET.w - 16} height={SHEET.h - 16} fill={deep ? PAPER_DEEP : PAPER} stroke="currentColor" strokeWidth={0.8} strokeOpacity={0.18} />
-                <Visual p={done} compact={compact} />
+                <Visual p={done} compact={compact} reduced />
               </svg>
             </div>
           </section>

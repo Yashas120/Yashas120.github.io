@@ -1,70 +1,84 @@
 "use client";
 
-import { motion, useTransform, type MotionValue } from "framer-motion";
-import { sceneRanges } from "@/data/backend";
+import { useEffect, useState } from "react";
+import type { MotionValue } from "framer-motion";
+import { RotateCcw } from "lucide-react";
+import { demoEvidence, type DemoId } from "@/data/demos";
+import { workById } from "@/data/backend";
+import { SharedProjectLab } from "@/components/demos/ProjectDemoHandoff";
+import { ControlPlaneSession } from "./ControlPlaneSession";
 
-const visualStates = [
-  { status: "request received", nodes: ["request", "desired state", "proof"] },
-  { status: "scope mapped", nodes: ["intern", "backend", "optical"] },
-  { status: "plan · review · apply", nodes: ["network", "compute", "data", "events", "identity"] },
-  { status: "events in flight", nodes: ["DynamoDB", "SNS fan-out", "regional SQS", "consumers"] },
-  { status: "observing", nodes: ["observe", "isolate", "change", "verify", "prevent"] },
-  { status: "reconciling hardware", nodes: ["desired", "current", "preserved", "changed"] },
-  { status: "automation lineage", nodes: ["contract", "SDK artifacts", "domain knowledge", "guided tool"] },
-  { status: "evidence attached", nodes: ["ownership", "contribution", "status", "links"] },
-  { status: "breadth resolved", nodes: ["research", "teaching", "education", "leadership"] },
-  { status: "registry complete", nodes: ["featured", "indexed", "excluded", "verified"] },
-  { status: "healthy · ready to connect", nodes: ["email", "GitHub", "LinkedIn"] },
-] as const;
+const projectIds: readonly DemoId[] = ["cloud", "bitcoin", "multiview", "swift"];
+const workIds: Record<DemoId, string> = {
+  cloud: "cloud-provisioning",
+  bitcoin: "bitcoin",
+  multiview: "multiview",
+  swift: "swift",
+  ghost: "ghost-scheduler",
+  chocollvm: "chocollvm",
+  cifar: "ssml",
+  parallel: "parallel",
+  yelp: "yelp",
+  petra: "petra",
+};
 
-export function BackendStage({ progress, activeScene }: Readonly<{ progress: MotionValue<number>; activeScene: number }>) {
-  const progressScale = useTransform(progress, [0, 1], [0, 1], { clamp: true });
-  const state = visualStates[activeScene] ?? visualStates[0];
-  const scene = sceneRanges[activeScene] ?? sceneRanges[0];
+function ProjectDemoStage({ activeProject }: Readonly<{ activeProject: DemoId }>) {
+  const [replay, setReplay] = useState(false);
+  const evidence = demoEvidence(activeProject);
+  const work = workById[workIds[activeProject]];
+
+  useEffect(() => setReplay(false), [activeProject]);
 
   return (
-    <aside className="bk-stage" aria-hidden="true">
-      <div className="bk-stage__grid" />
-      <div className="bk-stage__panel">
-        <div className="bk-stage__topline">
-          <span>CONTROL PLANE</span>
-          <span>{String(activeScene + 1).padStart(2, "0")} / {String(sceneRanges.length).padStart(2, "0")}</span>
+    <div className="bk-project-demo" data-project-demo={activeProject}>
+      <div className="bk-project-demo__head">
+        <div>
+          <p>PROJECT LAB · EXPLAIN → PROVE</p>
+          <h3>{evidence.projectTitle}</h3>
         </div>
-
-        <div className="bk-stage__core">
-          <span className="bk-state-dot" />
-          <span>{state.status}</span>
-        </div>
-
-        <div className="bk-stage__diagram" data-scene={scene.id}>
-          <div className="bk-stage__spine" />
-          {state.nodes.map((node, index) => (
-            <motion.div
-              key={`${scene.id}-${node}`}
-              className={`bk-stage__node bk-stage__node--${index % 3}`}
-              initial={{ opacity: 0, x: 14 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.24, delay: index * 0.035 }}
-            >
-              <span>{node}</span>
-              <i>{index === 0 ? "active" : index === state.nodes.length - 1 ? "verified" : "linked"}</i>
-            </motion.div>
-          ))}
-        </div>
-
-        <ol className="bk-stage__grammar">
-          {["desired", "plan", "review", "apply", "events", "observe", "converge"].map((step, index) => {
-            const threshold = index / 7;
-            return <li key={step} className={scene.end >= threshold ? "is-resolved" : ""}>{step}</li>;
-          })}
-        </ol>
+        <span>{projectIds.indexOf(activeProject) + 1} / {projectIds.length}</span>
       </div>
 
-      <div className="bk-progress" aria-hidden>
-        <motion.div className="bk-progress__fill" style={{ scaleY: progressScale }} />
-        {sceneRanges.map((item, index) => (
-          <span key={item.id} className={index === activeScene ? "is-active" : ""} style={{ top: `${item.start * 100}%` }} />
-        ))}
+      <div className="bk-project-demo__actions">
+        <button type="button" onClick={() => setReplay(true)}><RotateCcw aria-hidden /> Replay explanation</button>
+        {evidence.projectSourceHref && <a href={evidence.projectSourceHref} target="_blank" rel="noreferrer">Repository</a>}
+        {activeProject === "swift" && <a href="https://doi.org/10.47852/bonviewAIA42021930" target="_blank" rel="noreferrer">Paper</a>}
+      </div>
+
+      {replay ? (
+        <div className="bk-project-demo__explain">
+          <span>{work.featuredLabels?.join(" · ") ?? [...work.ownership, ...work.status].join(" · ")}</span>
+          <h4>{work.technologies.slice(0, 4).join(" → ")}</h4>
+          <p>{evidence.browserRuns}</p>
+          <p>{evidence.simplification}</p>
+          <button type="button" onClick={() => setReplay(false)}>Resolve into live demo</button>
+        </div>
+      ) : (
+        <div className="bk-project-demo__viewport" data-demo-scroll-pass-through>
+          <div className="bk-project-demo__scale">
+            <SharedProjectLab key={activeProject} demoId={activeProject} load />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function BackendStage({
+  progress,
+  activeProject,
+  projectDemoVisible,
+}: Readonly<{
+  progress: MotionValue<number>;
+  activeProject: DemoId;
+  projectDemoVisible: boolean;
+}>) {
+  return (
+    <aside className="bk-stage" aria-label="Live control-plane explanation">
+      <div className="bk-stage__grid" aria-hidden="true" />
+      <div className={`bk-stage__visual${projectDemoVisible ? " is-project" : ""}`} data-project-phase={projectDemoVisible ? "prove" : "explain"}>
+        <ControlPlaneSession progress={progress} />
+        {projectDemoVisible && <ProjectDemoStage activeProject={activeProject} />}
       </div>
     </aside>
   );

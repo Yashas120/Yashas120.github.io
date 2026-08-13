@@ -103,6 +103,7 @@ export function EcdsaSection({ privHex, pubKeyHex }: { privHex: string; pubKeyHe
       </div>
 
       <input
+        aria-label="Message to sign"
         value={message}
         spellCheck={false}
         onChange={(e) => {

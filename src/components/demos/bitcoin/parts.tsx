@@ -253,21 +253,24 @@ export function useDeferred<T>(placeholder: T, make: () => T): T {
 
 // True while `ref` is on (or near) the screen and the tab is visible.
 //
-// All nine demos mount eagerly on /demos, and several drive a continuous
+// All ten demos mount eagerly on /demos, and several drive a continuous
 // requestAnimationFrame canvas loop. Without this gate every one of those loops
 // redraws at ~60fps for the whole page lifetime — burning CPU and battery on
-// demos the visitor cannot even see. Defaults to `true` so a demo never fails to
-// paint if the element or IntersectionObserver is unavailable.
+// demos the visitor cannot even see. Start paused; browsers without an observer
+// are promoted to visible in the effect so progressive enhancement still works.
 export function useOnScreen(
   ref: React.RefObject<Element | null>,
   rootMargin = "250px",
 ): boolean {
-  const [onScreen, setOnScreen] = useState(true);
+  const [onScreen, setOnScreen] = useState(false);
   useEffect(() => {
     const el = ref.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setOnScreen(true);
+      return;
+    }
 
-    let intersecting = true;
+    let intersecting = false;
     const sync = () => setOnScreen(intersecting && !document.hidden);
 
     const obs = new IntersectionObserver(
